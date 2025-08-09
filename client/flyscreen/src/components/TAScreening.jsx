@@ -1,4 +1,9 @@
+import { StudyCard } from "./StudyCard"
+import { useState, useEffect } from "react"
+
 export default function TAScreening() {
+    const [studies, setStudies] = useState([])    
+
     return (
         <>
             <h1><i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening</h1>

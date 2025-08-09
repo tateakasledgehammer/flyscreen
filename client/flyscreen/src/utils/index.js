@@ -1,4 +1,4 @@
-const risData = 
+export const risData = 
 `
 TY  - JOUR
 T1  - What do you know about ADHD?: A comparison between mainstream and special education teachers
@@ -65,37 +65,4 @@ SP  - 101
 EP  - 110
 DP  - Informit
 ER  - 
-`
-
-function parseRIS(risData) {
-    // breaks it down
-    const lines = risData.split(/\r?\n/);
-
-    // holds on to the entries
-    const records = []; 
-
-    // holds one of the entries
-    let entry = {};
-    // skip empty lines
-    for (let line of lines) {
-        if (line.trim() === '') continue; 
-
-        // extract tags (AU, TI, etc.) and the value
-        const tag = line.slice(0, 2); 
-        const value = line.slice(6).trim(); 
-
-    // TY is the start of a new, so checks to push the value to records then resets
-    if (tag === 'TY') {
-        entry = { TY: value }; 
-    }  else if (tag === 'ER') {
-        entry.status = 'unscreened';
-        records.push(entry);
-        entry = {};
-    } else {
-        if (!entry[tag]) {
-            entry[tag] = [];
-        }
-        entry[tag].push(value);
-        }
-    }
-};
+`;

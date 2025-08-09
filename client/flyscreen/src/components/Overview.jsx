@@ -1,7 +1,7 @@
 export default function Overview() {
     return (
         <>
-            <h1><i className="fa-regular fa-house-chimney"></i> Your Homepage</h1>
+            <h1><i class="fa-solid fa-house-chimney"></i> Your Homepage</h1>
             {/* Add class and styling for the homepage cards + progress bar */}
             <div>
                 <h3 href="Overview.jsx">Overview</h3>
