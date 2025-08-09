@@ -1,8 +1,34 @@
-import { StudyCard } from "./StudyCard"
 import { useState, useEffect } from "react"
 
-export default function TAScreening() {
-    const [studies, setStudies] = useState([])    
+export default function TAScreening(props) {
+    const { studies, setStudies, savedStudies } = props;
+
+    const [itemsPerPage, setItemsPerPage] = useState(25);
+    const [sortBy, setSortBy] = useState(null);
+    const [searchFilter, setSearchFilter] = useState(null);
+    const [toggleDetails, setToggleDetails] = useState(null)
+
+    function handleItemsPerPage() {
+
+    }
+    function handleSortByOrder() {
+
+    }
+    function handleSetSearchFilter() {
+
+    }
+    function handleRemoveSearchFilter() {
+
+    }
+    function handleToggleDetailsGlobal() {
+
+    }
+    function handleToggleHighlights() {
+
+    }
+    function handleLoadMoreStudies() {
+
+    }
 
     return (
         <>
@@ -11,16 +37,17 @@ export default function TAScreening() {
             {/* Navigation bar for the screening */}
             <div id="screening-nav">
                 {/* Items per page */}
-                <label for="itemsPerPage">Show per page:</label>
-                <select id="itemsPerPage">
-                    <option value="25" selected>25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                <label>Show per page:</label>
+                <select id="itemsPerPage" onClick={handleItemsPerPage}>
+                    <option defaultValue={0}>Select</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
                 </select>
 
                 {/* Sort studies */}
-                <label for="sortBy">Sort by:</label>
-                <select id="sortBy">
+                <label>Sort by:</label>
+                <select id="sortBy" onClick={handleSortByOrder}>
                     <option value="year_asc">Year (Oldest First)</option>
                     <option value="year_des">Year (Newest First)</option>
                     <option value="title_asc">Title (A - Z)</option>
@@ -31,14 +58,14 @@ export default function TAScreening() {
                 </select>
 
                 {/* Filter studies */}
-                <label for="filterStudies">Set A Filter</label>
+                <label>Set A Filter</label>
                 <input type="text" id="newFilterInput" placeholder="Set a filter..." />
-                <button id="addFilterBtn">Add Filter</button>
-                <button id="clearFilterBtn">Clear</button>
+                <button id="addFilterBtn" onClick={handleSetSearchFilter}>Add Filter</button>
+                <button id="clearFilterBtn" onClick={handleRemoveSearchFilter}>Clear</button>
 
                 {/* Toggle highlights / abstract */}
-                <button id="toggleDetailsBtn" class="">▲ Hide Details</button>
-                <button id="toggleHighlightableBtn">Toggle Highlights Off</button>
+                <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>▲ Hide Details</button>
+                <button id="toggleHighlightableBtn" onClick={handleToggleHighlights}>Toggle Highlights Off</button>
             </div>
 
             {/* Filter notice */}
@@ -48,7 +75,11 @@ export default function TAScreening() {
 
             {/* Output section */}
             <div>
-                
+                {studies.map(study => (
+                    <div>
+                        <h3>{study.title}</h3>
+                    </div>
+                ))}
             </div>
 
             <br />
@@ -58,7 +89,7 @@ export default function TAScreening() {
             <br />
 
             {/* Load more button */}
-            <button>
+            <button onClick={handleLoadMoreStudies}>
                 Load more...
             </button>
 

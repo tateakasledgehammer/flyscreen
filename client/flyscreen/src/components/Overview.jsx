@@ -1,7 +1,9 @@
-export default function Overview() {
+export default function Overview(props) {
+    const { studies, setStudies, savedStudies } = props
+
     return (
         <>
-            <h1><i class="fa-solid fa-house-chimney"></i> Your Homepage</h1>
+            <h1><i className="fa-solid fa-house-chimney"></i> Your Homepage</h1>
             {/* Add class and styling for the homepage cards + progress bar */}
             <div>
                 <h3 href="Overview.jsx">Overview</h3>
@@ -12,7 +14,8 @@ export default function Overview() {
             </div>
             <div>
                 <h3 href="Import.jsx">Import Your Studies</h3>
-                <ul>Number of imported studies: ...</ul>
+                <ul>Number of imported studies: {studies.length}</ul>
+                <ul>Number of uploads: ...</ul>
             </div>
             <div>   
                 <h3 href="Setup.jsx">Set Up Your Review</h3>

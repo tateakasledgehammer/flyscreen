@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react"
 
-export default function Import() {
-    const [studies, setStudies] = useState([])
+export default function Import(props) {
+    const { studies, setStudies, savedStudies } = props
+
     const [fileName, setFileName] = useState('')
     const [error, setError] = useState('')
     const [uploadTimestamp, setUploadTimestamp] = useState('')
     const [uploadHistory, setUploadHistory] = useState([])
 
     useEffect(() => {
-        const savedStudies = localStorage.getItem('studies');
-        if (savedStudies) setStudies(JSON.parse(savedStudies));
-
         const savedFileName = localStorage.getItem('fileName');
         if (savedFileName) setFileName(savedFileName);
 
@@ -50,6 +48,24 @@ export default function Import() {
         return records;
     };
 
+    function handleStudyDetails(records) {
+        return records.map((entry, index) => ({
+            index: entry.index,
+            title: (entry.TI && entry.TI[0] || 'N/A'),
+            year: (entry.PY && entry.PY[0] || 'N/A'),
+            type: (entry.M3 && entry.M3[0] || 'N/A'),
+            authors: entry.AU ? entry.AU.join(', ') : 'N/A',
+            doi: (entry.DO && entry.DO[0] || 'N/A'),
+            link: (entry.UR && entry.UR[0] || 'N/A'),
+            journal: (entry.T2 && entry.T2[0] || 'N/A'),
+            volume: (entry.VL && entry.VL[0] || ''),
+            issue: (entry.IS && entry.IS[0] || ''),
+            abstract: (entry.AB && entry.AB[0] || 'N/A'),
+            keywords: entry.KW ? entry.KW.join(', ') : 'N/A',
+            language: (entry.LA && entry.LA[0] || 'N/A'),
+        }));
+    }
+
     function handleFileUpload(e) {
         const file = e.target.files[0];
 
@@ -74,9 +90,10 @@ export default function Import() {
             
             const risFileContent = e.target.result;
             const parsedStudies = parseRIS(risFileContent);
+            const studiesInDetail = handleStudyDetails(parsedStudies);
 
-            setStudies(parsedStudies);
-            localStorage.setItem('studies', JSON.stringify(parsedStudies))
+            setStudies((studiesInDetail));
+            localStorage.setItem('studies', JSON.stringify(studiesInDetail))
 
             const timeOfUpload = new Date().toLocaleString();
             setUploadTimestamp(timeOfUpload);
@@ -90,14 +107,13 @@ export default function Import() {
 
             const updatedUploadHistory = [...uploadHistory, newEntryDetails];
             setUploadHistory(updatedUploadHistory);
-            localStorage.setItem('uploadHistory', JSON.stringify(updateUploadHistory));
+            localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
             
         }
 
         reader.readAsText(file)
     }
-
-
+    
     function handleClear() {
         setStudies([]);
         setFileName('');
@@ -121,11 +137,10 @@ export default function Import() {
             
             {uploadHistory.length === 0 ? (<p>No uploads yet.</p>) : (
                 <ul>
-                    {uploadHistory.map((entry, index) => (
-                        <li>
+                    {uploadHistory.map((entry, fileIndex) => (
+                        <li key={fileIndex}>
                             <strong>Uploaded File: </strong>
                             {entry.fileName} - {entry.studyCount} studies uploaded - {entry.timestamp}
-               
                         </li>
                     ))}
                 </ul>

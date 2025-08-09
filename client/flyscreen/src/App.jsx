@@ -7,24 +7,32 @@ import Layout from './components/Layout'
 import Overview from './components/Overview'
 import Setup from './components/Setup'
 import Import from './components/Import'
+import StudyCard from './components/StudyCard'
 import TAScreening from './components/TAScreening'
 import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
 
 function App() {
   const isAuthenticated = true;
+  
+  const [studies, setStudies] = useState([]);
+
+  useEffect(() => {
+    const savedStudies = localStorage.getItem('studies');
+        if (savedStudies) setStudies(JSON.parse(savedStudies));
+  }, []);
 
   const authenticatedContent = (
     <>
       <Navbar />
       <br />
-      <Overview />
+      <Overview studies={studies} />
       <br />
       <Setup />
       <br />
-      <Import />
+      <Import studies={studies} setStudies={setStudies} />
       <br />
-      <TAScreening />
+      <TAScreening studies={studies} />
       <br />
       <FullTextScreening />
       <br />

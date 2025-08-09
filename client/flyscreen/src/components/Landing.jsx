@@ -1,7 +1,7 @@
 export default function Landing() {
     return (
         <>
-            <h1>Welcome to...<br></br>FLYSCREEN ACADEMICS <i class="fa-regular fa-paper-plane"></i></h1>
+            <h1>Welcome to...<br></br>FLYSCREEN ACADEMICS <i className="fa-regular fa-paper-plane"></i></h1>
             <button>
                 Get Screening!
             </button>

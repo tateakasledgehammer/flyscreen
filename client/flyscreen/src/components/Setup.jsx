@@ -5,9 +5,9 @@ export default function Setup(props) {
 
     // general background
     const [reviewTitle, setReviewTitle] = useState(''); 
-    const [studyType, setStudyType] = useState(null);
-    const [questionType, setQuestionType] = useState(null);
-    const [researchArea, setResearchArea] = useState(null);
+    const [studyType, setStudyType] = useState('');
+    const [questionType, setQuestionType] = useState('');
+    const [researchArea, setResearchArea] = useState('');
 
     // information about reviewers
     const [screenerNo, setScreenerNo] = useState(1);
@@ -207,7 +207,7 @@ export default function Setup(props) {
                     {/* Set up inclusion categories */}
                     <h4>Inclusion Criteria</h4>
                     <input type="text" id="newInclusionSection" placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onclick={handleNewInclusionCriteriaSection}>Add Section</button>
+                    <button onClick={handleNewInclusionCriteriaSection}>Add Section</button>
                     {/* Inclusion cards to go in as divs below */}
                 </div>
                     
@@ -215,7 +215,7 @@ export default function Setup(props) {
                     {/* Set up exclusion categories */}
                     <h4>Exclusion Criteria</h4>
                     <input type="text" id="newExclusionSection" placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onclick={handleNewInclusionCriteriaSection}>Add Section</button>
+                    <button onClick={handleNewInclusionCriteriaSection}>Add Section</button>
                     {/* Exclusion cards to go in as divs below */}
                     {/* They need their own buttons to add the actual criteria */}
                 </div>
@@ -229,7 +229,7 @@ export default function Setup(props) {
         <div>
             <h3>Set Full Text Exclusion Reasons</h3>
             <input type="text" id="newFullTextExclusionInput" placeholder="New full text exclusion (i.e. incorrect setting)"></input>
-            <button onclick={handleNewFullTextExclusion} id="addFullTextCriteriaBtn">Add Criteria</button>
+            <button onClick={handleNewFullTextExclusion} id="addFullTextCriteriaBtn">Add Criteria</button>
             {/* li of the exclusion reasons */}
         </div>
 
