@@ -12,9 +12,24 @@ export default function TAScreening(props) {
     function handleItemsPerPage() {
 
     }
-    function handleSortByOrder() {
-
+    
+    function handleSortByOrder(studies, sortBy) {
+        return [...studies].sort((a, b) => {
+            switch (sortBy) {
+                case 'year_asc':
+                    return (a.PY?.[0] || 0) - (b.PY?.[0] || 0);
+                case 'year_des':
+                    return (b.PY?.[0] || 0) - (a.PY?.[0] || 0);
+                case 'title-asc':
+                    return (a.TI?.[0] || '').localeCompare(b.TI?.[0] || 0)
+                case 'title-des':
+                    return (b.TI?.[0] || '').localeCompare(a.TI?.[0] || 0)
+                default:
+                    return 0;
+            }
+        });
     }
+    
     function handleSetSearchFilter() {
 
     }
@@ -86,11 +101,12 @@ export default function TAScreening(props) {
             <br />
 
             {/* Load more button */}
-            <button onClick={handleLoadMoreStudies}>
-                Load more...
-            </button>
 
-
+            {studies.length > 0 && (
+                <button onClick={handleLoadMoreStudies}>
+                    Load more...
+                </button>
+            )}
         </>
     )
 }

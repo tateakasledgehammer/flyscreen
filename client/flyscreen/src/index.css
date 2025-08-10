@@ -96,6 +96,22 @@ footer {
   font-size: 11px;
 }
 
+#screening-nav {
+  padding: 20px;
+}
+
+.study-entry {
+  margin: 20px;
+  padding: 10px 20px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.actions {
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

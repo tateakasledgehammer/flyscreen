@@ -87,13 +87,16 @@ export default function Import(props) {
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            
+            const existingStudies = JSON.parse(localStorage.getItem('studies') || '[]');
+
             const risFileContent = e.target.result;
             const parsedStudies = parseRIS(risFileContent);
             const studiesInDetail = handleStudyDetails(parsedStudies);
 
-            setStudies((studiesInDetail));
-            localStorage.setItem('studies', JSON.stringify(studiesInDetail))
+            const fullStudiesCombined = existingStudies.concat(studiesInDetail);
+            
+            setStudies((fullStudiesCombined));
+            localStorage.setItem('studies', JSON.stringify(fullStudiesCombined))
 
             const timeOfUpload = new Date().toLocaleString();
             setUploadTimestamp(timeOfUpload);
