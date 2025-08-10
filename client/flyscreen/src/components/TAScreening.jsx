@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import StudyCard from "./StudyCard";
 
 export default function TAScreening(props) {
     const { studies, setStudies, savedStudies } = props;
@@ -32,7 +33,9 @@ export default function TAScreening(props) {
 
     return (
         <>
-            <h1><i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening</h1>
+            <h1>
+                <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
+            </h1>
 
             {/* Navigation bar for the screening */}
             <div id="screening-nav">
@@ -74,13 +77,7 @@ export default function TAScreening(props) {
             </div>
 
             {/* Output section */}
-            <div>
-                {studies.map(study => (
-                    <div>
-                        <h3>{study.title}</h3>
-                    </div>
-                ))}
-            </div>
+            <StudyCard studies={studies} setStudies={setStudies} />
 
             <br />
             <br />

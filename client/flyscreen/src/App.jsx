@@ -19,7 +19,7 @@ function App() {
 
   useEffect(() => {
     const savedStudies = localStorage.getItem('studies');
-        if (savedStudies) setStudies(JSON.parse(savedStudies));
+    if (savedStudies) setStudies(JSON.parse(savedStudies));
   }, []);
 
   const authenticatedContent = (
@@ -32,7 +32,7 @@ function App() {
       <br />
       <Import studies={studies} setStudies={setStudies} />
       <br />
-      <TAScreening studies={studies} />
+      <TAScreening studies={studies} setStudies={setStudies} />
       <br />
       <FullTextScreening />
       <br />

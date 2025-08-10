@@ -51,7 +51,7 @@ export default function Import(props) {
     function handleStudyDetails(records) {
         return records.map((entry, index) => ({
             index: entry.index,
-            title: (entry.TI && entry.TI[0] || 'N/A'),
+            title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
             year: (entry.PY && entry.PY[0] || 'N/A'),
             type: (entry.M3 && entry.M3[0] || 'N/A'),
             authors: entry.AU ? entry.AU.join(', ') : 'N/A',
