@@ -1,19 +1,15 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function Setup(props) {
-    const { isAuthenticated } = props;
+    const { isAuthenticated, backgroundInformationForReview, setBackgroundInformationForReview } = props;
 
-    // general background
-    const [reviewTitle, setReviewTitle] = useState(''); 
-    const [studyType, setStudyType] = useState('');
-    const [questionType, setQuestionType] = useState('');
-    const [researchArea, setResearchArea] = useState('');
+    useEffect(() => {
+        localStorage.setItem(
+            "backgroundInformationForReview",
+            JSON.stringify(backgroundInformationForReview)
+        );
+    }, [backgroundInformationForReview])
 
-    // information about reviewers
-    const [screenerNo, setScreenerNo] = useState(1);
-    const [fullTextScreenerNo, setFullTextScreenerNo] = useState(1);
-    const [dataExtractionScreenerNo, setDataExtractionScreenerNo] = useState(1);
-    
     // tags & criteria
     const [studyTags, setStudyTags] = useState([]);
     const [inclusionSection, setInclusionSection] = useState([]);
@@ -74,64 +70,89 @@ export default function Setup(props) {
         {/* Review Title */}
         <div>
             <h3>Review Name</h3>
-            <input onChange={(e) => {
-                setReviewTitle(e.target.value);
-                console.log('New Review Title: ', e.target.value);
-            }} type="text" value={reviewTitle} placeholder="Provide the title of your review..." id="titleReview"></input>
+            <input 
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        title: e.target.value
+                    })
+                }
+                type="text" 
+                value={backgroundInformationForReview.title} 
+                placeholder="Provide the title of your review..." 
+                id="review-title"></input>
         </div>
 
         {/* Study Type */}
         <div>
             <h3>Study Type</h3>
-            <select onChange={(e) => {
-                setStudyType(e.target.value);
-                console.log('Selected Study Type: ', e.target.value)
-            }} value={studyType} id="study-type" name="study-type">
-                <option value={null}>Set study type</option>
-                <option value="systematic-review">Systematic Review</option>
-                <option value="scoping-review">Scoping Review</option>
-                <option value="literature-review">Literature Review</option>
-                <option value="rapid-review">Rapid Review</option>
-                <option value="umbrella-review">Umbrella Review</option>
-                <option value="other-review">Other</option>
+            <select 
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        studyType: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.studyType}
+                id="study-type"
+                >
+                    <option value="">Set study type</option>
+                    <option value="Systematic Review">Systematic Review</option>
+                    <option value="Scoping Review">Scoping Review</option>
+                    <option value="Literature Review">Literature Review</option>
+                    <option value="Rapid Review">Rapid Review</option>
+                    <option value="Umbrella Review">Umbrella Review</option>
+                    <option value="Other">Other</option>
             </select>
         </div>
 
         {/* Question Type */}
         <div>
             <h3>Question Type</h3>
-            <select onChange={(e) => {
-                setQuestionType(e.target.value);
-                console.log('Selected question type: ', e.target.value)
-            }} value={questionType} id="question-type" name="question-type">
-                <option value={null}>Set question type</option>
-                <option value="intervention">Intervention / Treatment</option>
-                <option value="prevention">Prevention</option>
-                <option value="etiology">Etiology</option>
-                <option value="diagnosis">Diagnosis</option>
-                <option value="prognosis">Prognosis</option>
-                <option value="qualitative">Qualitative</option>
+            <select
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        questionType: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.questionType} 
+                id="question-type"
+                >
+                    <option value={null}>Set question type</option>
+                    <option value="intervention">Intervention / Treatment</option>
+                    <option value="prevention">Prevention</option>
+                    <option value="etiology">Etiology</option>
+                    <option value="diagnosis">Diagnosis</option>
+                    <option value="prognosis">Prognosis</option>
+                    <option value="qualitative">Qualitative</option>
             </select>
         </div>
 
         {/* Research Area */}
         <div>
             <h3>Area of Research</h3>
-            <select onChange={(e) => {
-                setResearchArea(e.target.value);
-                console.log('Research area: ', e.target.value);
-            }} value={researchArea} id="research-area">
-                <option value={null}>Set research area</option>
-                <option value="arts">Arts & Humanities</option>
-                <option value="food-and-animals">Agriculture, Veterinary & Food sciences</option>
-                <option value="bio-and-chem">Biological & Chemical Sciences</option>
-                <option value="environmental">Environmental Sciences</option>
-                <option value="business-and-economic">Economic, Business & Social Sciences</option>
-                <option value="education">Education</option>
-                <option value="stem">Engineering, Maths, Physics & Technology</option>
-                <option value="medical-and-health">Medical & Health Science</option>
-                <option value="psychology">Psychology</option>
-                <option value="other">Other</option>
+            <select 
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        researchArea: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.researchArea} 
+                id="research-area"
+                    >
+                    <option value={null}>Set research area</option>
+                    <option value="arts">Arts & Humanities</option>
+                    <option value="food-and-animals">Agriculture, Veterinary & Food sciences</option>
+                    <option value="bio-and-chem">Biological & Chemical Sciences</option>
+                    <option value="environmental">Environmental Sciences</option>
+                    <option value="business-and-economic">Economic, Business & Social Sciences</option>
+                    <option value="education">Education</option>
+                    <option value="stem">Engineering, Maths, Physics & Technology</option>
+                    <option value="medical-and-health">Medical & Health Science</option>
+                    <option value="psychology">Psychology</option>
+                    <option value="other">Other</option>
             </select>
         </div>
 
@@ -142,30 +163,50 @@ export default function Setup(props) {
         <div>
             <h3>Reviewer Settings</h3>
             <p>Reviewers required for title & abstract screening</p>
-            <select onChange={(e) => {
-                setScreenerNo(e.target.value);
-                console.log('Screener Number needed: '. e.target.value)
-            }} value={screenerNo} id="screener-no" data-storage-key="screenerNo">
-                <option value="1">1</option>
-                <option value="2">2</option>
+            <select
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        numberOfReviewersForScreening: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.numberOfReviewersForScreening} 
+                id="screener-no"
+                >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
             </select>
 
             <p>Reviewers required for full text screening</p>
-            <select onChange={(e) => {
-                setFullTextScreenerNo(e.target.value);
-                console.log('Full Text Screener Number needed: '. e.target.value)
-            }} value={fullTextScreenerNo} id="full-text-screener-no" data-storage-key="fullTextScreenerNo">
-                <option value="1">1</option>
-                <option value="2">2</option>
+            <select
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        numberOfReviewersForFullText: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.numberOfReviewersForFullText}
+                id="full-text-screener-no"
+                data-storage-key="fullTextScreenerNo"
+                >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
             </select>
 
             <p>Reviewers required for data extraction</p>
-            <select onChange={(e) => {
-                setDataExtractionScreenerNo(e.target.value);
-                console.log('Data Extraction Screener Number needed: '. e.target.value)
-            }} value={dataExtractionScreenerNo} id="data-extraction-screener-no" data-storage-key="dataExtractionNo">
-                <option value="1">1</option>
-                <option value="2">2</option>
+            <select
+                onChange={(e) => 
+                    setBackgroundInformationForReview({
+                        ...backgroundInformationForReview, 
+                        numberOfReviewersForExtraction: e.target.value
+                    })
+                }
+                value={backgroundInformationForReview.numberOfReviewersForExtraction}
+                id="data-extraction-screener-no"
+                data-storage-key="dataExtractionNo"
+                >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
             </select>
 
             <button id="invite-reviewer">Invite Reviewer</button>

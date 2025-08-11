@@ -1,48 +1,58 @@
 export default function Overview(props) {
-    const { studies, setStudies, savedStudies } = props
+    const { studies, setStudies, savedStudies, backgroundInformationForReview } = props
 
     return (
         <>
             <h1><i className="fa-solid fa-house-chimney"></i> Your Homepage</h1>
             {/* Add class and styling for the homepage cards + progress bar */}
             <div>
-                <h3 href="Overview.jsx">Overview</h3>
-                <ul>Study Title: ...</ul>
-                <ul>Study Type: ...</ul>
-                <ul>Study commenced on: ...</ul>
-                <ul>Reviewers: ...</ul>
+                <h3>Overview</h3>
+                <ul>
+                    <li>Study Title: {backgroundInformationForReview.title || "No title set"}</li>
+                    <li>Study Type: {backgroundInformationForReview.studyType || "No study type set"}</li>
+                    <li>Reviewers needed for screening: {backgroundInformationForReview.numberOfReviewersForScreening || "Screener number not set"}</li>
+                    <li>Reviewers needed for full text view: {backgroundInformationForReview.numberOfReviewersForFullText || "Reviewer number not set"}</li>
+                    <li>Reviewers needed for extraction: {backgroundInformationForReview.numberOfReviewersForExtraction || "Extraction number not set"}</li>
+                </ul>
             </div>
             <div>
-                <h3 href="Import.jsx">Import Your Studies</h3>
-                <ul>Number of imported studies: {studies.length}</ul>
-                <ul>Number of uploads: ...</ul>
+                <h3>Import Your Studies</h3>
+                <ul>
+                    <li>Number of imported studies: {studies.length}</li>
+                    <li>Number of uploads: ...</li>
+                </ul>
             </div>
             <div>   
-                <h3 href="Setup.jsx">Set Up Your Review</h3>
-                <ul>Study Details: ...</ul>
-                <ul>Reviewer settings: ...</ul>
-                <ul>Tags: ...</ul>
-                <ul>Inclusion & Exclusion criteria: ...</ul>
+                <h3>Set Up Your Review</h3>
+                <ul>
+                    <li>Study Details: ...</li>
+                    <li>Tags: ...</li>
+                    <li>Inclusion & Exclusion criteria: ...</li>
+                </ul>
             </div>
             <div>
-                <h3 href="TAScreening.jsx">Title & Abstract Screening</h3>
-                <ul>Unscreened: ...</ul>
-                <ul>One Vote: ...</ul>
-                <ul>Approved: ...</ul>
-                <ul>Conflicts: ...</ul>
-                <ul>Rejected: ...</ul>
+                <h3>Title & Abstract Screening</h3>
+                <ul>
+                    <li>Unscreened: ...</li>
+                    <li>One Vote: ...</li>
+                    <li>Approved: ...</li>
+                    <li>Conflicts: ...</li>
+                    <li>Rejected: ...</li>
+                </ul>
             </div>
             <div>    
-                <h3 href="FullTextScreening.jsx">Full Text Screening</h3>
+                <h3>Full Text Screening</h3>
                 {/* ? copy above rather than double up */}
-                <ul>Unscreened: ...</ul>
-                <ul>One Vote: ...</ul>
-                <ul>Approved: ...</ul>
-                <ul>Conflicts: ...</ul>
-                <ul>Rejected: ...</ul>
+                <ul>
+                    <li>Unscreened: ...</li>
+                    <li>One Vote: ...</li>
+                    <li>Approved: ...</li>
+                    <li>Conflicts: ...</li>
+                    <li>Rejected: ...</li>
+                </ul>
             </div>
             <div>
-                <h3 href="IncludedStudies.jsx">Manage Your Included Studies</h3>
+                <h3>Manage Your Included Studies</h3>
             </div>
         </>
     )

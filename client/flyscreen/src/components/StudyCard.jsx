@@ -13,6 +13,9 @@ export default function StudyCard(props) {
     function handleRejectStudy() {
         
     }
+    function handleAssignTag() {
+        
+    }
 
     if (!studies || studies.length === 0) {
         return <p>No studies uploaded.</p>;
@@ -70,7 +73,7 @@ export default function StudyCard(props) {
                         </button>
                         <textarea label="Add Note:" placeholder="Enter your note here..."/>
                         <select>
-                            <option value="">Select a tag</option>
+                            <option value="" onChange={() => (handleAssignTag(index))}>Select a tag</option>
                         </select>
                     </div>
                 </div>

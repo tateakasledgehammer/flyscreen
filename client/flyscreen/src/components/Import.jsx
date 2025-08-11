@@ -49,7 +49,7 @@ export default function Import(props) {
     };
 
     function handleStudyDetails(records) {
-        return records.map((entry, index) => ({
+        return records.map((entry) => ({
             index: entry.index,
             title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
             year: (entry.PY && entry.PY[0] || 'N/A'),

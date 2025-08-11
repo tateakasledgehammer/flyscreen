@@ -16,19 +16,39 @@ function App() {
   const isAuthenticated = true;
   
   const [studies, setStudies] = useState([]);
-
   useEffect(() => {
     const savedStudies = localStorage.getItem('studies');
     if (savedStudies) setStudies(JSON.parse(savedStudies));
   }, []);
 
+  const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
+    const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
+    return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
+      title: "",
+      studyType: "",
+      questionType: "",
+      researchArea: "",
+      numberOfReviewersForScreening: 1,
+      numberOfReviewersForFullText: 1,
+      numberOfReviewersForExtraction: 1,
+    };
+  });
+
+  useEffect(() => {
+    // Save information when it changes
+    localStorage.setItem(
+      "backgroundInformationForReview",
+      JSON.stringify(backgroundInformationForReview)
+    );
+  }, [backgroundInformationForReview]);
+
   const authenticatedContent = (
     <>
       <Navbar />
       <br />
-      <Overview studies={studies} />
+      <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} />
       <br />
-      <Setup />
+      <Setup backgroundInformationForReview={backgroundInformationForReview} setBackgroundInformationForReview={setBackgroundInformationForReview} />
       <br />
       <Import studies={studies} setStudies={setStudies} />
       <br />

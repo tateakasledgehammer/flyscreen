@@ -5,7 +5,7 @@ export default function TAScreening(props) {
     const { studies, setStudies, savedStudies } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
-    const [sortBy, setSortBy] = useState(null);
+    const [sortBy, setSortBy] = useState('index_asc');
     const [searchFilter, setSearchFilter] = useState(null);
     const [toggleDetails, setToggleDetails] = useState(null)
 
@@ -13,22 +13,32 @@ export default function TAScreening(props) {
 
     }
     
-    function handleSortByOrder(studies, sortBy) {
+    function handleSortByOrder(studies) {
         return [...studies].sort((a, b) => {
             switch (sortBy) {
                 case 'year_asc':
                     return (a.PY?.[0] || 0) - (b.PY?.[0] || 0);
                 case 'year_des':
                     return (b.PY?.[0] || 0) - (a.PY?.[0] || 0);
-                case 'title-asc':
-                    return (a.TI?.[0] || '').localeCompare(b.TI?.[0] || 0)
-                case 'title-des':
-                    return (b.TI?.[0] || '').localeCompare(a.TI?.[0] || 0)
+                case 'title_asc':
+                    return (a.T1?.[0] || '').localeCompare(b.T1?.[0] || 0)
+                case 'title_des':
+                    return (b.T1?.[0] || '').localeCompare(a.T1?.[0] || 0)
+                case 'author_asc':
+                    return (a.AU?.[0] || '').localeCompare(b.AU?.[0] || 0);
+                case 'author_des':
+                    return (b.AU?.[0] || '').localeCompare(a.AU?.[0] || 0);
+                case 'index_asc':
+                    return a.index - b.index;
                 default:
                     return 0;
             }
         });
     }
+
+    useEffect(() => {
+        setStudies(prev => handleSortByOrder(prev, sortBy));
+    }, [sortBy]);
     
     function handleSetSearchFilter() {
 
@@ -56,7 +66,7 @@ export default function TAScreening(props) {
             <div id="screening-nav">
                 {/* Items per page */}
                 <label>Show per page:</label>
-                <select id="itemsPerPage" onClick={handleItemsPerPage}>
+                <select id="itemsPerPage" onChange={handleItemsPerPage}>
                     <option defaultValue={0}>Select</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>
@@ -65,14 +75,14 @@ export default function TAScreening(props) {
 
                 {/* Sort studies */}
                 <label>Sort by:</label>
-                <select id="sortBy" onClick={handleSortByOrder}>
+                <select id="sortBy" onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="index_asc">Study Index</option>
                     <option value="year_asc">Year (Oldest First)</option>
                     <option value="year_des">Year (Newest First)</option>
                     <option value="title_asc">Title (A - Z)</option>
                     <option value="title_des">Title (Z - A)</option>
                     <option value="author_asc">Author (A - Z)</option>
                     <option value="author_des">Author (Z - A)</option>
-                    <option value="index_asc">Study Index</option>
                 </select>
 
                 {/* Filter studies */}
