@@ -1,5 +1,5 @@
 export default function Overview(props) {
-    const { studies, setStudies, savedStudies, backgroundInformationForReview } = props
+    const { studies, setStudies, savedStudies, backgroundInformationForReview, studyTags } = props
 
     return (
         <>
@@ -26,7 +26,19 @@ export default function Overview(props) {
                 <h3>Set Up Your Review</h3>
                 <ul>
                     <li>Study Details: ...</li>
-                    <li>Tags: ...</li>
+                    {(!studyTags || studyTags.length === 0) && <li>Tags: No tags provided.</li>}
+
+                    {studyTags && studyTags.length > 0 && (
+                    <>
+                        <li>Tags: </li>
+                        <ul>
+                            {(studyTags.map((tag, index) => (
+                                <li key={index}>{tag}</li>
+                            )))}
+                        </ul>
+                    </>
+                    )}                  
+
                     <li>Inclusion & Exclusion criteria: ...</li>
                 </ul>
             </div>

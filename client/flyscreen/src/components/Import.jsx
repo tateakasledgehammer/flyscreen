@@ -95,7 +95,7 @@ export default function Import(props) {
 
             const fullStudiesCombined = existingStudies.concat(studiesInDetail);
             
-            setStudies((fullStudiesCombined));
+            setStudies(fullStudiesCombined);
             localStorage.setItem('studies', JSON.stringify(fullStudiesCombined))
 
             const timeOfUpload = new Date().toLocaleString();

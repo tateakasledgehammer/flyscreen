@@ -21,6 +21,17 @@ function App() {
     if (savedStudies) setStudies(JSON.parse(savedStudies));
   }, []);
 
+  const [studyTags, setStudyTags] = useState(() => {
+    const savedStudyTags = localStorage.getItem('studyTags');
+    return savedStudyTags ? JSON.parse(savedStudyTags) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem(
+        "studyTags",
+        JSON.stringify(studyTags)
+    );
+  }, [studyTags]);
+
   const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
     const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
     return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
@@ -33,7 +44,6 @@ function App() {
       numberOfReviewersForExtraction: 1,
     };
   });
-
   useEffect(() => {
     // Save information when it changes
     localStorage.setItem(
@@ -41,18 +51,19 @@ function App() {
       JSON.stringify(backgroundInformationForReview)
     );
   }, [backgroundInformationForReview]);
+  
 
   const authenticatedContent = (
     <>
       <Navbar />
       <br />
-      <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} />
+      <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} studyTags={studyTags}/>
       <br />
-      <Setup backgroundInformationForReview={backgroundInformationForReview} setBackgroundInformationForReview={setBackgroundInformationForReview} />
+      <Setup backgroundInformationForReview={backgroundInformationForReview} setBackgroundInformationForReview={setBackgroundInformationForReview} studyTags={studyTags} setStudyTags={setStudyTags} />
       <br />
       <Import studies={studies} setStudies={setStudies} />
       <br />
-      <TAScreening studies={studies} setStudies={setStudies} />
+      <TAScreening studies={studies} setStudies={setStudies} studyTags={studyTags} />
       <br />
       <FullTextScreening />
       <br />

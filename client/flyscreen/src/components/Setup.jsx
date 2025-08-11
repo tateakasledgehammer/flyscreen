@@ -1,30 +1,37 @@
 import { useEffect, useState } from "react"
 
 export default function Setup(props) {
-    const { isAuthenticated, backgroundInformationForReview, setBackgroundInformationForReview } = props;
+    const { 
+        isAuthenticated, 
+        backgroundInformationForReview, 
+        setBackgroundInformationForReview,
+        studyTags,
+        setStudyTags
+    } = props;
 
-    useEffect(() => {
-        localStorage.setItem(
-            "backgroundInformationForReview",
-            JSON.stringify(backgroundInformationForReview)
-        );
-    }, [backgroundInformationForReview])
+    const [newTagInput, setNewTagInput] = useState('');
 
     // tags & criteria
-    const [studyTags, setStudyTags] = useState([]);
     const [inclusionSection, setInclusionSection] = useState([]);
     const [inclusionCriteria, setInclusionCriteria] = useState([]);
     const [exclusionSection, setExclusionSection] = useState([]);
     const [exclusionCriteria, setExclusionCriteria] = useState([]);
     const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState([]);
 
-    async function handleNewTag() {
-        
+    async function handleNewTag(e) {        
+        const enteredTag = newTagInput.trim();
+        if (enteredTag === '') return;
+        if (studyTags.includes(enteredTag)) {
+            alert("Tag already exists");
+            return;
+        }
 
+        setStudyTags([...studyTags, enteredTag]);
+        setNewTagInput('');
     }
 
     async function handleDeleteTag() {
-
+        setStudyTags([]);
     }
 
     async function handleNewInclusionCriteriaSection() {
@@ -224,12 +231,27 @@ export default function Setup(props) {
             <h3>Define Tags</h3>
             <p>Tags will appear while you are screening and are helpful for you to place into groups to check later - whether it be to look into more, to inform another piece of research, or provide valuable background information.</p>
             <div>
-                <input placeholder="Enter your tag..." type="text"></input>
+                <input 
+                    onChange={(e) => setNewTagInput(e.target.value)}
+                    value={newTagInput}
+                    placeholder="Enter your tag..." 
+                    type="text" 
+                >
+                </input>
                 {/* input gets added to tag list which gets added to list below */}
                 <button onClick={handleNewTag}>Add Tag</button>
 
-                <ul>{studyTags}</ul>
+                {(!studyTags || studyTags.length === 0) && <p>No tags provided.</p>}
 
+                {studyTags && studyTags.length > 0 && (
+                    <ul>
+                        {(studyTags.map((tag, index) => (
+                            <li key={index}>{tag}</li>
+                        )))}
+                    </ul>
+                )}
+
+                <button onClick={handleDeleteTag}>Clear Tags</button>
             </div>
         </div>
 
