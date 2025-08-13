@@ -30,8 +30,14 @@ export default function Setup(props) {
         setNewTagInput('');
     }
 
-    async function handleDeleteTag() {
+    async function handleClearTags() {
         setStudyTags([]);
+    }
+
+    async function handleDeleteTag(index) {
+        const amendedStudyTags = studyTags.filter((_, i) => i !== index);
+        setStudyTags(amendedStudyTags);
+        console.log('removed the tag')
     }
 
     async function handleNewInclusionCriteriaSection() {
@@ -246,12 +252,15 @@ export default function Setup(props) {
                 {studyTags && studyTags.length > 0 && (
                     <ul>
                         {(studyTags.map((tag, index) => (
-                            <li key={index}>{tag}</li>
+                            <li key={index}>
+                                {tag}
+                                <button onClick={() => handleDeleteTag(index)}>X</button>
+                            </li>
                         )))}
                     </ul>
                 )}
 
-                <button onClick={handleDeleteTag}>Clear Tags</button>
+                <button onClick={handleClearTags}>Clear Tags</button>
             </div>
         </div>
 
