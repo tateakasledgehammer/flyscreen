@@ -6,17 +6,17 @@ export default function Setup(props) {
         backgroundInformationForReview, 
         setBackgroundInformationForReview,
         studyTags,
-        setStudyTags
+        setStudyTags,
+        inclusionCriteria,
+        setInclusionCriteria,
+        exclusionCriteria,
+        setExclusionCriteria,
+        fullTextExclusionReasons,
+        setFullTextExclusionReasons
     } = props;
 
+    // tags
     const [newTagInput, setNewTagInput] = useState('');
-
-    // tags & criteria
-    const [inclusionSection, setInclusionSection] = useState([]);
-    const [inclusionCriteria, setInclusionCriteria] = useState([]);
-    const [exclusionSection, setExclusionSection] = useState([]);
-    const [exclusionCriteria, setExclusionCriteria] = useState([]);
-    const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState([]);
 
     async function handleNewTag(e) {        
         const enteredTag = newTagInput.trim();
@@ -40,13 +40,43 @@ export default function Setup(props) {
         console.log('removed the tag')
     }
 
-    async function handleNewInclusionCriteriaSection() {
+    // Inclusion
+    const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
 
+    const [inclusionSection, setInclusionSection] = useState(() => {
+        const saved = localStorage.getItem('inclusionSection');
+        return saved ? JSON.parse(saved) : [];
+    });
+    useEffect(() => {
+        localStorage.setItem("inclusionSection", JSON.stringify(inclusionSection));
+      }, [inclusionSection]);
+
+    function handleNewInclusionCriteriaSection(e) {
+        const enteredIncludedSection = newIncludedSectionInput.trim();
+        if (enteredIncludedSection === '') return;
+        if (inclusionSection.includes(enteredIncludedSection)) {
+            alert("Inclusion criteria already exists");
+            return;
+        }
+        setInclusionSection([...inclusionSection, enteredIncludedSection])
+        setNewIncludedSectionInput('');
     }
 
     async function handleDeleteInclusionSection() {
 
     }
+
+    // Exclusion
+    const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
+
+    const [exclusionSection, setExclusionSection] = useState([]);
+
+    useEffect(() => {
+        localStorage.setItem(
+          "exclusionSection",
+          JSON.stringify(exclusionSection)
+        )
+      }, [exclusionSection]);
 
     async function handleNewExclusionCriteriSection() {
 
@@ -278,16 +308,33 @@ export default function Setup(props) {
                 <div>
                     {/* Set up inclusion categories */}
                     <h4>Inclusion Criteria</h4>
-                    <input type="text" id="newInclusionSection" placeholder="New Section (i.e. Population, Intervention...)"></input>
+                    <input 
+                        onChange={(e) => setNewIncludedSectionInput(e.target.value)}
+                        value={newIncludedSectionInput}
+                        type="text" 
+                        id="newInclusionSection" 
+                        placeholder="New Section (i.e. Population, Intervention...)"></input>
                     <button onClick={handleNewInclusionCriteriaSection}>Add Section</button>
                     {/* Inclusion cards to go in as divs below */}
+
+                    {inclusionSection && inclusionSection.length > 0 && (
+                    <div>
+                        {(inclusionSection.map((section, index) => (
+                            <>
+                            <h3 key={index}>{section}</h3>
+                            <input />
+                            <button>Add Inclusion Criteria</button>
+                            </>
+                        )))}
+                    </div>
+                )}
                 </div>
                     
                 <div>
                     {/* Set up exclusion categories */}
                     <h4>Exclusion Criteria</h4>
                     <input type="text" id="newExclusionSection" placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onClick={handleNewInclusionCriteriaSection}>Add Section</button>
+                    <button type="button" onClick={handleNewInclusionCriteriaSection}>Add Section</button>
                     {/* Exclusion cards to go in as divs below */}
                     {/* They need their own buttons to add the actual criteria */}
                 </div>

@@ -32,6 +32,22 @@ function App() {
     );
   }, [studyTags]);
 
+  const [inclusionCriteria, setInclusionCriteria] = useState(() => {
+    const savedInclusionCriteria = localStorage.getItem('inclusionCriteria');
+    if (!savedInclusionCriteria || savedInclusionCriteria === "undefined") return [];
+    return savedInclusionCriteria ? JSON.parse(savedInclusionCriteria) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem(
+      "inclusionCriteria",
+      JSON.stringify(inclusionCriteria)
+    )
+  }, [inclusionCriteria]);
+  
+  const [exclusionCriteria, setExclusionCriteria] = useState();
+  const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState();
+  
+
   const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
     const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
     return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
