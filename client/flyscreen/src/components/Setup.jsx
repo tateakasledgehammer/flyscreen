@@ -62,8 +62,15 @@ export default function Setup(props) {
         setNewIncludedSectionInput('');
     }
 
-    async function handleDeleteInclusionSection() {
+    async function handleClearInclusionSection() {
+        setInclusionSection([]);
+        setInclusionCriteria([]);
+    }
 
+    async function handleDeleteInclusionSection(index) {
+        const amendedInclusionSections = inclusionSection.filter((_, i) => i !== index);
+        setInclusionSection(amendedInclusionSections);
+        console.log('removed the section');
     }
 
     // Exclusion
@@ -307,34 +314,54 @@ export default function Setup(props) {
             <div>
                 <div>
                     {/* Set up inclusion categories */}
-                    <h4>Inclusion Criteria</h4>
+                    <h3>Inclusion Criteria</h3>
                     <input 
                         onChange={(e) => setNewIncludedSectionInput(e.target.value)}
                         value={newIncludedSectionInput}
                         type="text" 
                         id="newInclusionSection" 
                         placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onClick={handleNewInclusionCriteriaSection}>Add Section</button>
+                    <button onClick={() => handleNewInclusionCriteriaSection}>Add Section</button>
                     {/* Inclusion cards to go in as divs below */}
 
+                    {!inclusionSection && inclusionSection.length < 0 && (
+                        <p>No criteria categories set.</p>
+                    )}
+
                     {inclusionSection && inclusionSection.length > 0 && (
-                    <div>
-                        {(inclusionSection.map((section, index) => (
-                            <>
-                            <h3 key={index}>{section}</h3>
-                            <input />
-                            <button>Add Inclusion Criteria</button>
-                            </>
-                        )))}
-                    </div>
-                )}
+                        <div>
+                            {(inclusionSection.map((section, index) => (
+                                <>
+                                <h3 key={index}>
+                                    {section}
+                                    <button onClick={() => handleDeleteInclusionSection(index)}
+                                    >X</button>
+                                </h3>
+                                <input />
+                                <button>Add Inclusion Criteria</button>
+                                </>
+                            )))}
+                        </div>
+                    )}
+
+                    <button onClick={() => handleClearInclusionSection}>Clear Inclusion Criteria</button>
+
                 </div>
                     
                 <div>
                     {/* Set up exclusion categories */}
-                    <h4>Exclusion Criteria</h4>
-                    <input type="text" id="newExclusionSection" placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button type="button" onClick={handleNewInclusionCriteriaSection}>Add Section</button>
+                    <h3>Exclusion Criteria</h3>
+                    <input 
+                        type="text" 
+                        id="newExclusionSection" 
+                        placeholder="New Section (i.e. Population, Intervention...)"
+                        >
+                    </input>
+                    <button 
+                        type="button" 
+                        onClick={() => handleNewExclusionCriteriSection}
+                        >
+                    Add Section</button>
                     {/* Exclusion cards to go in as divs below */}
                     {/* They need their own buttons to add the actual criteria */}
                 </div>
