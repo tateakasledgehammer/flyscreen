@@ -40,7 +40,11 @@ export default function Setup(props) {
         console.log('removed the tag')
     }
 
+    //
     // Inclusion
+    //
+
+    // Inclusion sections
     const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
 
     const [inclusionSection, setInclusionSection] = useState(() => {
@@ -73,7 +77,19 @@ export default function Setup(props) {
         console.log('removed the section');
     }
 
+    // Inclusion criteria
+    async function handleNewInclusionCriteria() {
+        
+    }
+
+    async function handleDeleteInclusionCriteria() {
+    }
+
+    //
     // Exclusion
+    //
+
+    // Exclusion section
     const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
 
     const [exclusionSection, setExclusionSection] = useState(() => {
@@ -107,17 +123,13 @@ export default function Setup(props) {
         console.log('removed the section');
     }
 
-    async function handleNewInclusionCriteria() {
-
-    }
-
-    async function handleDeleteInclusionCriteria() {
-        
-    }
-
     async function handleDeleteExclusionCriteria() {
 
     }
+
+    // 
+    // Full Text Criteria
+    // 
 
     async function handleNewFullTextExclusion() {
 
@@ -343,7 +355,7 @@ export default function Setup(props) {
                     )}
 
                     {inclusionSection && inclusionSection.length > 0 && (
-                        <div>
+                        <div className="criteria-section">
                             {(inclusionSection.map((section, index) => (
                                 <div key={index}>
                                     <h3>
@@ -377,7 +389,7 @@ export default function Setup(props) {
                     )}
 
                     {exclusionSection && exclusionSection.length > 0 && (
-                        <div>
+                        <div className="criteria-section">
                             {(exclusionSection.map((section, index) => (
                                 <div key={index}>
                                     <h3>

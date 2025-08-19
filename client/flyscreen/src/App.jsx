@@ -43,8 +43,19 @@ function App() {
       JSON.stringify(inclusionCriteria)
     )
   }, [inclusionCriteria]);
+
+  const [exclusionCriteria, setExclusionCriteria] = useState(() => {
+    const savedExclusionCriteria = localStorage.getItem('exclusionCriteria');
+    if (!savedExclusionCriteria || savedExclusionCriteria === "undefined") return [];
+    return savedExclusionCriteria ? JSON.parse(savedExclusionCriteria) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem(
+        "exclusionCriteria",
+        JSON.stringify(exclusionCriteria)
+    )
+  }, [exclusionCriteria]);
   
-  const [exclusionCriteria, setExclusionCriteria] = useState();
   const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState();
   
 

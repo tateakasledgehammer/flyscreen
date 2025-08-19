@@ -89,6 +89,10 @@ footer {
   justify-content: center;
 }
 
+.criteria-section {
+  padding: 20px;
+}
+
 #screening-nav input,
 #screening-nav button,
 #screening-nav select {
