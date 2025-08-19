@@ -321,7 +321,7 @@ export default function Setup(props) {
                         type="text" 
                         id="newInclusionSection" 
                         placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onClick={() => handleNewInclusionCriteriaSection}>Add Section</button>
+                    <button onClick={() => handleNewInclusionCriteriaSection()}>Add Section</button>
                     {/* Inclusion cards to go in as divs below */}
 
                     {!inclusionSection && inclusionSection.length < 0 && (
@@ -331,20 +331,20 @@ export default function Setup(props) {
                     {inclusionSection && inclusionSection.length > 0 && (
                         <div>
                             {(inclusionSection.map((section, index) => (
-                                <>
-                                <h3 key={index}>
-                                    {section}
-                                    <button onClick={() => handleDeleteInclusionSection(index)}
-                                    >X</button>
-                                </h3>
-                                <input />
-                                <button>Add Inclusion Criteria</button>
-                                </>
+                                <div key={index}>
+                                    <h3>
+                                        {section}
+                                        <button onClick={() => handleDeleteInclusionSection(index)}
+                                        >X</button>
+                                    </h3>
+                                    <input />
+                                    <button>Add Inclusion Criteria</button>
+                                </div>
                             )))}
                         </div>
                     )}
 
-                    <button onClick={() => handleClearInclusionSection}>Clear Inclusion Criteria</button>
+                    <button onClick={() => handleClearInclusionSection()}>Clear Inclusion Criteria</button>
 
                 </div>
                     
@@ -359,7 +359,7 @@ export default function Setup(props) {
                     </input>
                     <button 
                         type="button" 
-                        onClick={() => handleNewExclusionCriteriSection}
+                        onClick={() => handleNewExclusionCriteriSection()}
                         >
                     Add Section</button>
                     {/* Exclusion cards to go in as divs below */}
