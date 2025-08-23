@@ -182,18 +182,57 @@ export default function Setup(props) {
         setExclusionSection(amendedExclusionCriteria)
     }
 
-    
+    //
+    // Global Inclusion + Exclusion
+    //
+
+    useEffect(() => {
+        const criteria = inclusionSection.flatMap(section => section.criteria);
+        setInclusionCriteria(criteria);
+      }, [inclusionSection]);
+      
+      useEffect(() => {
+        const criteria = exclusionSection.flatMap(section => section.criteria);
+        setExclusionCriteria(criteria);
+      }, [exclusionSection]);
 
     // 
     // Full Text Criteria
     // 
+    const [fullTextInput, setFullTextInput] = useState('')
 
-    async function handleNewFullTextExclusion() {
-
+    function handleFullTextCriteriaInputChange(value) {
+        setFullTextInput(value);
     }
 
-    async function handleDeleteFullTextExclusion() {
+    const [fullTextSub, setFullTextSub] = useState(() => {
+        const saved = localStorage.getItem('fullTextExclusionReasons');
+        return saved ? JSON.parse(saved) : [];
+    });
+    
+    useEffect(() => {
+        localStorage.setItem("fullTextExclusionReasons", JSON.stringify(fullTextSub));
+      }, [fullTextSub]);
 
+    async function handleNewFullTextExclusion() {
+        const enteredFullText = fullTextInput.trim();
+        if (enteredFullText === '') return;
+        if (fullTextSub.includes(enteredFullText)) {
+            alert("Criteria already exists");
+            return;
+        }
+        setFullTextSub([...fullTextSub, enteredFullText])
+        setFullTextInput('');
+    }
+
+    async function handleDeleteFullTextExclusion(index) {
+        const amendedFullText = fullTextSub.filter((_, i) => i !== index);
+        setFullTextSub(amendedFullText);
+    }
+
+    async function handleClearFullTextReasons() {
+        setFullTextSub([])
+        setFullTextInput('')
     }
 
     return (
@@ -517,15 +556,6 @@ export default function Setup(props) {
                     <button onClick={() => handleClearExclusionSection()}>Clear Exclusion Criteria</button>
                 </div>
 
-
-                
-
-
-
-
-
-
-
             </div>
         </div>    
 
@@ -534,12 +564,35 @@ export default function Setup(props) {
 
         {/* Set up Full Text exclusion reasons */}
         <div>
-            <h3>Set Full Text Exclusion Reasons</h3>
-            <input type="text" id="newFullTextExclusionInput" placeholder="New full text exclusion (i.e. incorrect setting)"></input>
-            <button onClick={handleNewFullTextExclusion} id="addFullTextCriteriaBtn">Add Criteria</button>
-            {/* li of the exclusion reasons */}
-        </div>
+            {/* Set up exclusion categories */}
+            <h3>Full Text Exclusion Criteria</h3>
+            <input 
+                onChange={(e) => setFullTextInput(e.target.value)}
+                value={fullTextInput}
+                type="text" 
+                placeholder="New full text exclusion reasons (i.e. not a study, unavailable in English..."></input>
+            <button onClick={() => handleNewFullTextExclusion()}>Add Reason</button>
 
+            {!fullTextSub || fullTextSub.length === 0 && (
+                <p>No criteria set.</p>
+            )}
+
+            {fullTextSub && fullTextSub.length > 0 && (
+                <div className="criteria-section">
+                    <div className="inclusion-exclusion-criteria">
+                        {fullTextSub.map((term, index) => (
+                            <h4 key={index}>
+                                {term}
+                                <button onClick={() => handleDeleteFullTextExclusion(index)}
+                                >X</button>
+                            </h4>
+                        ))}
+                    </div>
+                </div>
+            )}
+                    
+            <button onClick={() => handleClearFullTextReasons()}>Clear Criteria</button>
+        </div>
         </>
     )
 }

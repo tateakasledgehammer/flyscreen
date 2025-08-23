@@ -56,8 +56,17 @@ function App() {
     )
   }, [exclusionCriteria]);
   
-  const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState();
-  
+  const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState(() => {
+    const savedFullTextExclusion = localStorage.getItem("fullTextExclusionReasons");
+    if (!savedFullTextExclusion || savedFullTextExclusion === "undefined") return [];
+    return savedFullTextExclusion ? JSON.parse(savedFullTextExclusion) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem(
+      "fullTextExclusionReasons",
+      JSON.stringify(fullTextExclusionReasons)
+    )
+  }, [fullTextExclusionReasons])
 
   const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
     const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
@@ -86,7 +95,18 @@ function App() {
       <br />
       <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} studyTags={studyTags}/>
       <br />
-      <Setup backgroundInformationForReview={backgroundInformationForReview} setBackgroundInformationForReview={setBackgroundInformationForReview} studyTags={studyTags} setStudyTags={setStudyTags} />
+      <Setup 
+        backgroundInformationForReview={backgroundInformationForReview} 
+        setBackgroundInformationForReview={setBackgroundInformationForReview} 
+        studyTags={studyTags} 
+        setStudyTags={setStudyTags} 
+        inclusionCriteria={inclusionCriteria} 
+        setInclusionCriteria={setInclusionCriteria} 
+        exclusionCriteria={exclusionCriteria} 
+        setExclusionCriteria={setExclusionCriteria} 
+        fullTextExclusionReasons={fullTextExclusionReasons}
+        setFullTextExclusionReasons={setFullTextExclusionReasons}
+      />
       <br />
       <Import studies={studies} setStudies={setStudies} />
       <br />
