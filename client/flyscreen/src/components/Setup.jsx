@@ -59,7 +59,6 @@ export default function Setup(props) {
         const saved = localStorage.getItem('inclusionSection');
         return saved ? JSON.parse(saved) : [];
     });
-
     
     useEffect(() => {
         localStorage.setItem("inclusionSection", JSON.stringify(inclusionSection));
@@ -116,17 +115,25 @@ export default function Setup(props) {
     // Exclusion
     //
 
-    // Exclusion section
+    // Exclusion sections
     const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
+    const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
+
+    function handleExclusionCriteriaInputChange(index, value) {
+        setExclusionCriteriaInputs(prev => ({
+            ...prev,
+            [index]: value
+        }));
+    }
 
     const [exclusionSection, setExclusionSection] = useState(() => {
         const saved = localStorage.getItem('exclusionSection');
         return saved ? JSON.parse(saved) : [];
     });
+    
     useEffect(() => {
         localStorage.setItem("exclusionSection", JSON.stringify(exclusionSection));
       }, [exclusionSection]);
-
 
     function handleNewExclusionCriteriaSection(e) {
         const enteredExcludedSection = newExcludedSectionInput.trim();
@@ -135,24 +142,47 @@ export default function Setup(props) {
             alert("Exclusion criteria already exists");
             return;
         }
-        setExclusionSection([...exclusionSection, enteredExcludedSection])
+        setExclusionSection([...exclusionSection, { name: enteredExcludedSection, criteria: [] }])
         setNewExcludedSectionInput('');
     }
 
     async function handleClearExclusionSection() {
         setExclusionSection([]);
         setExclusionCriteria([]);
+        setExclusionCriteriaInputs({});
     }
 
     async function handleDeleteExclusionSection(index) {
         const amendedExclusionSections = exclusionSection.filter((_, i) => i !== index);
         setExclusionSection(amendedExclusionSections);
-        console.log('removed the section');
     }
 
-    async function handleDeleteExclusionCriteria() {
+    // Exclusion criteria
+    async function handleNewExclusionCriteria(index) {
+        const enteredExclusion = (exclusionCriteriaInputs[index] || "").trim();
+        if (!enteredExclusion) return;
 
+        const updated = [...exclusionSection];
+        if (updated[index].criteria.includes(enteredExclusion)) {
+            alert("Exclusion criteria already exists");
+            return;
+        }
+
+        updated[index].criteria.push(enteredExclusion);
+        setExclusionSection(updated);
+        setExclusionCriteriaInputs(prev => ({
+            ...prev,
+            [index]: ""
+        }));
     }
+
+    async function handleDeleteExclusionCriteria(index, termIndex) {
+        const amendedExclusionCriteria = [...exclusionSection];
+        amendedExclusionCriteria[index].criteria.splice(termIndex, 1);
+        setExclusionSection(amendedExclusionCriteria)
+    }
+
+    
 
     // 
     // Full Text Criteria
@@ -425,8 +455,10 @@ export default function Setup(props) {
                     
                     <button onClick={() => handleClearInclusionSection()}>Clear Inclusion Criteria</button>
                 </div>
+
+
                 <div>
-                    {/* Set up inclusion categories */}
+                    {/* Set up exclusion categories */}
                     <h3>Exclusion Criteria</h3>
                     <input 
                         onChange={(e) => setNewExcludedSectionInput(e.target.value)}
@@ -435,9 +467,8 @@ export default function Setup(props) {
                         id="newExclusionSection" 
                         placeholder="New Section (i.e. Population, Intervention...)"></input>
                     <button onClick={() => handleNewExclusionCriteriaSection()}>Add Section</button>
-                    {/* Exclusion cards to go in as divs below */}
 
-                    {!exclusionSection && exclusionSection.length < 0 && (
+                    {!exclusionSection || exclusionSection.length === 0 && (
                         <p>No criteria categories set.</p>
                     )}
 
@@ -446,21 +477,55 @@ export default function Setup(props) {
                             {(exclusionSection.map((section, index) => (
                                 <div key={index}>
                                     <h3>
-                                        {section}
+                                        {section.name}
                                         <button onClick={() => handleDeleteExclusionSection(index)}
                                         >X</button>
                                     </h3>
-                                    <input />
-                                    <button>Add Exclusion Criteria</button>
+                                    <input
+                                        onChange={(e) => handleExclusionCriteriaInputChange(index, e.target.value)}
+                                        value={exclusionCriteriaInputs[index] || ""}
+                                        id="newExclusionCriteria"
+                                        placeholder="Provide your term for exclusion..."
+                                    >
+                                    </input>
+                                    <button onClick={() => handleNewExclusionCriteria(index)}>Add</button>
+
+                                    {(!section.criteria || section.criteria.length === 0) && (
+                                        <p>No terms for exclusion added.</p>
+                                    )}
+
+                                    {(section.criteria && section.criteria.length > 0) && (
+                                        <div className="inclusion-exclusion-criteria">
+                                            {(section.criteria.map((term, termIndex) => (
+                                                <div key={termIndex}>
+                                                    <h4>
+                                                        {term}
+                                                        <button onClick={() => handleDeleteExclusionCriteria(index, termIndex)}
+                                                        >X</button>
+                                                    </h4>
+                                                </div>
+                                            )))}
+                                        </div>
+                                    )}
+
+
                                 </div>
                             )))}
                         </div>
                     )}
-
+                    
                     <button onClick={() => handleClearExclusionSection()}>Clear Exclusion Criteria</button>
                 </div>
-                    
+
+
                 
+
+
+
+
+
+
+
             </div>
         </div>    
 
