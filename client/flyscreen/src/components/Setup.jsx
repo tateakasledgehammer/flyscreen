@@ -46,7 +46,14 @@ export default function Setup(props) {
 
     // Inclusion sections
     const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
-    const [newInclusionCriteriaInput, setNewInclusionCriteriaInput] = useState('');
+    const [criteriaInputs, setCriteriaInputs] = useState({});
+
+    function handleCriteriaInputChange(index, value) {
+        setCriteriaInputs(prev => ({
+            ...prev,
+            [index]: value
+        }));
+    }
 
     const [inclusionSection, setInclusionSection] = useState(() => {
         const saved = localStorage.getItem('inclusionSection');
@@ -72,6 +79,7 @@ export default function Setup(props) {
     async function handleClearInclusionSection() {
         setInclusionSection([]);
         setInclusionCriteria([]);
+        setCriteriaInputs({});
     }
 
     async function handleDeleteInclusionSection(index) {
@@ -81,7 +89,7 @@ export default function Setup(props) {
 
     // Inclusion criteria
     async function handleNewInclusionCriteria(index) {
-        const enteredInclusion = newInclusionCriteriaInput.trim();
+        const enteredInclusion = (criteriaInputs[index] || "").trim();
         if (!enteredInclusion) return;
 
         const updated = [...inclusionSection];
@@ -92,7 +100,10 @@ export default function Setup(props) {
 
         updated[index].criteria.push(enteredInclusion);
         setInclusionSection(updated);
-        setNewInclusionCriteriaInput('');
+        setCriteriaInputs(prev => ({
+            ...prev,
+            [index]: ""
+        }));
     }
 
     async function handleDeleteInclusionCriteria(index, termIndex) {
@@ -380,20 +391,19 @@ export default function Setup(props) {
                                         >X</button>
                                     </h3>
                                     <input
-                                        onChange={(e) => setNewInclusionCriteriaInput(e.target.value)}
-                                        value={newInclusionCriteriaInput}
-                                        type="text"
+                                        onChange={(e) => handleCriteriaInputChange(index, e.target.value)}
+                                        value={criteriaInputs[index] || ""}
                                         id="newInclusionCriteria"
                                         placeholder="Provide your term for inclusion..."
                                     >
                                     </input>
                                     <button onClick={() => handleNewInclusionCriteria(index)}>Add</button>
 
-                                    {!section.criteria || section.criteria.length === 0 && (
+                                    {(!section.criteria || section.criteria.length === 0) && (
                                         <p>No terms for inclusion added.</p>
                                     )}
 
-                                    {section.criteria || section.criteria.length > 0 && (
+                                    {(section.criteria && section.criteria.length > 0) && (
                                         <div className="inclusion-exclusion-criteria">
                                             {(section.criteria.map((term, termIndex) => (
                                                 <div key={termIndex}>
@@ -402,7 +412,6 @@ export default function Setup(props) {
                                                         <button onClick={() => handleDeleteInclusionCriteria(index, termIndex)}
                                                         >X</button>
                                                     </h4>
-                                                    <input />
                                                 </div>
                                             )))}
                                         </div>

@@ -93,6 +93,14 @@ footer {
   padding: 20px;
 }
 
+.inclusion-exclusion-criteria {
+  padding-left: 20px;
+  margin-top: 10px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background-color: lightgray;
+}
+
 #screening-nav input,
 #screening-nav button,
 #screening-nav select {
