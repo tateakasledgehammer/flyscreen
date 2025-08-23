@@ -46,11 +46,14 @@ export default function Setup(props) {
 
     // Inclusion sections
     const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
+    const [newInclusionCriteriaInput, setNewInclusionCriteriaInput] = useState('');
 
     const [inclusionSection, setInclusionSection] = useState(() => {
         const saved = localStorage.getItem('inclusionSection');
         return saved ? JSON.parse(saved) : [];
     });
+
+    
     useEffect(() => {
         localStorage.setItem("inclusionSection", JSON.stringify(inclusionSection));
       }, [inclusionSection]);
@@ -62,7 +65,7 @@ export default function Setup(props) {
             alert("Inclusion criteria already exists");
             return;
         }
-        setInclusionSection([...inclusionSection, enteredIncludedSection])
+        setInclusionSection([...inclusionSection, { name: enteredIncludedSection, criteria: [] }])
         setNewIncludedSectionInput('');
     }
 
@@ -74,15 +77,28 @@ export default function Setup(props) {
     async function handleDeleteInclusionSection(index) {
         const amendedInclusionSections = inclusionSection.filter((_, i) => i !== index);
         setInclusionSection(amendedInclusionSections);
-        console.log('removed the section');
     }
 
     // Inclusion criteria
-    async function handleNewInclusionCriteria() {
-        
+    async function handleNewInclusionCriteria(index) {
+        const enteredInclusion = newInclusionCriteriaInput.trim();
+        if (!enteredInclusion) return;
+
+        const updated = [...inclusionSection];
+        if (updated[index].criteria.includes(enteredInclusion)) {
+            alert("Inclusion criteria already exists");
+            return;
+        }
+
+        updated[index].criteria.push(enteredInclusion);
+        setInclusionSection(updated);
+        setNewInclusionCriteriaInput('');
     }
 
-    async function handleDeleteInclusionCriteria() {
+    async function handleDeleteInclusionCriteria(index, termIndex) {
+        const amendedInclusionCriteria = [...inclusionSection];
+        amendedInclusionCriteria[index].criteria.splice(termIndex, 1);
+        setInclusionSection(amendedInclusionCriteria)
     }
 
     //
@@ -350,7 +366,7 @@ export default function Setup(props) {
                     <button onClick={() => handleNewInclusionCriteriaSection()}>Add Section</button>
                     {/* Inclusion cards to go in as divs below */}
 
-                    {!inclusionSection && inclusionSection.length < 0 && (
+                    {!inclusionSection || inclusionSection.length === 0 && (
                         <p>No criteria categories set.</p>
                     )}
 
@@ -359,12 +375,40 @@ export default function Setup(props) {
                             {(inclusionSection.map((section, index) => (
                                 <div key={index}>
                                     <h3>
-                                        {section}
+                                        {section.name}
                                         <button onClick={() => handleDeleteInclusionSection(index)}
                                         >X</button>
                                     </h3>
-                                    <input />
-                                    <button>Add Inclusion Criteria</button>
+                                    <input
+                                        onChange={(e) => setNewInclusionCriteriaInput(e.target.value)}
+                                        value={newInclusionCriteriaInput}
+                                        type="text"
+                                        id="newInclusionCriteria"
+                                        placeholder="Provide your term for inclusion..."
+                                    >
+                                    </input>
+                                    <button onClick={() => handleNewInclusionCriteria(index)}>Add</button>
+
+                                    {!section.criteria || section.criteria.length === 0 && (
+                                        <p>No terms for inclusion added.</p>
+                                    )}
+
+                                    {section.criteria || section.criteria.length > 0 && (
+                                        <div className="inclusion-exclusion-criteria">
+                                            {(section.criteria.map((term, termIndex) => (
+                                                <div key={termIndex}>
+                                                    <h4>
+                                                        {term}
+                                                        <button onClick={() => handleDeleteInclusionCriteria(index, termIndex)}
+                                                        >X</button>
+                                                    </h4>
+                                                    <input />
+                                                </div>
+                                            )))}
+                                        </div>
+                                    )}
+
+
                                 </div>
                             )))}
                         </div>
