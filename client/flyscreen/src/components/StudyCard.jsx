@@ -14,7 +14,7 @@ export default function StudyCard(props) {
         
     }
     function handleAssignTag() {
-        
+
     }
 
     if (!studies || studies.length === 0) {
@@ -24,11 +24,11 @@ export default function StudyCard(props) {
     return (
         <div className="study-card">
             {(studies.map((study, index) => (
-                <div key={index} className="study-entry">
+                <div key={study.id} className="study-entry">
                     {/* Study information */}
                     <h3><span className="highlightable">{study.title}</span></h3>
                     <div>
-                        <p><strong>Study Index: </strong>{index}</p>
+                        <p><strong>Study Index: </strong>{study.id}</p>
                         <p className="authors"><strong>Authors: </strong>{study.authors}</p>
                         <p className="year"><strong>Year: </strong>{study.year}</p>
                         <p className="type"><strong>Type: </strong>{study.type}</p>
@@ -55,25 +55,19 @@ export default function StudyCard(props) {
                     </button>
 
                     {/* Keywords & Abstract */}
-                    <div className="expandable" key={index}>
+                    <div className="expandable">
                         <p className="keywords"><strong>Keywords: </strong><span className="highlightable">{study.keywords}</span></p>
                         <p className="abstract"><strong>Abstract: </strong><span className="highlightable">{study.abstract}</span></p>
                     </div>
 
                     {/* Actions section */}
                     <div className="actions">
-                        <button onClick={() => (handleAcceptStudy(index))}>
-                            <p>ACCEPT</p>
-                        </button>
-                        <button onClick={() => (handleRejectStudy(index))}>
-                            <p>REJECT</p>
-                        </button>
-                        <button onClick={() => (handleRemoveVote(index))}>
-                            <p>REVERT</p>
-                        </button>
+                        <button onClick={() => (handleAcceptStudy(index))}>ACCEPT</button>
+                        <button onClick={() => (handleRejectStudy(index))}>REJECT</button>
+                        <button onClick={() => (handleRemoveVote(index))}>REVERT</button>
                         <textarea label="Add Note:" placeholder="Enter your note here..."/>
-                        <select>
-                            <option value="" onChange={() => (handleAssignTag(index))}>Select a tag</option>
+                        <select onChange={(e) => (handleAssignTag(index, e.target.value))}>
+                            <option value="">Select a tag</option>
                         </select>
                     </div>
                 </div>

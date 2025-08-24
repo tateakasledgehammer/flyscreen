@@ -20,7 +20,14 @@ export default function Import(props) {
         
         const savedUploadHistory = localStorage.getItem('uploadHistory');
         if (savedUploadHistory) setUploadHistory(JSON.parse(savedUploadHistory))
-    }, [])
+
+        const savedStudies = localStorage.getItem('studies');
+        if (savedStudies) setStudies(JSON.parse(savedStudies))
+    }, [setStudies])
+
+    useEffect(() => {
+        localStorage.setItem('studies', JSON.stringify(studies));
+    }, [studies])
 
     function parseRIS(content) {
         const lines = content.split(/\r?\n/);
@@ -53,7 +60,7 @@ export default function Import(props) {
 
     function handleStudyDetails(records) {
         return records.map((entry) => ({
-            index: entry.index,
+            id: (entry.id),
             title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
             year: (entry.PY && entry.PY[0] || 'N/A'),
             type: (entry.M3 && entry.M3[0] || 'N/A'),
@@ -97,9 +104,11 @@ export default function Import(props) {
                 const parsedStudies = parseRIS(risFileContent);
                 const studiesInDetail = handleStudyDetails(parsedStudies);
 
-                const fullStudiesCombined = [...studies, ...studiesInDetail];
-                
-                setStudies(fullStudiesCombined);
+                setStudies(prev => {
+                    const fullStudies = [...prev, ...studiesInDetail];
+                    localStorage.setItem('studies', JSON.stringify(fullStudies));
+                    return fullStudies;
+                });
 
                 const timeOfUpload = new Date().toLocaleString();
                 setUploadTimestamp(timeOfUpload);
@@ -130,7 +139,9 @@ export default function Import(props) {
         setFileName('');
         setUploadTimestamp('');
         setUploadHistory([]);
+        setIsLoading(false);
 
+        localStorage.removeItem('studies');
         localStorage.removeItem('fileName');
         localStorage.removeItem('uploadTimestamp');
         localStorage.removeItem('uploadHistory')
