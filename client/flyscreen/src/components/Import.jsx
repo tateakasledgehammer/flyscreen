@@ -8,6 +8,9 @@ export default function Import(props) {
     const [uploadTimestamp, setUploadTimestamp] = useState('')
     const [uploadHistory, setUploadHistory] = useState([])
 
+    // isLoading
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         const savedFileName = localStorage.getItem('fileName');
         if (savedFileName) setFileName(savedFileName);
@@ -84,34 +87,39 @@ export default function Import(props) {
         setFileName(file.name)
         localStorage.setItem('fileName', file.name)
 
+        setIsLoading(true);
+
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            const existingStudies = JSON.parse(localStorage.getItem('studies') || '[]');
+            try {
+                const risFileContent = e.target.result;
+                const parsedStudies = parseRIS(risFileContent);
+                const studiesInDetail = handleStudyDetails(parsedStudies);
 
-            const risFileContent = e.target.result;
-            const parsedStudies = parseRIS(risFileContent);
-            const studiesInDetail = handleStudyDetails(parsedStudies);
+                const fullStudiesCombined = [...studies, ...studiesInDetail];
+                
+                setStudies(fullStudiesCombined);
 
-            const fullStudiesCombined = existingStudies.concat(studiesInDetail);
+                const timeOfUpload = new Date().toLocaleString();
+                setUploadTimestamp(timeOfUpload);
+                localStorage.setItem('uploadTimestamp', timeOfUpload)
+
+                const newEntryDetails = {
+                    fileName: file.name,
+                    studyCount: parsedStudies.length,
+                    timestamp: timeOfUpload
+                }
             
-            setStudies(fullStudiesCombined);
-            localStorage.setItem('studies', JSON.stringify(fullStudiesCombined))
-
-            const timeOfUpload = new Date().toLocaleString();
-            setUploadTimestamp(timeOfUpload);
-            localStorage.setItem('uploadTimestamp', timeOfUpload)
-
-            const newEntryDetails = {
-                fileName: file.name,
-                studyCount: parsedStudies.length,
-                timestamp: timeOfUpload
-            }
-
-            const updatedUploadHistory = [...uploadHistory, newEntryDetails];
-            setUploadHistory(updatedUploadHistory);
-            localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
-            
+                const updatedUploadHistory = [...uploadHistory, newEntryDetails];
+                setUploadHistory(updatedUploadHistory);
+                localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
+            } catch (err) {
+                setError('Error parsing the file');
+                console.log(err);
+            } finally {
+                setIsLoading(false);
+            }    
         }
 
         reader.readAsText(file)
@@ -123,7 +131,6 @@ export default function Import(props) {
         setUploadTimestamp('');
         setUploadHistory([]);
 
-        localStorage.removeItem('studies');
         localStorage.removeItem('fileName');
         localStorage.removeItem('uploadTimestamp');
         localStorage.removeItem('uploadHistory')
@@ -137,6 +144,8 @@ export default function Import(props) {
             {error && (<p style={{ color: "red" }}>{error}</p>)}
 
             <h3>Uploaded Files</h3>
+
+            {isLoading && <p>Importing file...</p>}
             
             {uploadHistory.length === 0 ? (<p>No uploads yet.</p>) : (
                 <ul>

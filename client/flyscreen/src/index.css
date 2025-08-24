@@ -89,6 +89,16 @@ footer {
   justify-content: center;
 }
 
+.homepage-section {
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 10px;
+}
+
+.homepage-section:hover {
+  font-size: 101%;
+}
+
 .criteria-section {
   padding: 20px;
 }

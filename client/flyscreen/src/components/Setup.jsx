@@ -182,20 +182,6 @@ export default function Setup(props) {
         setExclusionSection(amendedExclusionCriteria)
     }
 
-    //
-    // Global Inclusion + Exclusion
-    //
-
-    useEffect(() => {
-        const criteria = inclusionSection.flatMap(section => section.criteria);
-        setInclusionCriteria(criteria);
-      }, [inclusionSection]);
-      
-      useEffect(() => {
-        const criteria = exclusionSection.flatMap(section => section.criteria);
-        setExclusionCriteria(criteria);
-      }, [exclusionSection]);
-
     // 
     // Full Text Criteria
     // 
@@ -234,6 +220,25 @@ export default function Setup(props) {
         setFullTextSub([])
         setFullTextInput('')
     }
+
+    //
+    // Global Inclusion + Exclusion
+    //
+
+    useEffect(() => {
+        const criteria = inclusionSection.flatMap(section => section.criteria);
+        setInclusionCriteria(criteria);
+    }, [inclusionSection]);
+      
+    useEffect(() => {
+        const criteria = exclusionSection.flatMap(section => section.criteria);
+        setExclusionCriteria(criteria);
+    }, [exclusionSection]);
+
+    useEffect(() => {
+        const criteria = fullTextSub.flatMap(term => term);
+        setFullTextExclusionReasons(criteria);
+    }, [fullTextSub]);
 
     return (
         <>
@@ -406,18 +411,20 @@ export default function Setup(props) {
                 {/* input gets added to tag list which gets added to list below */}
                 <button onClick={handleNewTag}>Add Tag</button>
 
-                {(!studyTags || studyTags.length === 0) && <p>No tags provided.</p>}
+                <div className="criteria-section">
+                    {(!studyTags || studyTags.length === 0) && <p>No tags provided.</p>}
 
-                {studyTags && studyTags.length > 0 && (
-                    <ul>
-                        {(studyTags.map((tag, index) => (
-                            <li key={index}>
-                                {tag}
-                                <button onClick={() => handleDeleteTag(index)}>X</button>
-                            </li>
-                        )))}
-                    </ul>
-                )}
+                    {studyTags && studyTags.length > 0 && (
+                        <div className="inclusion-exclusion-criteria">
+                            {(studyTags.map((tag, index) => (
+                                <h4 key={index}>
+                                    {tag}
+                                    <button onClick={() => handleDeleteTag(index)}>X</button>
+                                </h4>
+                            )))}
+                        </div>
+                    )}
+                </div>
 
                 <button onClick={handleClearTags}>Clear Tags</button>
             </div>
