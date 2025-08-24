@@ -87,6 +87,7 @@ function App() {
     );
   }, [backgroundInformationForReview]);
   
+  const [toggleDetails, setToggleDetails] = useState({});
 
   const authenticatedContent = (
     <>
@@ -109,7 +110,7 @@ function App() {
       <br />
       <Import studies={studies} setStudies={setStudies} />
       <br />
-      <TAScreening studies={studies} setStudies={setStudies} studyTags={studyTags} />
+      <TAScreening studies={studies} setStudies={setStudies} studyTags={studyTags} toggleDetails={toggleDetails} setToggleDetails={setToggleDetails} />
       <br />
       <FullTextScreening />
       <br />

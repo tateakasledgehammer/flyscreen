@@ -1,21 +1,17 @@
 export default function StudyCard(props) {
-    const { studies, setStudies, savedStudies } = props;
+    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails } = props;
 
-    function handleToggleDetails() {
+    function handleToggleDetails(studyID) {
+        setToggleDetails(prev => ({
+            ...prev,
+            [studyID]: !prev[studyID]
+        }));
+    }
 
-    }
-    function handleAcceptStudy() {
-
-    }
-    function handleRemoveVote() {
-
-    }
-    function handleRejectStudy() {
-        
-    }
-    function handleAssignTag() {
-
-    }
+    function handleAcceptStudy(studyId) {    }
+    function handleRemoveVote(studyId) {    }
+    function handleRejectStudy(studyId) {    }
+    function handleAssignTag(studyId, value) {    }
 
     if (!studies || studies.length === 0) {
         return <p>No studies uploaded.</p>;
@@ -23,7 +19,9 @@ export default function StudyCard(props) {
 
     return (
         <div className="study-card">
-            {studies.map((study, index) => (
+            {studies.map((study, index) => {
+                const isExpanded = toggleDetails?.[study.id] || false;
+                return (
                 <div key={study.id} className="study-entry">
                     {/* Study information */}
                     <h3><span className="highlightable">{study.title}</span></h3>
@@ -48,18 +46,22 @@ export default function StudyCard(props) {
                                 </a>
                             ) : ("N/A")}
                         </p>
-
-                    {/* Button to toggle keywords & abstract */}
-                    <button onClick={() => (handleToggleDetails(index))}>
-                        <p>▲ Hide Details</p> {/* event listener needed to change display */}
-                    </button>
-
-                    {/* Keywords & Abstract */}
-                    <div className="expandable">
-                        <p className="keywords"><strong>Keywords: </strong><span className="highlightable">{study.keywords}</span></p>
-                        <p className="abstract"><strong>Abstract: </strong><span className="highlightable">{study.abstract}</span></p>
                     </div>
 
+                    {/* Button to toggle keywords & abstract */}
+                    <div>
+                        <button onClick={() => (handleToggleDetails(study.id))}>
+                            {!isExpanded ? "▲ Hide details" : "▼ Show details"}
+                        </button>
+
+                        {!isExpanded && (
+                            <div>
+                                <p className="keywords"><strong>Keywords: </strong><span className="highlightable">{study.keywords}</span></p>
+                                <p className="abstract"><strong>Abstract: </strong><span className="highlightable">{study.abstract}</span></p>
+                            </div>
+                        )}
+                    </div>
+                    
                     {/* Actions section */}
                     <div className="actions">
                         <button onClick={() => (handleAcceptStudy(index))}>ACCEPT</button>
@@ -71,9 +73,7 @@ export default function StudyCard(props) {
                         </select>
                     </div>
                 </div>
-
-                </div>
-            ))}
+            )})}
         </div>
     )
 }

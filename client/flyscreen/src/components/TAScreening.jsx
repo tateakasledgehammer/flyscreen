@@ -2,12 +2,11 @@ import { useState, useEffect } from "react"
 import StudyCard from "./StudyCard";
 
 export default function TAScreening(props) {
-    const { studies, setStudies, savedStudies } = props;
+    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [sortBy, setSortBy] = useState('index_asc');
     const [searchFilter, setSearchFilter] = useState(null);
-    const [toggleDetails, setToggleDetails] = useState(null)
 
     function handleItemsPerPage() {
 
@@ -102,7 +101,12 @@ export default function TAScreening(props) {
             </div>
 
             {/* Output section */}
-            <StudyCard studies={studies} setStudies={setStudies} />
+            <StudyCard 
+                studies={studies} 
+                setStudies={setStudies} 
+                toggleDetails={toggleDetails}
+                setToggleDetails={setToggleDetails}
+            />
 
             <br />
             <br />
