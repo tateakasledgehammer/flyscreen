@@ -23,7 +23,7 @@ export default function StudyCard(props) {
 
     return (
         <div className="study-card">
-            {(studies.map((study, index) => (
+            {studies.map((study, index) => (
                 <div key={study.id} className="study-entry">
                     {/* Study information */}
                     <h3><span className="highlightable">{study.title}</span></h3>
@@ -73,7 +73,7 @@ export default function StudyCard(props) {
                 </div>
 
                 </div>
-            )))}
+            ))}
         </div>
     )
 }

@@ -15,11 +15,10 @@ import IncludedStudies from './components/IncludedStudies'
 function App() {
   const isAuthenticated = true;
   
-  const [studies, setStudies] = useState([]);
-  useEffect(() => {
+  const [studies, setStudies] = useState(() => {
     const savedStudies = localStorage.getItem('studies');
-    if (savedStudies) setStudies(JSON.parse(savedStudies));
-  }, []);
+    return savedStudies ? JSON.parse(savedStudies) : []
+  });
 
   const [studyTags, setStudyTags] = useState(() => {
     const savedStudyTags = localStorage.getItem('studyTags');

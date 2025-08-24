@@ -7,8 +7,6 @@ export default function Import(props) {
     const [error, setError] = useState('')
     const [uploadTimestamp, setUploadTimestamp] = useState('')
     const [uploadHistory, setUploadHistory] = useState([])
-
-    // isLoading
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -19,11 +17,8 @@ export default function Import(props) {
         if (savedTimestamp) setUploadTimestamp(savedTimestamp);
         
         const savedUploadHistory = localStorage.getItem('uploadHistory');
-        if (savedUploadHistory) setUploadHistory(JSON.parse(savedUploadHistory))
-
-        const savedStudies = localStorage.getItem('studies');
-        if (savedStudies) setStudies(JSON.parse(savedStudies))
-    }, [setStudies])
+        if (savedUploadHistory) setUploadHistory(JSON.parse(savedUploadHistory));
+    }, [])
 
     useEffect(() => {
         localStorage.setItem('studies', JSON.stringify(studies));
@@ -60,7 +55,7 @@ export default function Import(props) {
 
     function handleStudyDetails(records) {
         return records.map((entry) => ({
-            id: (entry.id),
+            id: (entry.id || crypto.randomUUID()),
             title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
             year: (entry.PY && entry.PY[0] || 'N/A'),
             type: (entry.M3 && entry.M3[0] || 'N/A'),
@@ -78,30 +73,18 @@ export default function Import(props) {
 
     function handleFileUpload(e) {
         const file = e.target.files[0];
-
-        if (!file) {
-            setError("No files uploaded");
-            return;
-        }
-
-        if (!file.name.toLowerCase().endsWith('.ris')) {
-            setError("Please upload a .ris file");
-            return;
-        }
+        if (!file) return setError("No files uploaded");
+        if (!file.name.toLowerCase().endsWith('.ris')) return setError("Please upload a .ris file");
 
         setError('')
-
         setFileName(file.name)
         localStorage.setItem('fileName', file.name)
-
         setIsLoading(true);
 
         const reader = new FileReader();
-
         reader.onload = (e) => {
             try {
-                const risFileContent = e.target.result;
-                const parsedStudies = parseRIS(risFileContent);
+                const parsedStudies = parseRIS(e.target.result);
                 const studiesInDetail = handleStudyDetails(parsedStudies);
 
                 setStudies(prev => {
@@ -118,20 +101,20 @@ export default function Import(props) {
                     fileName: file.name,
                     studyCount: parsedStudies.length,
                     timestamp: timeOfUpload
-                }
+                };
             
                 const updatedUploadHistory = [...uploadHistory, newEntryDetails];
                 setUploadHistory(updatedUploadHistory);
                 localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
+            
             } catch (err) {
                 setError('Error parsing the file');
                 console.log(err);
             } finally {
                 setIsLoading(false);
             }    
-        }
-
-        reader.readAsText(file)
+        };
+        reader.readAsText(file);
     }
     
     function handleClear() {
@@ -150,14 +133,11 @@ export default function Import(props) {
     return (
         <>
             <h1><i className="fa-solid fa-upload"></i> Import Your Studies</h1>
-
             <input type="file" accept=".ris" onChange={handleFileUpload} />
             {error && (<p style={{ color: "red" }}>{error}</p>)}
 
             <h3>Uploaded Files</h3>
-
-            {isLoading && <p>Importing file...</p>}
-            
+            {isLoading && <p>Importing file...</p>}    
             {uploadHistory.length === 0 ? (<p>No uploads yet.</p>) : (
                 <ul>
                     {uploadHistory.map((entry, fileIndex) => (
