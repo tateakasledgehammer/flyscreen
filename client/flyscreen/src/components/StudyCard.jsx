@@ -11,6 +11,7 @@ export default function StudyCard(props) {
     function handleAcceptStudy(studyId) {    }
     function handleRemoveVote(studyId) {    }
     function handleRejectStudy(studyId) {    }
+    function handleAddNote(studyId) {   }
     function handleAssignTag(studyId, value) {    }
 
     if (!studies || studies.length === 0) {
@@ -18,14 +19,17 @@ export default function StudyCard(props) {
     }
 
     return (
-        <div className="study-card">
+        <div>
             {studies.map((study, index) => {
                 const isExpanded = toggleDetails?.[study.id] || false;
                 return (
-                <div key={study.id} className="study-entry">
+                <div key={study.id} className="study-card">
                     {/* Study information */}
-                    <h3><span className="highlightable">{study.title}</span></h3>
-                    <div>
+                    <div className="title-wrapper">
+                        <h3 className="study-title"><span className="highlightable">{study.title}</span></h3>
+                        <div className="percentile-card">23%</div>
+                    </div>
+                    <div className="study-info">
                         <p><strong>Study Index: </strong>{study.id}</p>
                         <p className="authors"><strong>Authors: </strong>{study.authors}</p>
                         <p className="year"><strong>Year: </strong>{study.year}</p>
@@ -34,7 +38,6 @@ export default function StudyCard(props) {
                         <p className="journal"><strong>Journal: </strong>{study.journal}</p>
                         <p className="volume"><strong>Volume: </strong>{study.volume}</p>
                         <p className="issue"><strong>Issue: </strong>{study.issue}</p>
-                        <p className="journal"><strong>Journal: </strong>{study.journal}</p>
                         <p className="doi"><strong>DOI: </strong>
                             {(study.doi !== "N/A") ? (
                                 <a 
@@ -50,7 +53,7 @@ export default function StudyCard(props) {
 
                     {/* Button to toggle keywords & abstract */}
                     <div>
-                        <button onClick={() => (handleToggleDetails(study.id))}>
+                        <button className="adding-bottom-margin" onClick={() => (handleToggleDetails(study.id))}>
                             {!isExpanded ? "▲ Hide details" : "▼ Show details"}
                         </button>
 
@@ -64,12 +67,12 @@ export default function StudyCard(props) {
                     
                     {/* Actions section */}
                     <div className="actions">
-                        <button onClick={() => (handleAcceptStudy(index))}>ACCEPT</button>
-                        <button onClick={() => (handleRejectStudy(index))}>REJECT</button>
+                        <button className="accept-btn" onClick={() => (handleAcceptStudy(index))}>ACCEPT</button>
+                        <button className="reject-btn" onClick={() => (handleRejectStudy(index))}>REJECT</button>
                         <button onClick={() => (handleRemoveVote(index))}>REVERT</button>
-                        <textarea label="Add Note:" placeholder="Enter your note here..."/>
+                        <button onClick={() => (handleAddNote(index))}>ADD NOTE</button>
                         <select onChange={(e) => (handleAssignTag(index, e.target.value))}>
-                            <option value="">Select a tag</option>
+                            <option value="">SELECT TAG</option>
                         </select>
                     </div>
                 </div>
