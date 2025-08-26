@@ -122,6 +122,13 @@ footer {
   padding: 20px;
 }
 
+.filter-notice {
+  color: #213547;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .study-card {
   position: relative;
   margin: 20px 80px;

@@ -8,7 +8,9 @@ export default function TAScreening(props) {
     const [currentPage, setCurrentPage] = useState(1)
 
     const [sortBy, setSortBy] = useState('index_asc');
-    const [searchFilter, setSearchFilter] = useState(null);
+
+    const [searchFilter, setSearchFilter] = useState("");
+    const [searchFilterInput, setSearchFilterInput] = useState("");
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -32,6 +34,10 @@ export default function TAScreening(props) {
                     return b.authors.localeCompare(a.authors);
                 case 'index_asc':
                     return a.id.localeCompare(b.id)
+                case 'probability_asc':
+                    return 0;
+                case 'probability_des':
+                    return 0;
                 default:
                     return 0;
             }
@@ -42,23 +48,45 @@ export default function TAScreening(props) {
         setStudies(prev => handleSortByOrder(prev, sortBy));
     }, [sortBy]);
     
-    function handleSetSearchFilter() {
+    function handleSetSearchFilter(e) {
+        setSearchFilter(searchFilterInput);
+        setCurrentPage(1);
+        setSearchFilterInput("");
 
+        
     }
+
     function handleRemoveSearchFilter() {
-
+        setSearchFilter("");
+        setCurrentPage(1);
+        setSearchFilterInput("")
     }
+
     function handleToggleDetailsGlobal() {
 
     }
+
     function handleToggleHighlights() {
 
     }
+
     function handleLoadMoreStudies() {
         setItemsPerPage(itemsPerPage * 2)
     }
 
-    const sortedStudies = handleSortByOrder(studies);
+
+    const filteredStudies = studies.filter(study => {
+        if (!searchFilter) return true;
+        const term = searchFilter.toLocaleLowerCase();
+        return (
+            study.title.toLowerCase().includes(term) ||
+            study.abstract.toLowerCase().includes(term) ||
+            study.keywords.toLowerCase().includes(term)
+        )
+    })
+    
+    const sortedStudies = handleSortByOrder(filteredStudies);
+    
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const visibleStudies = sortedStudies.slice(startIndex, endIndex);
@@ -92,13 +120,29 @@ export default function TAScreening(props) {
                     <option value="title_des">Title (Z - A)</option>
                     <option value="author_asc">Author (A - Z)</option>
                     <option value="author_des">Author (Z - A)</option>
+                    <option value="probability_asc">Probability Score (Ascending)</option>
+                    <option value="probability_des">Probability Score (Descending)</option>
                 </select>
 
                 {/* Filter studies */}
                 <label>Set A Filter</label>
-                <input type="text" id="newFilterInput" placeholder="Set a filter..." />
-                <button id="addFilterBtn" onClick={handleSetSearchFilter}>Add Filter</button>
-                <button id="clearFilterBtn" onClick={handleRemoveSearchFilter}>Clear</button>
+                <input 
+                    onChange={(e) => setSearchFilterInput(e.target.value)}
+                    value={searchFilterInput}
+                    type="text" 
+                    placeholder="Set a filter..." 
+                />
+                <button 
+                    onClick={handleSetSearchFilter}
+                    >
+                    Add Filter
+                </button>
+                <button 
+                    id="clearFilterBtn" 
+                    onClick={handleRemoveSearchFilter}
+                    >
+                    Clear Filter
+                </button>
 
                 {/* Toggle highlights / abstract */}
                 <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>▲ Hide Details</button>
@@ -107,7 +151,9 @@ export default function TAScreening(props) {
 
             {/* Filter notice */}
             <div>
-
+                {searchFilter && (
+                    <h3 className="filter-notice">Filter: {searchFilter}</h3>
+                )}
             </div>
 
             {/* Output section */}
