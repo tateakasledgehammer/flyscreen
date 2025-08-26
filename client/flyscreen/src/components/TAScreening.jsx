@@ -5,11 +5,14 @@ export default function TAScreening(props) {
     const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
+    const [currentPage, setCurrentPage] = useState(1)
+
     const [sortBy, setSortBy] = useState('index_asc');
     const [searchFilter, setSearchFilter] = useState(null);
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
+        setCurrentPage(1);
     }
     
     function handleSortByOrder(studies) {
@@ -52,8 +55,13 @@ export default function TAScreening(props) {
 
     }
     function handleLoadMoreStudies() {
-
+        setItemsPerPage(itemsPerPage * 2)
     }
+
+    const sortedStudies = handleSortByOrder(studies);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const visibleStudies = sortedStudies.slice(startIndex, endIndex);
 
     return (
         <>
@@ -104,7 +112,7 @@ export default function TAScreening(props) {
 
             {/* Output section */}
             <StudyCard 
-                studies={studies} 
+                studies={visibleStudies} 
                 setStudies={setStudies} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
