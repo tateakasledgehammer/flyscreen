@@ -8,27 +8,27 @@ export default function TAScreening(props) {
     const [sortBy, setSortBy] = useState('index_asc');
     const [searchFilter, setSearchFilter] = useState(null);
 
-    function handleItemsPerPage() {
-
+    function handleItemsPerPage(e) {
+        setItemsPerPage(e.target.value);
     }
     
     function handleSortByOrder(studies) {
         return [...studies].sort((a, b) => {
             switch (sortBy) {
                 case 'year_asc':
-                    return (a.PY?.[0] || 0) - (b.PY?.[0] || 0);
+                    return (a.year - b.year);
                 case 'year_des':
-                    return (b.PY?.[0] || 0) - (a.PY?.[0] || 0);
+                    return (b.year - a.year);
                 case 'title_asc':
-                    return (a.T1?.[0] || '').localeCompare(b.T1?.[0] || 0)
+                    return a.title.localeCompare(b.title);
                 case 'title_des':
-                    return (b.T1?.[0] || '').localeCompare(a.T1?.[0] || 0)
+                    return b.title.localeCompare(a.title);
                 case 'author_asc':
-                    return (a.AU?.[0] || '').localeCompare(b.AU?.[0] || 0);
+                    return a.authors.localeCompare(b.authors);
                 case 'author_des':
-                    return (b.AU?.[0] || '').localeCompare(a.AU?.[0] || 0);
+                    return b.authors.localeCompare(a.authors);
                 case 'index_asc':
-                    return a.index - b.index;
+                    return a.id.localeCompare(b.id)
                 default:
                     return 0;
             }
@@ -65,8 +65,10 @@ export default function TAScreening(props) {
             <div id="screening-nav">
                 {/* Items per page */}
                 <label>Show per page:</label>
-                <select id="itemsPerPage" onChange={handleItemsPerPage}>
-                    <option defaultValue={0}>Select</option>
+                <select id="itemsPerPage" onChange={handleItemsPerPage} value={itemsPerPage}>
+                    <option defaultValue={25}>Select</option>
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>
                     <option value={100}>100</option>
