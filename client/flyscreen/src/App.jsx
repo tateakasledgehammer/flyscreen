@@ -124,6 +124,9 @@ function App() {
       <Landing />
       <Authentication />
       <br /><hr />
+
+      {!isAuthenticated && (<button>Log in to view content</button>)}
+
       {isAuthenticated && (authenticatedContent)}
     </Layout>
   )

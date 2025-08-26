@@ -74,7 +74,6 @@ export default function TAScreening(props) {
         setItemsPerPage(itemsPerPage * 2)
     }
 
-
     const filteredStudies = studies.filter(study => {
         if (!searchFilter) return true;
         const term = searchFilter.toLocaleLowerCase();
@@ -147,6 +146,13 @@ export default function TAScreening(props) {
                 {/* Toggle highlights / abstract */}
                 <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>▲ Hide Details</button>
                 <button id="toggleHighlightableBtn" onClick={handleToggleHighlights}>Toggle Highlights Off</button>
+            </div>
+
+            <div id="toggle-status">
+                <button>UNSCREENED</button>
+                <button>ONE VOTE</button>
+                <button>ACCEPTED</button>
+                <button>REJECTED</button>
             </div>
 
             {/* Filter notice */}

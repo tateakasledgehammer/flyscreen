@@ -8,7 +8,10 @@ export default function StudyCard(props) {
         }));
     }
 
-    function handleAcceptStudy(studyId) {    }
+    function handleAcceptStudy(studyId) {
+        
+    }
+
     function handleRemoveVote(studyId) {    }
     function handleRejectStudy(studyId) {    }
     function handleAddNote(studyId) {   }
