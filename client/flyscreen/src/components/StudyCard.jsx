@@ -27,7 +27,7 @@ export default function StudyCard(props) {
                     {/* Study information */}
                     <div className="title-wrapper">
                         <h3 className="study-title"><span className="highlightable">{study.title}</span></h3>
-                        <div className="percentile-card">23%</div>
+                        <div className="percentile-card">77%</div>
                     </div>
                     <div className="study-info">
                         <p><strong>Study Index: </strong>{study.id}</p>
