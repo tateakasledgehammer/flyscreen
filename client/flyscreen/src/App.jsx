@@ -13,7 +13,7 @@ import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
 
 function App() {
-  const isAuthenticated = true;
+  const isAuthenticated = false;
   
   const [studies, setStudies] = useState(() => {
     const savedStudies = localStorage.getItem('studies');

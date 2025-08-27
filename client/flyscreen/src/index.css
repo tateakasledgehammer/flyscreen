@@ -89,6 +89,14 @@ footer {
   justify-content: center;
 }
 
+.log-in {
+  margin: 40px;
+}
+
+.log-in button {
+  margin-top: 10px;
+}
+
 .nav-bar {
   display: flex;
   align-items: center;
