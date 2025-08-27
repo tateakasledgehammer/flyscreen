@@ -89,6 +89,26 @@ footer {
   justify-content: center;
 }
 
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  margin-left: 10px;
+}
+
+.nav-bar button {
+  background-color: transparent;
+  border: transparent
+}
+
+.nav-bar button:hover,
+.nav-bar button:active {
+  background-color: #213547;
+  color: rgba(255, 255, 255, 0.87);
+  transition: 0.25s;
+}
+
 .homepage-section {
   border: 1px solid black;
   border-radius: 5px;

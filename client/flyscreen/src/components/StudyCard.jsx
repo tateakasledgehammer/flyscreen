@@ -9,12 +9,22 @@ export default function StudyCard(props) {
     }
 
     function handleAcceptStudy(studyId) {
-        
+        studies[studyId].status = "1 vote to accept";
+        console.log(studies[studyId]);
     }
 
-    function handleRemoveVote(studyId) {    }
-    function handleRejectStudy(studyId) {    }
+    function handleRemoveVote(studyId) {
+        studies[studyId].status = "No votes";
+        console.log(studies[studyId]);
+    }
+
+    function handleRejectStudy(studyId) {
+        studies[studyId].status = "1 vote to reject";
+        console.log(studies[studyId]);
+    }
+
     function handleAddNote(studyId) {   }
+
     function handleAssignTag(studyId, value) {    }
 
     if (!studies || studies.length === 0) {

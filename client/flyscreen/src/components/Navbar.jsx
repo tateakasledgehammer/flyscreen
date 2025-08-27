@@ -3,15 +3,15 @@ import { useState } from "react";
 export default function Navbar() {
     return (
         <>
-            <ul>
+            <div className="nav-bar">
                 {/* set up to go between pages */}
-                <li>Home</li>
-                <li>Import</li>
-                <li>Setup</li>
-                <li>Screening</li>
-                <li>Full Text</li>
-                <li>Included</li>
-            </ul>
+                <button>Home</button>
+                <button>Import</button>
+                <button>Setup</button>
+                <button>Screening</button>
+                <button>Full Text</button>
+                <button>Included</button>
+            </div>
         </>
     )
 }
