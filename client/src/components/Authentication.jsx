@@ -4,17 +4,33 @@ export default function Authentication() {
     const [usernameInput, setUsernameInput] = useState("")
     const [passwordInput, setPasswordInput] = useState("")
     const [message, setMessage] = useState("")
+    const [errors, setErrors] = useState([])
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        const res = await fetch("/api/authentication", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-        })
+        e.preventDefault();
+
+        try {
+            const res = await fetch("/api/authentication", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        });
+        
         const data = await res.json()
-        setMessage(data.message)
+
+        if (data.success) {
+            setMessage(data.message)
+            setErrors([])
+        } else {
+            setErrors(data.errors)
+            setMessage("")
+        }
+    }   catch (err) {
+        setErrors(["Server error. Please try again later."]);
+        setMessage("");
+        console.log(err);
     }
+};
 
     return (
         <>
@@ -24,6 +40,17 @@ export default function Authentication() {
             <h2><i className="fa-solid fa-right-to-bracket"></i> Authentication</h2>
             
             <form action="/authentication" onSubmit={handleSubmit} method="POST">
+                
+                {errors.map((error, i) => (
+                    <p 
+                        key={i} 
+                        className="notice"
+                        style={{ color: "red" }}
+                    >
+                        {error}
+                    </p>
+                ))}
+
                 <fieldset className="log-in">
                     <legend>Create an account</legend>
                     <label htmlFor="username">Username</label>
@@ -41,7 +68,7 @@ export default function Authentication() {
                     <input 
                         value={passwordInput}
                         onChange={(e) => setPasswordInput(e.target.value)}
-                        type="passowrd" 
+                        type="password" 
                         id="password" 
                         name="password" 
                         placeholder="enter your password..."
