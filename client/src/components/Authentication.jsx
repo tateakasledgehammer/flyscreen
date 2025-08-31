@@ -6,31 +6,36 @@ export default function Authentication() {
     const [message, setMessage] = useState("")
     const [errors, setErrors] = useState([])
 
+    const onFinish = values => (
+        console.log('x')
+    )
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrors([]);
+        setMessage("")
 
         try {
-            const res = await fetch("/api/authentication", {
+            const res = await fetch("http://localhost:5005/authentication", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: usernameInput, password: passwordInput })
-        });
-        
-        const data = await res.json()
+                body: JSON.stringify({ 
+                    username: usernameInput, 
+                    password: passwordInput 
+                })
+            });
+            
+            const data = await res.json()
 
-        if (data.success) {
-            setMessage(data.message)
-            setErrors([])
-        } else {
-            setErrors(data.errors)
-            setMessage("")
+            if (!data.success) {
+                setErrors(data.errors || ["Something went wrong"])
+            } else {
+                setMessage(data.message)
+            }
+        }   catch (err) {
+            setErrors(["Failed to connect"]);
         }
-    }   catch (err) {
-        setErrors(["Server error. Please try again later."]);
-        setMessage("");
-        console.log(err);
-    }
-};
+    };
 
     return (
         <>
@@ -39,17 +44,7 @@ export default function Authentication() {
 
             <h2><i className="fa-solid fa-right-to-bracket"></i> Authentication</h2>
             
-            <form action="/authentication" onSubmit={handleSubmit} method="POST">
-                
-                {errors.map((error, i) => (
-                    <p 
-                        key={i} 
-                        className="notice"
-                        style={{ color: "red" }}
-                    >
-                        {error}
-                    </p>
-                ))}
+            <form onSubmit={handleSubmit}>
 
                 <fieldset className="log-in">
                     <legend>Create an account</legend>
@@ -76,10 +71,20 @@ export default function Authentication() {
                     />
 
                     <br />
-                    <button type="submit">Set up</button>
-                    {message && <p>{message}</p>}
+                    <button type="submit">Sign up</button>
                 </fieldset>
+
             </form>
+
+            {errors.length > 0 && (
+                <ul style={{ color: "red" }}>
+                    {errors.map((err, i) => (
+                        <li key={i}>{err}</li>
+                    ))}
+                </ul>
+            )}
+
+            {message && <p style={{ color: "green" }}>{message}</p>}
         </>
     )
 }

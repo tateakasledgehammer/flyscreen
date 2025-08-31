@@ -1,10 +1,10 @@
+import { useState, useEffect } from "react"
+
 export default function Landing() {
+    
     return (
         <>
             <h1>Welcome to...<br></br>FLYSCREEN ACADEMICS <i className="fa-regular fa-paper-plane"></i></h1>
-            <button>
-                Get Screening!
-            </button>
             <div>
                 <h3><i className="fa-solid fa-star-half-stroke"></i> Predictive scores to save you time</h3>
                     <p>Systematic reviews and the like typically take <strong>12 to 18 months</strong> to complete. This involves hours upon hours of valuable staff and student time on menial tasks such as screening studies in a search that are irrelevant to the topic and any learning. It is vital that this time gets reduced to <strong>increase staff productivity, student engagement, and allow all to contribute to global knowledge more effectively</strong></p>
