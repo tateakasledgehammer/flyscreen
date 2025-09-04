@@ -79,7 +79,9 @@ export default function Authentication() {
             {errors.length > 0 && (
                 <ul style={{ color: "red" }}>
                     {errors.map((err, i) => (
-                        <li key={i}>{err}</li>
+                        <li key={i} style={{ color: "red" }}>
+                            {err}
+                        </li>
                     ))}
                 </ul>
             )}
