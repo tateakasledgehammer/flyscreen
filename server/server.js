@@ -1,3 +1,7 @@
+require("dotenv").config()
+const cookieParser = require("cookie-parser")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt")
 const express = require("express");
 const cors = require("cors");
 const db = require("better-sqlite3")("flyscreen.db");
@@ -21,8 +25,12 @@ createTables();
 const app = express();
 const PORT = 5005;
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser())
 
 app.get("/", (req, res) => {
     res.send("Welcome to the node server");
@@ -55,8 +63,25 @@ app.post("/authentication", (req, res) => {
         })
     } 
 
+    // saving new user
+    const salt = bcrypt.genSaltSync(10)
+    req.body.password = bcrypt.hashSync(req.body.password, salt)
+
     const ourStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
-    ourStatement.run(req.body.username, req.body.password);
+    const result = ourStatement.run(req.body.username, req.body.password);
+
+    const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
+    const selectedUser = lookupStatement.get(result.lastInsertRowid)
+
+    // cookies
+    const tokenValue = jwt.sign({exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, userid: selectedUser.id, username: selectedUser.username}, process.env.JWTSECRET);
+    
+    res.cookie("flyscreenCookie", tokenValue, {
+        httpOnly: true, // can't access cookies in browser
+        secure: false, // change back to true later
+        sameSite: "strict",
+        maxAge: 1000 * 60 * 60 * 24
+    })
 
     res.json({
         success: true,

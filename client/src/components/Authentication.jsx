@@ -19,6 +19,7 @@ export default function Authentication() {
             const res = await fetch("http://localhost:5005/authentication", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify({ 
                     username: usernameInput, 
                     password: passwordInput 
