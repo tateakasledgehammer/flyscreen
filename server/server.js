@@ -1,10 +1,11 @@
-require("dotenv").config()
-const cookieParser = require("cookie-parser")
-const jwt = require("jsonwebtoken")
-const bcrypt = require("bcrypt")
+require("dotenv").config();
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
-const db = require("better-sqlite3")("flyscreen.db");
+const path = require("path");
+const db = require("better-sqlite3")(path.join(__dirname, "flyscreen.db"));
 db.pragma("journal_mode = WAL");
 
 // database set up
@@ -16,8 +17,7 @@ const createTables = db.transaction(() => {
         password STRING NOT NULL
         )
     `).run()
-})
-
+});
 createTables();
 
 // the rest of the server
@@ -44,7 +44,6 @@ app.use(function (req, res, next) {
     }
     res.locals.user = req.user
     console.log(req.user)
-
     next()
 })
 
@@ -96,34 +95,50 @@ app.post("/authentication", (req, res) => {
             success: false,
             errors: errors
         })
-    } 
+    }
+
+    const existingUsername = db.prepare("SELECT * FROM users WHERE username = ?").get(trimmedUsername);
+    if (existingUsername) {
+        return res.json({ success: false, errors: ["Username already exists"] });
+    }
 
     // saving new user
     const salt = bcrypt.genSaltSync(10)
-    req.body.password = bcrypt.hashSync(req.body.password, salt)
+    const hashedPassword = bcrypt.hashSync(req.body.password, salt)
 
-    const ourStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
-    const result = ourStatement.run(req.body.username, req.body.password);
+    const userStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
 
-    const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
-    const selectedUser = lookupStatement.get(result.lastInsertRowid)
+    try {
+        const result = userStatement.run(trimmedUsername, hashedPassword);
+        console.log("User saved: ", result)
 
-    // cookies
-    const tokenValue = jwt.sign({exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, userid: selectedUser.id, username: selectedUser.username}, process.env.JWTSECRET);
-    
-    res.cookie("flyscreenCookie", tokenValue, {
-        httpOnly: true, // can't access cookies in browser
-        secure: false, // change back to true later
-        sameSite: "strict",
-        maxAge: 1000 * 60 * 60 * 24
-    })
+        const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
+        const selectedUser = lookupStatement.get(result.lastInsertRowid)
 
-    console.log("New cookie set: ", tokenValue)
+        // cookies
+        const tokenValue = jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, 
+            userid: selectedUser.id, 
+            username: selectedUser.username
+        }, process.env.JWTSECRET);
+        
+        res.cookie("flyscreenCookie", tokenValue, {
+            httpOnly: true, // can't access cookies in browser
+            secure: false, // change back to true later
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24
+        })
 
-    res.json({
-        success: true,
-        message: "Thank you for joining"
-    })
+        console.log("New cookie set: ", tokenValue)
+
+        res.json({
+            success: true,
+            message: "Thank you for joining"
+        })
+    } catch (err) {
+        console.error("Error saving user: ", err);
+        return res.json({ success: false, errors: ["Could not save user"] })
+    }
 });
 
 app.listen(PORT, () => {
