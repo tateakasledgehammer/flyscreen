@@ -28,7 +28,7 @@ export default function StudyCard(props) {
     function handleAssignTag(studyId, value) {    }
 
     if (!studies || studies.length === 0) {
-        return <p>No studies uploaded.</p>;
+        return <p>No studies visible. None uploaded or studies per page not set.</p>;
     }
 
     return (

@@ -62,6 +62,15 @@ app.get("/whoami", (req, res) => {
     });
 });
 
+app.get("/logout", (req, res) => {
+    res.clearCookie("flyscreenCookie", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+    });
+    res.json({ success: true, message: "Logged out." })
+})
+
 app.post("/authentication", (req, res) => {
     console.log("POST /authentication hit with body:", req.body);
 

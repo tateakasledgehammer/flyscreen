@@ -146,13 +146,21 @@ function App() {
   )
 
   return (
-    <Layout>
-      <Landing />
+    <Layout 
+      isAuthenticated={isAuthenticated} 
+      setIsAuthenticated={setIsAuthenticated} 
+      user={user} 
+      setUser={setUser}
+    >
       {loading && (<p>Loading...</p>)}
 
-      {!isAuthenticated && (<Authentication />)}
-
-      <br /><hr />
+      {!isAuthenticated && (
+        <>
+          <Landing />
+          <Authentication />
+        </>
+      )}
+      <br />
 
       {isAuthenticated && (authenticatedContent)}
     </Layout>
