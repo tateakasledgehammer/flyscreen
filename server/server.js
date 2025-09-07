@@ -32,8 +32,34 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser())
 
+app.use(function (req, res, next) {
+    res.locals.errors = [];
+
+    // decode cookie
+    try {
+        const decoded = jwt.verify(req.cookies.flyscreenCookie, process.env.JWTSECRET);
+        req.user = decoded;
+    } catch(err) {
+        req.user = false;
+    }
+    res.locals.user = req.user
+    console.log(req.user)
+
+    next()
+})
+
 app.get("/", (req, res) => {
     res.send("Welcome to the node server");
+});
+
+app.get("/whoami", (req, res) => {
+    if (!req.user) {
+        return res.json({ isAuthenticated: false });
+    }
+    res.json({
+        isAuthenticated: true,
+        user: { id: req.user.userid, username: req.user.username}
+    });
 });
 
 app.post("/authentication", (req, res) => {
@@ -82,6 +108,8 @@ app.post("/authentication", (req, res) => {
         sameSite: "strict",
         maxAge: 1000 * 60 * 60 * 24
     })
+
+    console.log("New cookie set: ", tokenValue)
 
     res.json({
         success: true,

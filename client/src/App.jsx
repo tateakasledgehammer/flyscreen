@@ -13,8 +13,34 @@ import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
 
 function App() {
-  const isAuthenticated = false;
-  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:5005/whoami", {
+          credentials: "include"
+        })
+        const data = await res.json()
+        if (data.isAuthenticated) {
+          setIsAuthenticated(true)
+          setUser(data.user)
+        } else {
+          setIsAuthenticated(false)
+          setUser(null)
+        }
+      } catch (err) {
+        console.error("Auth check failed", err)
+        setIsAuthenticated(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+    checkAuth()
+  }, [])
+
   const [studies, setStudies] = useState(() => {
     const savedStudies = localStorage.getItem('studies');
     return savedStudies ? JSON.parse(savedStudies) : []
@@ -122,10 +148,11 @@ function App() {
   return (
     <Layout>
       <Landing />
-      <Authentication />
-      <br /><hr />
+      {loading && (<p>Loading...</p>)}
 
-      {!isAuthenticated && (<button>Log in to view content</button>)}
+      {!isAuthenticated && (<Authentication />)}
+
+      <br /><hr />
 
       {isAuthenticated && (authenticatedContent)}
     </Layout>
