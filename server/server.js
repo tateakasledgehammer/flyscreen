@@ -70,6 +70,69 @@ app.get("/logout", (req, res) => {
     res.json({ success: true, message: "Logged out." })
 })
 
+app.post("/login", (req, res) => {
+    console.log("POST /login hit with body:", req.body);
+
+    const { username, password } = req.body;
+    let errors = [];
+
+    if (typeof username !== "string" || typeof password !== "string") {
+        errors.push("Invalid data request. Inputs are not strings")
+    }
+
+    if (req.body.username.trim() == "") errors = ["No username provided"]
+    if (req.body.password == "") errors = ["No password provided"]
+
+    if (errors.length) {
+        return res.json({
+            success: false,
+            errors: errors
+        })
+    }
+
+    const userLoggingInStatement = db.prepare("SELECT * FROM users WHERE USERNAME = ?")
+    const userLoggingIn = userLoggingInStatement.get(req.body.username)
+
+    if (!userLoggingIn) {
+        errors = ["Invalid username / password"]
+        return res.json({
+            success: false,
+            errors: errors
+        })
+    }
+
+    const passwordMatch = bcrypt.compareSync(req.body.password, userLoggingIn.password)
+    if (!passwordMatch) {
+        errors = ["Invalid username / password"]
+        return res.json({
+            success: false,
+            errors: errors
+        })
+    }
+
+    if (passwordMatch) {
+        const tokenValue = jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, 
+            userid: userLoggingIn.id, 
+            username: userLoggingIn.username
+        }, process.env.JWTSECRET);
+        
+        res.cookie("flyscreenCookie", tokenValue, {
+            httpOnly: true, // can't access cookies in browser
+            secure: false, // change back to true later
+            sameSite: "strict",
+            maxAge: 1000 * 60 * 60 * 24
+        })
+
+        console.log("New cookie set: ", tokenValue)
+
+        res.json({
+            success: true,
+            message: "Logged in"
+        })
+    }
+})
+
 app.post("/authentication", (req, res) => {
     console.log("POST /authentication hit with body:", req.body);
 
