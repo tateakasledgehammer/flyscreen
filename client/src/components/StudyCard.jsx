@@ -1,5 +1,7 @@
+import { useState } from "react";
+
 export default function StudyCard(props) {
-    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails } = props;
+    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails, studyTags, setStudyTags, user, setUser } = props;
 
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
@@ -9,23 +11,128 @@ export default function StudyCard(props) {
     }
 
     function handleAcceptStudy(studyId) {
-        studies[studyId].status = "1 vote to accept";
-        console.log(studies[studyId]);
-    }
+        setStudies(prev => {
+            return prev.map(study => {
+                if (study.id !== studyId) return study;
 
-    function handleRemoveVote(studyId) {
-        studies[studyId].status = "No votes";
-        console.log(studies[studyId]);
+                // prevent duplicate votes
+                const votes = {
+                    accept: [...study.votes.accept],
+                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
+                };
+                
+                if (!votes.accept.includes(user)) {
+                    votes.accept.push(user)
+                }
+
+                let status = ""
+                if (votes.accept.length >= 2) {
+                    status = "Accepted";
+                }
+                if (votes.reject.length >= 2) {
+                    status = "Rejected";
+                }
+                if (votes.accept.length === 1) {
+                    status = "1 vote to accept";
+                }
+                if (votes.reject.length === 1) {
+                    status = "1 vote to reject";
+                }
+                if (votes.reject.length === 1 && votes.accept.length === 1) {
+                    status = "Two different votes";
+                }
+                else status = "No votes";
+
+                console.log("Updating study - accepted", studyId, user, votes, status);
+                return {...study, votes, status};
+        })})
     }
 
     function handleRejectStudy(studyId) {
-        studies[studyId].status = "1 vote to reject";
+        setStudies(prev => {
+            return prev.map(study => {
+                if (study.id !== studyId) return study;
+
+                // prevent duplicate votes
+                const votes = {
+                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
+                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
+                };
+                
+                if (!votes.reject.includes(user)) {
+                    votes.reject.push(user)
+                }
+
+                let status = ""
+                if (votes.accept.length >= 2) {
+                    status = "Accepted";
+                }
+                if (votes.reject.length >= 2) {
+                    status = "Rejected";
+                }
+                if (votes.accept.length === 1) {
+                    status = "1 vote to accept";
+                }
+                if (votes.reject.length === 1) {
+                    status = "1 vote to reject";
+                }
+                if (votes.reject.length === 1 && votes.accept.length === 1) {
+                    status = "Two different votes";
+                }
+                else status = "No votes";
+
+                console.log("Updating study - rejected", studyId, user, votes, status);
+                return {...study, votes, status};
+        })})
+    }
+
+
+    function handleRemoveVote(studyId) {
+        setStudies(prev => {
+            return prev.map(study => {
+                if (study.id !== studyId) return study;
+
+                // prevent duplicate votes
+                const votes = {
+                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
+                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
+                };
+
+                let status = ""
+                if (votes.accept.length >= 2) {
+                    status = "Accepted";
+                }
+                if (votes.reject.length >= 2) {
+                    status = "Rejected";
+                }
+                if (votes.accept.length === 1) {
+                    status = "1 vote to accept";
+                }
+                if (votes.reject.length === 1) {
+                    status = "1 vote to reject";
+                }
+                if (votes.reject.length === 1 && votes.accept.length === 1) {
+                    status = "Two different votes";
+                }
+                else status = "No votes";
+
+                console.log("Updating study - reverted", studyId, user, votes, status);
+                return {...study, votes, status};
+        })})
+    }
+
+    function handleAddNote(studyId) {
+        studies[studyId].note = e.target.value
         console.log(studies[studyId]);
     }
 
-    function handleAddNote(studyId) {   }
-
-    function handleAssignTag(studyId, value) {    }
+    function handleAssignTag(studyId, value) {
+        setStudyTags(prev => 
+            prev.map(study =>
+                study.id === studyId ? {...study, tagStatus: value} : study
+            )
+        )
+    }
 
     if (!studies || studies.length === 0) {
         return <p>No studies visible. None uploaded or studies per page not set.</p>;
@@ -80,12 +187,18 @@ export default function StudyCard(props) {
                     
                     {/* Actions section */}
                     <div className="actions">
-                        <button className="accept-btn" onClick={() => (handleAcceptStudy(index))}>ACCEPT</button>
-                        <button className="reject-btn" onClick={() => (handleRejectStudy(index))}>REJECT</button>
-                        <button onClick={() => (handleRemoveVote(index))}>REVERT</button>
+                        <button className="accept-btn" onClick={() => (handleAcceptStudy(study.id))}>ACCEPT</button>
+                        <button className="reject-btn" onClick={() => (handleRejectStudy(study.id))}>REJECT</button>
+                        <button onClick={() => (handleRemoveVote(study.id))}>REVERT</button>
+                        
                         <button onClick={() => (handleAddNote(index))}>ADD NOTE</button>
                         <select onChange={(e) => (handleAssignTag(index, e.target.value))}>
-                            <option value="">SELECT TAG</option>
+                            <option value="">Select tag</option>
+                            {(studyTags.map((tag, tagIndex) => (
+                                <option key={tagIndex} value={tag}>
+                                    {tag}
+                                </option>
+                            )))}
                         </select>
                     </div>
                 </div>

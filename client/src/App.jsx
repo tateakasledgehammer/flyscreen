@@ -134,9 +134,20 @@ function App() {
         setFullTextExclusionReasons={setFullTextExclusionReasons}
       />
       <br />
-      <Import studies={studies} setStudies={setStudies} />
+      <Import 
+        studies={studies} 
+        setStudies={setStudies} />
       <br />
-      <TAScreening studies={studies} setStudies={setStudies} studyTags={studyTags} toggleDetails={toggleDetails} setToggleDetails={setToggleDetails} />
+      <TAScreening 
+        studies={studies} 
+        setStudies={setStudies} 
+        studyTags={studyTags} 
+        setStudyTags={setStudyTags}
+        toggleDetails={toggleDetails} 
+        setToggleDetails={setToggleDetails}
+        user={user}
+        setUser={setUser}
+      />
       <br />
       <FullTextScreening />
       <br />

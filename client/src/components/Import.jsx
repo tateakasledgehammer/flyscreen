@@ -68,7 +68,9 @@ export default function Import(props) {
             abstract: (entry.AB && entry.AB[0] || 'N/A'),
             keywords: entry.KW ? entry.KW.join(', ') : 'N/A',
             language: (entry.LA && entry.LA[0] || 'N/A'),
-            status: 'No votes'
+            votes: { accept: [], reject: [] },
+            status: 'No votes',
+            tagStatus: ""
         }));
     }
 

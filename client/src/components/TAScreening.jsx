@@ -3,7 +3,7 @@ import StudyCard from "./StudyCard";
 import { handleSortByOrder } from "../utils/screeningTools";
 
 export default function TAScreening(props) {
-    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails } = props;
+    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails, studyTags, setStudyTags, user, setUser } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1)
@@ -140,6 +140,10 @@ export default function TAScreening(props) {
                 setStudies={setStudies} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
+                studyTags={studyTags}
+                setStudyTags={setStudyTags}
+                user={user}
+                setUser={setUser}
             />
 
             <br />
