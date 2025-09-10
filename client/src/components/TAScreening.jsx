@@ -3,14 +3,13 @@ import StudyCard from "./StudyCard";
 import { handleSortByOrder } from "../utils/screeningTools";
 
 export default function TAScreening(props) {
-    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails, studyTags, setStudyTags, user, setUser } = props;
+    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails, studyTags, setStudyTags, user, setUser, searchFilter, setSearchFilter, inclusionCriteria, setInclusionCriteria, exclusionCriteria, setExclusionCriteria } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1)
 
     const [sortBy, setSortBy] = useState('index_asc');
 
-    const [searchFilter, setSearchFilter] = useState("");
     const [searchFilterInput, setSearchFilterInput] = useState("");
 
     function handleItemsPerPage(e) {
@@ -120,7 +119,7 @@ export default function TAScreening(props) {
                 <button id="toggleHighlightableBtn" onClick={handleToggleHighlights}>Toggle Highlights Off</button>
             </div>
 
-            <div id="toggle-status">
+            <div className="toggle-status">
                 <button>UNSCREENED</button>
                 <button>ONE VOTE</button>
                 <button>ACCEPTED</button>
@@ -144,6 +143,12 @@ export default function TAScreening(props) {
                 setStudyTags={setStudyTags}
                 user={user}
                 setUser={setUser}
+                inclusionCriteria={inclusionCriteria} 
+                setInclusionCriteria={setInclusionCriteria} 
+                exclusionCriteria={exclusionCriteria} 
+                setExclusionCriteria={setExclusionCriteria}
+                searchFilter={searchFilter}
+                setSearchFilter={setSearchFilter}
             />
 
             <br />

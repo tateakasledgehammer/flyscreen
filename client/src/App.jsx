@@ -81,6 +81,15 @@ function App() {
     )
   }, [exclusionCriteria]);
   
+  const [searchFilter, setSearchFilter] = useState(() => {
+    const savedFilter = localStorage.getItem('searchFilter');
+    if (!savedFilter || savedFilter === "undefined") return "";
+    return savedFilter;
+  });
+  useEffect(() => {
+    localStorage.setItem("searchFilter", searchFilter)
+  }, [searchFilter]);
+
   const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState(() => {
     const savedFullTextExclusion = localStorage.getItem("fullTextExclusionReasons");
     if (!savedFullTextExclusion || savedFullTextExclusion === "undefined") return [];
@@ -147,6 +156,12 @@ function App() {
         setToggleDetails={setToggleDetails}
         user={user}
         setUser={setUser}
+        inclusionCriteria={inclusionCriteria} 
+        setInclusionCriteria={setInclusionCriteria} 
+        exclusionCriteria={exclusionCriteria} 
+        setExclusionCriteria={setExclusionCriteria}
+        searchFilter={searchFilter}
+        setSearchFilter={setSearchFilter}
       />
       <br />
       <FullTextScreening />

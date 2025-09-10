@@ -1,7 +1,23 @@
 import { useState } from "react";
 
 export default function StudyCard(props) {
-    const { studies, setStudies, savedStudies, toggleDetails, setToggleDetails, studyTags, setStudyTags, user, setUser } = props;
+    const { 
+        studies, 
+        setStudies, 
+        savedStudies, 
+        toggleDetails, 
+        setToggleDetails, 
+        studyTags, 
+        setStudyTags, 
+        user, 
+        setUser,
+        inclusionCriteria = [],
+        setInclusionCriteria, 
+        exclusionCriteria = [],
+        setExclusionCriteria,
+        searchFilter,
+        setSearchFilter
+    } = props;
 
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
@@ -86,7 +102,6 @@ export default function StudyCard(props) {
         })})
     }
 
-
     function handleRemoveVote(studyId) {
         setStudies(prev => {
             return prev.map(study => {
@@ -121,9 +136,12 @@ export default function StudyCard(props) {
         })})
     }
 
-    function handleAddNote(studyId) {
-        studies[studyId].note = e.target.value
-        console.log(studies[studyId]);
+    function handleAddNote(studyId, note) {
+        setStudies(prev => 
+            prev.map(study =>
+                study.id === studyId ? {...study, note } : study
+            )
+        )
     }
 
     function handleAssignTag(studyId, value) {
@@ -159,6 +177,59 @@ export default function StudyCard(props) {
         }
     }
 
+    function highlightContent(text, includedWords = [], excludedWords = [], filteredWords = []) {
+        if (!text) return ""
+
+        const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        const fullText = [
+            ...includedWords.map((w) => ({ word: w.trim(), type: "include" })),
+            ...excludedWords.map((w) => ({ word: w.trim(), type: "exclude" })),
+            ...filteredWords.map((w) => ({ word: w.trim(), type: "filter" }))
+        ];
+
+        if (fullText.length === 0) return text;
+
+        const regex = new RegExp(
+            fullText.map((item) => escapeRegex(item.word)).join("|"),
+            "gi"
+        );
+
+        const parts = [];
+        let lastIndex = 0;
+        let match;
+
+        while ((match = regex.exec(text)) !== null) {
+            const before = text.slice(lastIndex, match.index);
+            if (before) parts.push(before);
+
+            const found = fullText.find(
+                (item) => item.word && item.word.toLowerCase() === match[0].toLowerCase().trim()
+            );
+
+            parts.push(
+                <span key={match.index} className={`highlight-${found.type || "include"}`}>
+                    {match[0]}
+                </span>
+            );
+
+            lastIndex = regex.lastIndex;
+        }
+
+        if (lastIndex < text.length) {
+            parts.push(text.slice(lastIndex));
+        }
+
+        return parts;          
+    }
+
+    const searchWords = searchFilter
+        ? searchFilter
+            .split(" ")       // split by spaces
+            .map(w => w.trim())
+            .filter(Boolean)  // remove empty strings
+        : [];
+
     if (!studies || studies.length === 0) {
         return <p>No studies visible. None uploaded or studies per page not set.</p>;
     }
@@ -171,7 +242,11 @@ export default function StudyCard(props) {
                 <div key={study.id} className="study-card">
                     {/* Study information */}
                     <div className="title-wrapper">
-                        <h3 className="study-title"><span className="highlightable">{study.title}</span></h3>
+                        <h3 className="study-title">
+                            <span className="highlightable">
+                                {highlightContent(study.title, inclusionCriteria, exclusionCriteria, searchWords)}
+                            </span>
+                        </h3>
                         <div className="percentile-card">XX%</div>
                     </div>
                     <div className="study-info">
@@ -204,8 +279,14 @@ export default function StudyCard(props) {
 
                         {!isExpanded && (
                             <div>
-                                <p className="keywords"><strong>Keywords: </strong><span className="highlightable">{study.keywords}</span></p>
-                                <p className="abstract"><strong>Abstract: </strong><span className="highlightable">{study.abstract}</span></p>
+                                <p className="keywords">
+                                    <strong>Keywords: </strong>
+                                    {highlightContent(study.keywords, inclusionCriteria, exclusionCriteria, searchWords)}
+                                </p>
+                                <p className="abstract">
+                                    <strong>Abstract: </strong>
+                                    {highlightContent(study.abstract, inclusionCriteria, exclusionCriteria, searchWords)}
+                                </p>
                             </div>
                         )}
                     </div>
@@ -216,8 +297,8 @@ export default function StudyCard(props) {
                         <button className="reject-btn" onClick={() => (handleRejectStudy(study.id))}>REJECT</button>
                         <button onClick={() => (handleRemoveVote(study.id))}>REVERT</button>
                         
-                        <button onClick={() => (handleAddNote(index))}>ADD NOTE</button>
-                        <select onChange={(e) => (handleAssignTag(index, e.target.value))}>
+                        <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
+                        <select onChange={(e) => (handleAssignTag(study.id, e.target.value))}>
                             <option value="">Select tag</option>
                             {(studyTags.map((tag, tagIndex) => (
                                 <option key={tagIndex} value={tag}>
