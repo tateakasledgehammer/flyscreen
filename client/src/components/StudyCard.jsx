@@ -134,6 +134,31 @@ export default function StudyCard(props) {
         )
     }
 
+    function formatAuthors(authorString) {
+        if (!authorString) return "N/A";
+
+        const parts = authorString.split(",").map(a => a.trim());
+
+        const authors = [];
+
+        for (let i = 0; i < parts.length; i +=2) {
+            const last = parts[i] || "";
+            const first = parts[i + 1] || "";
+            authors.push(`${last}`.trim());
+        }
+
+        if (authors.length === 1) {
+            return authorString;
+        }
+        if (authors.length === 2) {
+            return authors[0] + " & " + authors[1];
+        }
+
+        if (authors.length > 2) {
+            return authors[0] + " et al."
+        }
+    }
+
     if (!studies || studies.length === 0) {
         return <p>No studies visible. None uploaded or studies per page not set.</p>;
     }
@@ -147,11 +172,11 @@ export default function StudyCard(props) {
                     {/* Study information */}
                     <div className="title-wrapper">
                         <h3 className="study-title"><span className="highlightable">{study.title}</span></h3>
-                        <div className="percentile-card">77%</div>
+                        <div className="percentile-card">XX%</div>
                     </div>
                     <div className="study-info">
                         <p><strong>Study Index: </strong>{study.id}</p>
-                        <p className="authors"><strong>Authors: </strong>{study.authors}</p>
+                        <p className="authors"><strong>Authors: </strong>{formatAuthors(study.authors)}</p>
                         <p className="year"><strong>Year: </strong>{study.year}</p>
                         <p className="type"><strong>Type: </strong>{study.type}</p>
                         <p className="language"><strong>Language: </strong>{study.language}</p>
