@@ -16,7 +16,9 @@ export default function StudyCard(props) {
         exclusionCriteria = [],
         setExclusionCriteria,
         searchFilter,
-        setSearchFilter
+        setSearchFilter,
+        highlighted,
+        setHighlighted
     } = props;
 
     function handleToggleDetails(studyID) {
@@ -243,9 +245,15 @@ export default function StudyCard(props) {
                     {/* Study information */}
                     <div className="title-wrapper">
                         <h3 className="study-title">
+                            {highlighted ? (
+                                <span className="highlightable">
+                                    {highlightContent(study.title, inclusionCriteria, exclusionCriteria, searchWords)}
+                                </span>
+                            ) : 
                             <span className="highlightable">
-                                {highlightContent(study.title, inclusionCriteria, exclusionCriteria, searchWords)}
+                                    {study.title}
                             </span>
+                            }
                         </h3>
                         <div className="percentile-card">XX%</div>
                     </div>
@@ -281,11 +289,27 @@ export default function StudyCard(props) {
                             <div>
                                 <p className="keywords">
                                     <strong>Keywords: </strong>
-                                    {highlightContent(study.keywords, inclusionCriteria, exclusionCriteria, searchWords)}
+                                    {highlighted ? (
+                                        <span className="highlightable">
+                                            {highlightContent(study.keywords, inclusionCriteria, exclusionCriteria, searchWords)}
+                                        </span>
+                                    ) : 
+                                        <span className="highlightable">
+                                                {study.keywords}
+                                        </span>
+                                    }
                                 </p>
                                 <p className="abstract">
                                     <strong>Abstract: </strong>
-                                    {highlightContent(study.abstract, inclusionCriteria, exclusionCriteria, searchWords)}
+                                    {highlighted ? (
+                                        <span className="highlightable">
+                                            {highlightContent(study.abstract, inclusionCriteria, exclusionCriteria, searchWords)}
+                                        </span>
+                                    ) : 
+                                        <span className="highlightable">
+                                                {study.abstract}
+                                        </span>
+                                    }
                                 </p>
                             </div>
                         )}

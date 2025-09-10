@@ -30,7 +30,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  padding: 60px;
 }
 
 h1 {
@@ -167,18 +166,21 @@ footer {
 }
 
 .highlight-include {
-  background-color: rgba(0, 255, 0, 0.4);
+  background-color: rgba(121, 255, 121, 0.4);
+  font-weight: 500;
   padding-left: 3px;
   padding-right: 3px;
 }
 .highlight-exclude {
-  background-color: rgba(255, 0, 255, 0.4);
+  background-color: rgba(255, 0, 0, 0.4);
+  font-weight: 500;
   padding-left: 3px;
   padding-right: 3px;
 }
 .highlight-filter {
-  background-color: rgba(0, 0, 255, 0.7);
+  background-color: rgba(0, 0, 128, 0.7);
   color: #fff;
+  font-weight: 500;
   padding-left: 3px;
   padding-right: 3px;
 }

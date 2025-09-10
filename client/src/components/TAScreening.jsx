@@ -12,6 +12,8 @@ export default function TAScreening(props) {
 
     const [searchFilterInput, setSearchFilterInput] = useState("");
 
+    const [highlighted, setHighlighted] = useState(true)
+
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
         setCurrentPage(1);
@@ -34,11 +36,11 @@ export default function TAScreening(props) {
     }
 
     function handleToggleDetailsGlobal() {
-
+        
     }
 
-    function handleToggleHighlights() {
-
+    function handleToggleHighlightsGlobal() {
+        setHighlighted(prev => !prev);
     }
 
     function handleLoadMoreStudies() {
@@ -116,7 +118,9 @@ export default function TAScreening(props) {
 
                 {/* Toggle highlights / abstract */}
                 <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>▲ Hide Details</button>
-                <button id="toggleHighlightableBtn" onClick={handleToggleHighlights}>Toggle Highlights Off</button>
+                <button id="toggleHighlightableBtn" onClick={handleToggleHighlightsGlobal}>
+                    {highlighted ? "Toggle Highlights Off" : "Toggle Highlights On"}
+                </button>
             </div>
 
             <div className="toggle-status">
@@ -149,6 +153,8 @@ export default function TAScreening(props) {
                 setExclusionCriteria={setExclusionCriteria}
                 searchFilter={searchFilter}
                 setSearchFilter={setSearchFilter}
+                highlighted={highlighted}
+                setHighlighted={setHighlighted}
             />
 
             <br />
