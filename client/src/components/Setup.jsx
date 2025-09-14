@@ -12,7 +12,11 @@ export default function Setup(props) {
         exclusionCriteria,
         setExclusionCriteria,
         fullTextExclusionReasons,
-        setFullTextExclusionReasons
+        setFullTextExclusionReasons,
+        setSearchFilter,
+        setProjectTitle,
+        setUser,
+        setStudies
     } = props;
 
     // tags
@@ -240,9 +244,30 @@ export default function Setup(props) {
         setFullTextExclusionReasons(criteria);
     }, [fullTextSub]);
 
+    function resetApp() {
+        setStudies([]);
+        setSearchFilter("")
+        setInclusionCriteria([]);
+        setExclusionCriteria([]);
+        setFullTextExclusionReasons([])
+        setBackgroundInformationForReview({})
+        setProject(null);
+        setUser(null);
+        setStudyTags([]);
+        localStorage.clear();
+        console.log("All data cleared")
+    }
+
     return (
         <>
         <h1><i className="fa-solid fa-circle-info"></i> Setup Your Review</h1>
+
+        <div className="homepage-section">
+                <h3>Clear</h3>
+                <button onClick={resetApp}>Reset</button>
+                <br />
+                <br />
+        </div>
 
         {/* Review Title */}
         <div>

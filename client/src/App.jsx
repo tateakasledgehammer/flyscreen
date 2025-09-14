@@ -143,7 +143,11 @@ function App() {
         setProjectTitle={setProjectTitle}
       />
       <br />
-      <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} studyTags={studyTags}/>
+      <Overview 
+        studies={studies} 
+        backgroundInformationForReview={backgroundInformationForReview} 
+        studyTags={studyTags}
+      />
       <br />
       <Setup 
         backgroundInformationForReview={backgroundInformationForReview} 
@@ -156,6 +160,10 @@ function App() {
         setExclusionCriteria={setExclusionCriteria} 
         fullTextExclusionReasons={fullTextExclusionReasons}
         setFullTextExclusionReasons={setFullTextExclusionReasons}
+        setSearchFilter={setSearchFilter}
+        setProjectTitle={setProjectTitle}
+        setUser={setUser}
+        setStudies={setStudies}
       />
       <br />
       <Import 
