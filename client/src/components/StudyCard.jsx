@@ -28,12 +28,27 @@ export default function StudyCard(props) {
         }));
     }
 
+    function updateStudyStatus(votes) {
+        if (votes.accept.length >= 2) {
+            return "Accepted";
+        } else if (votes.reject.length >= 2) {
+            return "Rejected";
+        } else if (votes.reject.length === 1 && votes.accept.length === 1) {
+            return "Conflict";
+        } else if (votes.accept.length === 1) {
+            return "One for";
+        } else if (votes.reject.length === 1) {
+            return "One against";
+        } else {
+            return "No votes"
+        };   
+    }
+
     function handleAcceptStudy(studyId) {
         setStudies(prev => {
             return prev.map(study => {
                 if (study.id !== studyId) return study;
 
-                // prevent duplicate votes
                 const votes = {
                     accept: [...study.votes.accept],
                     reject: study.votes.reject.filter(currentUser => currentUser !== user)
@@ -43,23 +58,7 @@ export default function StudyCard(props) {
                     votes.accept.push(user)
                 }
 
-                let status = ""
-                if (votes.accept.length >= 2) {
-                    status = "Accepted";
-                }
-                if (votes.reject.length >= 2) {
-                    status = "Rejected";
-                }
-                if (votes.accept.length === 1) {
-                    status = "1 vote to accept";
-                }
-                if (votes.reject.length === 1) {
-                    status = "1 vote to reject";
-                }
-                if (votes.reject.length === 1 && votes.accept.length === 1) {
-                    status = "Two different votes";
-                }
-                else status = "No votes";
+                const status = updateStudyStatus(votes);
 
                 console.log("Updating study - accepted", studyId, user, votes, status);
                 return {...study, votes, status};
@@ -71,33 +70,16 @@ export default function StudyCard(props) {
             return prev.map(study => {
                 if (study.id !== studyId) return study;
 
-                // prevent duplicate votes
                 const votes = {
                     accept: study.votes.accept.filter(currentUser => currentUser !== user),
-                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
+                    reject: [...study.votes.reject]
                 };
                 
                 if (!votes.reject.includes(user)) {
                     votes.reject.push(user)
                 }
 
-                let status = ""
-                if (votes.accept.length >= 2) {
-                    status = "Accepted";
-                }
-                if (votes.reject.length >= 2) {
-                    status = "Rejected";
-                }
-                if (votes.accept.length === 1) {
-                    status = "1 vote to accept";
-                }
-                if (votes.reject.length === 1) {
-                    status = "1 vote to reject";
-                }
-                if (votes.reject.length === 1 && votes.accept.length === 1) {
-                    status = "Two different votes";
-                }
-                else status = "No votes";
+                const status = updateStudyStatus(votes);
 
                 console.log("Updating study - rejected", studyId, user, votes, status);
                 return {...study, votes, status};
@@ -109,29 +91,12 @@ export default function StudyCard(props) {
             return prev.map(study => {
                 if (study.id !== studyId) return study;
 
-                // prevent duplicate votes
                 const votes = {
                     accept: study.votes.accept.filter(currentUser => currentUser !== user),
                     reject: study.votes.reject.filter(currentUser => currentUser !== user)
                 };
 
-                let status = ""
-                if (votes.accept.length >= 2) {
-                    status = "Accepted";
-                }
-                if (votes.reject.length >= 2) {
-                    status = "Rejected";
-                }
-                if (votes.accept.length === 1) {
-                    status = "1 vote to accept";
-                }
-                if (votes.reject.length === 1) {
-                    status = "1 vote to reject";
-                }
-                if (votes.reject.length === 1 && votes.accept.length === 1) {
-                    status = "Two different votes";
-                }
-                else status = "No votes";
+                const status = updateStudyStatus(votes);
 
                 console.log("Updating study - reverted", studyId, user, votes, status);
                 return {...study, votes, status};
@@ -331,6 +296,8 @@ export default function StudyCard(props) {
                             )))}
                         </select>
                     </div>
+
+                    <h1>{study.status}</h1>
                 </div>
             )})}
         </div>

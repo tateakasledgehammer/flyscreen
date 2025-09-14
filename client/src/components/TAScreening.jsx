@@ -18,7 +18,7 @@ export default function TAScreening(props) {
         inclusionCriteria, 
         setInclusionCriteria, 
         exclusionCriteria, 
-        setExclusionCriteria 
+        setExclusionCriteria,
     } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -27,6 +27,7 @@ export default function TAScreening(props) {
     const [sortBy, setSortBy] = useState('index_asc');
 
     const [searchFilterInput, setSearchFilterInput] = useState("");
+    const [statusFilter, setStatusFilter] = useState("")
 
     const [highlighted, setHighlighted] = useState(true)
 
@@ -63,6 +64,22 @@ export default function TAScreening(props) {
         setItemsPerPage(itemsPerPage * 2)
     }
 
+    function toggleStudyStatusShowing(filter) {
+        if (filter === "UNSCREENED") {
+            setStatusFilter(studies.filter(study => !study.status || study.status === "No votes"));
+        } else if (filter === "AWAITING SECOND VOTE") {
+            setStatusFilter(studies.filter(study =>
+                study.status === "One for" || study.status === "One against"
+            ))
+        } else if (filter === "ACCEPTED") {
+            setStatusFilter(studies.filter(study => study.status === "Accepted"));
+        } else if (filter === "REJECTED") {
+            setStatusFilter(studies.filter(study => study.status === "Rejected"));
+        } else {
+            setStatusFilter("studies")
+        }
+    }
+
     const filteredStudies = studies.filter(study => {
         if (!searchFilter) return true;
         const term = searchFilter.toLocaleLowerCase();
@@ -71,6 +88,16 @@ export default function TAScreening(props) {
             study.abstract.toLowerCase().includes(term) ||
             study.keywords.toLowerCase().includes(term)
         )
+
+        if (statusFilter === "UNSCREENED") {
+            return study.status === "No votes"
+        } else if (statusFilter === "AWAITING SECOND VOTE") {
+            return study.status === "One for" || study.status === "One against";
+        } else if (statusFilter === "ACCEPTED") {
+            return study.status === "Accepted"
+        } else if (statusFilter === "REJECTED") {
+            return study.status === "Rejected"
+        }
     })
     
     const sortedStudies = handleSortByOrder(filteredStudies);
@@ -140,10 +167,35 @@ export default function TAScreening(props) {
             </div>
 
             <div className="toggle-status">
-                <button>UNSCREENED</button>
-                <button>ONE VOTE</button>
-                <button>ACCEPTED</button>
-                <button>REJECTED</button>
+                <button 
+                    onClick={() => toggleStudyStatusShowing("UNSCREENED")}
+                >
+                    UNSCREENED ({studies.filter(study => !study.status || study.status === "No votes").length})
+                </button>
+
+                <button 
+                    onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}
+                >
+                    AWAITING SECOND VOTE ({studies.filter(study => study.status === "One for" && study.status === "One against").length})
+                </button>
+
+                <button 
+                    onClick={() => toggleStudyStatusShowing("CONFLICT")}
+                >
+                    CONFLICT ({studies.filter(study => study.status === "Conflict").length})
+                </button>
+
+                <button 
+                    onClick={() => toggleStudyStatusShowing("ACCEPTED")}
+                >
+                    ACCEPTED ({studies.filter(study => study.status === "Accepted").length})
+                </button>
+
+                <button 
+                    onClick={() => toggleStudyStatusShowing("REJECTED")}
+                >
+                    REJECTED ({studies.filter(study => study.status === "Rejected").length})
+                    </button>
             </div>
 
             {/* Filter notice */}

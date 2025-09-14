@@ -55,6 +55,12 @@ function App() {
     const savedStudies = localStorage.getItem('studies');
     return savedStudies ? JSON.parse(savedStudies) : []
   });
+  useEffect(() => {
+    localStorage.setItem(
+      "studies",
+      JSON.stringify(studies)
+    )
+  }, []);
 
   const [studyTags, setStudyTags] = useState(() => {
     const savedStudyTags = localStorage.getItem('studyTags');
@@ -138,10 +144,7 @@ function App() {
     <>
       <Navbar />
       <br />
-      <CreateProject
-        projectTitle={projectTitle}
-        setProjectTitle={setProjectTitle}
-      />
+      {/* Create Project component */}
       <br />
       <Overview 
         studies={studies} 
