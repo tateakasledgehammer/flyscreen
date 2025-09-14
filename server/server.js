@@ -133,6 +133,25 @@ app.post("/login", (req, res) => {
     }
 })
 
+app.get("/create-project", (req, res) => {
+    res.json({ success: true })
+})
+
+app.post("/create-project", (req, res) => {
+    const { projectTitle } = req.body;
+
+    if (!projectTitle) {
+        return res.status(400).json({ error: "Title is required" });
+    }
+
+    console.log("New project: ", projectTitle)
+
+    res.json({
+        success: true,
+        project: {projectTitle}
+    })
+})
+
 app.post("/authentication", (req, res) => {
     console.log("POST /authentication hit with body:", req.body);
 
@@ -148,6 +167,11 @@ app.post("/authentication", (req, res) => {
     if (trimmedUsername.length < 4) { errors.push("Username must be longer than 4 characters") }
     if (trimmedUsername.length > 10) { errors.push("Username must be less than 11 characters") }
     
+    const usernameStatement = db.prepare("SELECT * FROM users WHERE username = ?");
+    const usernameCheck = usernameStatement.get(req.body.username);
+
+    if (usernameCheck) errors.push("Username has been taken")
+
     const trimmedPassword = password.trim()
     if (!trimmedPassword) { errors.push("No password") }
     if (trimmedPassword.length < 6) { errors.push("Password must be longer than 6 characters") }

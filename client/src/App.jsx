@@ -11,6 +11,7 @@ import StudyCard from './components/StudyCard'
 import TAScreening from './components/TAScreening'
 import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
+import CreateProject from './components/CreateProject'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +41,15 @@ function App() {
     }
     checkAuth()
   }, [])
+
+  const [projectTitle, setProjectTitle] = useState(() => {
+    const savedProject = localStorage.getItem('projectTitle');
+    if (!savedProject || savedProject === "undefined") return "";
+    return savedProject;
+  });
+  useEffect(() => {
+    localStorage.setItem("projectTitle", projectTitle)
+  }, [projectTitle]);
 
   const [studies, setStudies] = useState(() => {
     const savedStudies = localStorage.getItem('studies');
@@ -127,6 +137,11 @@ function App() {
   const authenticatedContent = (
     <>
       <Navbar />
+      <br />
+      <CreateProject
+        projectTitle={projectTitle}
+        setProjectTitle={setProjectTitle}
+      />
       <br />
       <Overview studies={studies} backgroundInformationForReview={backgroundInformationForReview} studyTags={studyTags}/>
       <br />

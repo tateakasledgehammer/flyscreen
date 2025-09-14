@@ -99,6 +99,18 @@ footer {
   margin-top: 10px;
 }
 
+.log-in input {
+  margin-top: 20px;
+}
+
+.log-in label,
+.log-in input,
+.new-project label,
+.new-project input {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
 .nav-bar {
   display: flex;
   align-items: center;
