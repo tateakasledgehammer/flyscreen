@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+
 import Landing from './components/Landing'
 import Authentication from './components/Authentication'
-
 import Navbar from './components/Navbar'
 import Layout from './components/Layout'
 import Overview from './components/Overview'
@@ -142,58 +143,71 @@ function App() {
 
   const authenticatedContent = (
     <>
+    <Router>
       <Navbar />
-      <br />
-      {/* Create Project component */}
-      <br />
-      <Overview 
-        studies={studies} 
-        backgroundInformationForReview={backgroundInformationForReview} 
-        studyTags={studyTags}
-      />
-      <br />
-      <Setup 
-        backgroundInformationForReview={backgroundInformationForReview} 
-        setBackgroundInformationForReview={setBackgroundInformationForReview} 
-        studyTags={studyTags} 
-        setStudyTags={setStudyTags} 
-        inclusionCriteria={inclusionCriteria} 
-        setInclusionCriteria={setInclusionCriteria} 
-        exclusionCriteria={exclusionCriteria} 
-        setExclusionCriteria={setExclusionCriteria} 
-        fullTextExclusionReasons={fullTextExclusionReasons}
-        setFullTextExclusionReasons={setFullTextExclusionReasons}
-        setSearchFilter={setSearchFilter}
-        setProjectTitle={setProjectTitle}
-        setUser={setUser}
-        setStudies={setStudies}
-      />
-      <br />
-      <Import 
-        studies={studies} 
-        setStudies={setStudies} />
-      <br />
-      <TAScreening 
-        studies={studies} 
-        setStudies={setStudies} 
-        studyTags={studyTags} 
-        setStudyTags={setStudyTags}
-        toggleDetails={toggleDetails} 
-        setToggleDetails={setToggleDetails}
-        user={user}
-        setUser={setUser}
-        inclusionCriteria={inclusionCriteria} 
-        setInclusionCriteria={setInclusionCriteria} 
-        exclusionCriteria={exclusionCriteria} 
-        setExclusionCriteria={setExclusionCriteria}
-        searchFilter={searchFilter}
-        setSearchFilter={setSearchFilter}
-      />
-      <br />
-      <FullTextScreening />
-      <br />
-      <IncludedStudies />
-      <br />
+      <Routes>
+        {/* Create Project component */}
+
+        <Route path="/overview" element={
+          <Overview 
+            studies={studies} 
+            backgroundInformationForReview={backgroundInformationForReview} 
+            studyTags={studyTags}
+          />
+        } />        
+        <Route path="/setup" element={
+          <Setup 
+            backgroundInformationForReview={backgroundInformationForReview} 
+            setBackgroundInformationForReview={setBackgroundInformationForReview} 
+            studyTags={studyTags} 
+            setStudyTags={setStudyTags} 
+            inclusionCriteria={inclusionCriteria} 
+            setInclusionCriteria={setInclusionCriteria} 
+            exclusionCriteria={exclusionCriteria} 
+            setExclusionCriteria={setExclusionCriteria} 
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            setFullTextExclusionReasons={setFullTextExclusionReasons}
+            setSearchFilter={setSearchFilter}
+            setProjectTitle={setProjectTitle}
+            setUser={setUser}
+            setStudies={setStudies}
+          />
+        } />        
+
+        <Route path="/import" element={
+          <Import 
+            studies={studies} 
+            setStudies={setStudies} />
+        } />
+
+        <Route path="/tascreening" element={
+          <TAScreening 
+            studies={studies} 
+            setStudies={setStudies} 
+            studyTags={studyTags} 
+            setStudyTags={setStudyTags}
+            toggleDetails={toggleDetails} 
+            setToggleDetails={setToggleDetails}
+            user={user}
+            setUser={setUser}
+            inclusionCriteria={inclusionCriteria} 
+            setInclusionCriteria={setInclusionCriteria} 
+            exclusionCriteria={exclusionCriteria} 
+            setExclusionCriteria={setExclusionCriteria}
+            searchFilter={searchFilter}
+            setSearchFilter={setSearchFilter}
+          />
+        } />
+
+        <Route path="/fulltext" element={
+          <FullTextScreening />
+        } />
+        
+        <Route path="/included" element={
+          <IncludedStudies />
+        } />
+      </Routes>
+    </Router>
     </>
   )
 

@@ -159,35 +159,56 @@ export default function TAScreening(props) {
             </div>
 
             <div className="toggle-status">
-                <button 
-                    onClick={() => toggleStudyStatusShowing("UNSCREENED")}
-                >
-                    UNSCREENED ({studies.filter(study => !study.status || study.status === "No votes").length})
-                </button>
-
-                <button 
-                    onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}
-                >
-                    AWAITING SECOND VOTE ({studies.filter(study => study.status === "Awaiting second vote").length})
-                </button>
-
-                <button 
-                    onClick={() => toggleStudyStatusShowing("CONFLICT")}
-                >
-                    CONFLICT ({studies.filter(study => study.status === "Conflict").length})
-                </button>
-
-                <button 
-                    onClick={() => toggleStudyStatusShowing("ACCEPTED")}
-                >
-                    ACCEPTED ({studies.filter(study => study.status === "Accepted").length})
-                </button>
-
-                <button 
-                    onClick={() => toggleStudyStatusShowing("REJECTED")}
-                >
-                    REJECTED ({studies.filter(study => study.status === "Rejected").length})
+                {(statusFilter == "UNSCREENED") ? (
+                    <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}
+                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
+                        UNSCREENED ({studies.filter(study => !study.status || study.status === "No votes").length})
                     </button>
+                ) : (
+                    <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}>
+                        UNSCREENED ({studies.filter(study => !study.status || study.status === "No votes").length})
+                    </button>
+                )}
+                {(statusFilter == "AWAITING SECOND VOTE") ? (
+                    <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}
+                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
+                        AWAITING SECOND VOTE ({studies.filter(study => !study.status || study.status === "Awaiting second vote").length})
+                    </button>
+                ) : (
+                    <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}>
+                        AWAITING SECOND VOTE ({studies.filter(study => !study.status || study.status === "Awaiting second vote").length})
+                    </button>
+                )}                        
+                {(statusFilter == "CONFLICT") ? (
+                    <button onClick={() => toggleStudyStatusShowing("CONFLICT")}
+                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
+                        CONFLICT ({studies.filter(study => !study.status || study.status === "Conflict").length})
+                    </button>
+                ) : (
+                    <button onClick={() => toggleStudyStatusShowing("CONFLICT")}>
+                        CONFLICT ({studies.filter(study => !study.status || study.status === "Conflict").length})
+                    </button>
+                )}
+                {(statusFilter == "ACCEPTED") ? (
+                    <button onClick={() => toggleStudyStatusShowing("ACCEPTED")}
+                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
+                        ACCEPTED ({studies.filter(study => !study.status || study.status === "Accepted").length})
+                    </button>
+                ) : (
+                    <button onClick={() => toggleStudyStatusShowing("ACCEPTED")}>
+                        ACCEPTED ({studies.filter(study => !study.status || study.status === "Accepted").length})
+                    </button>
+                )}
+                {(statusFilter == "REJECTED") ? (
+                    <button onClick={() => toggleStudyStatusShowing("REJECTED")}
+                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
+                        REJECTED ({studies.filter(study => !study.status || study.status === "Rejected").length})
+                    </button>
+                ) : (
+                    <button onClick={() => toggleStudyStatusShowing("REJECTED")}>
+                        REJECTED ({studies.filter(study => !study.status || study.status === "Rejected").length})
+                    </button>
+                )}
             </div>
 
             {/* Filter notice */}
