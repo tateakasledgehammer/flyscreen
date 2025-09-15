@@ -35,13 +35,11 @@ export default function StudyCard(props) {
             return "Rejected";
         } else if (votes.reject.length === 1 && votes.accept.length === 1) {
             return "Conflict";
-        } else if (votes.accept.length === 1) {
-            return "One for";
-        } else if (votes.reject.length === 1) {
-            return "One against";
+        } else if (votes.accept.length === 1 || votes.reject.length === 1) {
+            return "Awaiting second vote";
         } else {
             return "No votes"
-        };   
+        };
     }
 
     function handleAcceptStudy(studyId) {
@@ -50,7 +48,7 @@ export default function StudyCard(props) {
                 if (study.id !== studyId) return study;
 
                 const votes = {
-                    accept: [...study.votes.accept],
+                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
                     reject: study.votes.reject.filter(currentUser => currentUser !== user)
                 };
                 
@@ -60,7 +58,7 @@ export default function StudyCard(props) {
 
                 const status = updateStudyStatus(votes);
 
-                console.log("Updating study - accepted", studyId, user, votes, status);
+                console.log("Updating study - accepted", studyId, user, votes, "Status: ", status);
                 return {...study, votes, status};
         })})
     }
@@ -72,7 +70,7 @@ export default function StudyCard(props) {
 
                 const votes = {
                     accept: study.votes.accept.filter(currentUser => currentUser !== user),
-                    reject: [...study.votes.reject]
+                    reject: study.votes.reject.filter(currentUser => currentUser !== user),
                 };
                 
                 if (!votes.reject.includes(user)) {
@@ -81,7 +79,7 @@ export default function StudyCard(props) {
 
                 const status = updateStudyStatus(votes);
 
-                console.log("Updating study - rejected", studyId, user, votes, status);
+                console.log("Updating study - rejected", studyId, user, votes, "Status: ", status);
                 return {...study, votes, status};
         })})
     }
@@ -98,7 +96,7 @@ export default function StudyCard(props) {
 
                 const status = updateStudyStatus(votes);
 
-                console.log("Updating study - reverted", studyId, user, votes, status);
+                console.log("Updating study - reverted", studyId, user, votes, "Status: ", status);
                 return {...study, votes, status};
         })})
     }
@@ -297,7 +295,7 @@ export default function StudyCard(props) {
                         </select>
                     </div>
 
-                    <h1>{study.status}</h1>
+                    <h3>Status: {study.status}</h3> 
                 </div>
             )})}
         </div>
