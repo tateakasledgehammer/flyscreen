@@ -100,9 +100,9 @@ export default function TAScreening(props) {
 
     return (
         <>
-            <h1>
+            <h2>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
-            </h1>
+            </h2>
 
             {/* Navigation bar for the screening */}
             <div id="screening-nav">

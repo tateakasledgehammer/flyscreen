@@ -29,6 +29,7 @@ export default function Layout(props) {
                     </button>
                     <button onClick={() => handleLogout()}>
                         <p>Log out</p>
+                        <i className="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </>
             )}

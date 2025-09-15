@@ -200,7 +200,22 @@ function App() {
         } />
 
         <Route path="/fulltext" element={
-          <FullTextScreening />
+          <FullTextScreening
+            studies={studies} 
+            setStudies={setStudies} 
+            studyTags={studyTags} 
+            setStudyTags={setStudyTags}
+            toggleDetails={toggleDetails} 
+            setToggleDetails={setToggleDetails}
+            user={user}
+            setUser={setUser}
+            inclusionCriteria={inclusionCriteria} 
+            setInclusionCriteria={setInclusionCriteria} 
+            exclusionCriteria={exclusionCriteria} 
+            setExclusionCriteria={setExclusionCriteria}
+            searchFilter={searchFilter}
+            setSearchFilter={setSearchFilter}
+          />
         } />
         
         <Route path="/included" element={

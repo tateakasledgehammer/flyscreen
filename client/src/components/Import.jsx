@@ -135,7 +135,7 @@ export default function Import(props) {
 
     return (
         <>
-            <h1><i className="fa-solid fa-upload"></i> Import Your Studies</h1>
+            <h2><i className="fa-solid fa-upload"></i> Import Your Studies</h2>
             <input type="file" accept=".ris" onChange={handleFileUpload} />
             {error && (<p style={{ color: "red" }}>{error}</p>)}
 

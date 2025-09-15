@@ -260,7 +260,7 @@ export default function Setup(props) {
 
     return (
         <>
-        <h1><i className="fa-solid fa-circle-info"></i> Setup Your Review</h1>
+        <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
         <div className="homepage-section">
                 <h3>Clear</h3>

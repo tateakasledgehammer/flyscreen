@@ -3,7 +3,7 @@ export default function Overview(props) {
 
     return (
         <>
-            <h1><i className="fa-solid fa-house-chimney"></i> Your Homepage</h1>
+            <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
             {/* Add class and styling for the homepage cards + progress bar */}
             <div className="homepage-section">
                 <h3>Overview</h3>
