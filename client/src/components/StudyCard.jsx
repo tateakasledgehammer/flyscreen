@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { updateStudyStatus } from "../utils/screeningTools";
 
 export default function StudyCard(props) {
     const { 
@@ -21,84 +22,45 @@ export default function StudyCard(props) {
         setHighlighted
     } = props;
 
+    function handleVote(studyId, action) {
+        setStudies(prev => {
+            const updated = prev.map(study => {
+                if (study.id !== studyId) return study;
+
+                let votes = {
+                    accept: study.votes.accept.filter(u => u.id !== user.id),
+                    reject: study.votes.reject.filter(u => u.id !== user.id)
+                };
+
+                if (action === "accept") {
+                    votes.accept.push(user)
+                } else if (action === "reject") {
+                    votes.reject.push(user);
+                } else if (action === "remove") {
+                    votes = { accept: [], reject: [] };
+                }
+                
+                votes = {
+                    accept: [...new Map(votes.accept.map(u => [u.id, u])).values()],
+                    reject: [...new Map(votes.reject.map(u => [u.id, u])).values()]
+                }
+    
+                const status = updateStudyStatus(votes)
+    
+                console.log(`Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
+    
+                return { ...study, votes, status };
+            })
+            localStorage.setItem("studies", JSON.stringify(updated));
+            return updated;
+        })
+    }
+
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
             ...prev,
             [studyID]: !prev[studyID]
         }));
-    }
-
-    function updateStudyStatus(votes) {
-        if (votes.accept.length >= 2) {
-            return "Accepted";
-        } else if (votes.reject.length >= 2) {
-            return "Rejected";
-        } else if (votes.reject.length === 1 && votes.accept.length === 1) {
-            return "Conflict";
-        } else if (votes.accept.length === 1 || votes.reject.length === 1) {
-            return "Awaiting second vote";
-        } else {
-            return "No votes"
-        };
-    }
-
-    function handleAcceptStudy(studyId) {
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-
-                const votes = {
-                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
-                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
-                };
-                
-                if (!votes.accept.includes(user)) {
-                    votes.accept.push(user)
-                }
-
-                const status = updateStudyStatus(votes);
-
-                console.log("Updating study - accepted", studyId, user, votes, "Status: ", status);
-                return {...study, votes, status};
-        })})
-    }
-
-    function handleRejectStudy(studyId) {
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-
-                const votes = {
-                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
-                    reject: study.votes.reject.filter(currentUser => currentUser !== user),
-                };
-                
-                if (!votes.reject.includes(user)) {
-                    votes.reject.push(user)
-                }
-
-                const status = updateStudyStatus(votes);
-
-                console.log("Updating study - rejected", studyId, user, votes, "Status: ", status);
-                return {...study, votes, status};
-        })})
-    }
-
-    function handleRemoveVote(studyId) {
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-
-                const votes = {
-                    accept: study.votes.accept.filter(currentUser => currentUser !== user),
-                    reject: study.votes.reject.filter(currentUser => currentUser !== user)
-                };
-
-                const status = updateStudyStatus(votes);
-
-                console.log("Updating study - reverted", studyId, user, votes, "Status: ", status);
-                return {...study, votes, status};
-        })})
     }
 
     function handleAddNote(studyId, note) {
@@ -280,9 +242,9 @@ export default function StudyCard(props) {
                     
                     {/* Actions section */}
                     <div className="actions">
-                        <button className="accept-btn" onClick={() => (handleAcceptStudy(study.id))}>ACCEPT</button>
-                        <button className="reject-btn" onClick={() => (handleRejectStudy(study.id))}>REJECT</button>
-                        <button onClick={() => (handleRemoveVote(study.id))}>REVERT</button>
+                        <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
+                        <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
+                        <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                         
                         <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
                         <select onChange={(e) => (handleAssignTag(study.id, e.target.value))}>

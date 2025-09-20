@@ -83,6 +83,8 @@ export default function TAScreening(props) {
             return study.status === "No votes"
         } else if (statusFilter === "AWAITING SECOND VOTE") {
             return study.status === "Awaiting second vote";
+        } else if (statusFilter === "CONFLICT") {
+            return study.status === "Conflict"
         } else if (statusFilter === "ACCEPTED") {
             return study.status === "Accepted"
         } else if (statusFilter === "REJECTED") {

@@ -19,6 +19,25 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [studies, setStudies] = useState(() => {
+    try {
+      const savedStudies = JSON.parse(localStorage.getItem("studies"));
+      if (!Array.isArray(savedStudies)) return [];
+
+      return savedStudies.map(study => ({
+        ...study,
+        votes: {
+          accept: [...new Set(study.votes?.accept || [])],
+          reject: [...new Set(study.votes?.reject || [])]
+        },
+        status: study.status || "No votes"
+      }));
+    } catch (e) {
+      console.error("Failed to parse studies from localStorage", e);
+      return [];
+    }
+  })
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -40,8 +59,8 @@ function App() {
         setLoading(false)
       }
     }
-    checkAuth()
-  }, [])
+    checkAuth();
+  }, []);
 
   const [projectTitle, setProjectTitle] = useState(() => {
     const savedProject = localStorage.getItem('projectTitle');
@@ -52,16 +71,11 @@ function App() {
     localStorage.setItem("projectTitle", projectTitle)
   }, [projectTitle]);
 
-  const [studies, setStudies] = useState(() => {
-    const savedStudies = localStorage.getItem('studies');
-    return savedStudies ? JSON.parse(savedStudies) : []
-  });
   useEffect(() => {
-    localStorage.setItem(
-      "studies",
-      JSON.stringify(studies)
-    )
-  }, []);
+    if (studies && Array.isArray(studies)) {
+      localStorage.setItem("studies", JSON.stringify(studies))
+    }
+  }, [studies]);
 
   const [studyTags, setStudyTags] = useState(() => {
     const savedStudyTags = localStorage.getItem('studyTags');
