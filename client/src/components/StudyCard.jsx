@@ -56,6 +56,36 @@ export default function StudyCard(props) {
         })
     }
 
+    function handleResolveConflict(studyId, action) {
+        setStudies(prev => {
+            const updated = prev.map(study => {
+                if (study.id !== studyId) return study;
+
+                let votes = {
+                    accept: study.votes.accept,
+                    reject: study.votes.reject
+                };
+
+                if (action === "accept") {
+                    votes.accept.push(user)
+                } else if (action === "reject") {
+                    votes.reject.push(user);
+                }
+    
+                if (votes.accept.length >=3) votes.accept.pop();
+                if (votes.reject.length >= 3) votes.reject.pop();
+
+                const status = updateStudyStatus(votes)
+    
+                console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
+    
+                return { ...study, votes, status };
+            })
+            localStorage.setItem("studies", JSON.stringify(updated));
+            return updated;
+        })
+    }
+
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
             ...prev,
@@ -241,10 +271,28 @@ export default function StudyCard(props) {
                     </div>
                     
                     {/* Actions section */}
+
                     <div className="actions">
-                        <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
-                        <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
-                        <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                        {(study.status === "No votes" || study.status === "Awaiting second vote") && (
+                            <>
+                                <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
+                                <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
+                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                            </>
+                        )}
+
+                        {(study.status === "Conflict") && (
+                            <>
+                                <button className="accept-btn" onClick={() => handleResolveConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
+                                <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
+                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                            </>
+                        )}
+
+                        {(study.status === "Accepted" || study.status === "Rejected") && (
+                            <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                        )}
+                        
                         
                         <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
                         <select onChange={(e) => (handleAssignTag(study.id, e.target.value))}>
@@ -258,6 +306,13 @@ export default function StudyCard(props) {
                     </div>
 
                     <h3>Status: {study.status}</h3> 
+
+                    {(study.status === "Conflict" || study.status === "Awaiting second vote") && (
+                        <>
+                            <p>Accept vote: {study.votes.accept.map(user => user.username).join(", ")}</p>
+                            <p>Reject vote: {study.votes.reject.map(user => user.username).join(", ")}</p>
+                        </>
+                    )}
                 </div>
             )})}
         </div>
