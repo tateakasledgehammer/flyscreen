@@ -237,7 +237,9 @@ function App() {
         } />
         
         <Route path="/included" element={
-          <IncludedStudies />
+          <IncludedStudies
+            studies={studies}
+          />
         } />
       </Routes>
     </Router>
