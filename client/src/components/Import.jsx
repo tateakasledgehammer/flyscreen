@@ -140,7 +140,8 @@ export default function Import(props) {
             {error && (<p style={{ color: "red" }}>{error}</p>)}
 
             <h3>Uploaded Files</h3>
-            {isLoading && <p>Importing file...</p>}    
+            {isLoading && <p>Importing file...</p>}
+
             {uploadHistory.length === 0 ? (<p>No uploads yet.</p>) : (
                 <ul>
                     {uploadHistory.map((entry, fileIndex) => (

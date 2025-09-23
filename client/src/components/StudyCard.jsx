@@ -102,7 +102,7 @@ export default function StudyCard(props) {
     }
 
     function handleAssignTag(studyId, value) {
-        setStudyTags(prev => 
+        setStudies(prev => 
             prev.map(study =>
                 study.id === studyId ? {...study, tagStatus: value} : study
             )
@@ -293,9 +293,12 @@ export default function StudyCard(props) {
                             <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                         )}
                         
-                        
                         <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
-                        <select onChange={(e) => (handleAssignTag(study.id, e.target.value))}>
+                        
+                        <select
+                            value={study.tagStatus || ""}
+                            onChange={(e) => (handleAssignTag(study.id, e.target.value))}
+                        >
                             <option value="">Select tag</option>
                             {(studyTags.map((tag, tagIndex) => (
                                 <option key={tagIndex} value={tag}>

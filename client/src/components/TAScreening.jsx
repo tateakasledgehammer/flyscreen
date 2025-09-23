@@ -49,10 +49,12 @@ export default function TAScreening(props) {
         setSearchFilter("");
         setCurrentPage(1);
         setSearchFilterInput("")
+
+        if (searchFilter === "") alert("No filter to clear")
     }
 
     function handleToggleDetailsGlobal() {
-        
+        alert("This function has not been set up")
     }
 
     function handleToggleHighlightsGlobal() {

@@ -258,6 +258,11 @@ export default function Setup(props) {
         console.log("All data cleared")
     }
 
+    function resetCriteria() {
+        setInclusionCriteria([]);
+        setExclusionCriteria([]);
+    }
+
     return (
         <>
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
@@ -461,7 +466,6 @@ export default function Setup(props) {
         {/* Inclusion / Exclusion Set Up */}
         <div>
             <h3>Set Inclusion & Exclusion Criteria</h3>
-            <button id="resetIncExcCriteria">Reset Your Criteria</button>
             {/* Needs a modal to open to confirm okay to delete - only for primary author */}
             <p>The terms that you input below will show up highlighted in green (inclusion) or red (exclusion) to help guide your screening process (this can also be toggled off). You are able to add your own subheadings for maximum customisability.</p>
 
