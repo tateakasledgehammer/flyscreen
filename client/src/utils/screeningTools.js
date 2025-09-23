@@ -38,3 +38,28 @@ export function updateStudyStatus(votes) {
         return "No votes"
     };
 }
+
+export function formatAuthors(authorString) {
+    if (!authorString) return "N/A";
+
+    const parts = authorString.split(",").map(a => a.trim());
+
+    const authors = [];
+
+    for (let i = 0; i < parts.length; i +=2) {
+        const last = parts[i] || "";
+        const first = parts[i + 1] || "";
+        authors.push(`${last}`.trim());
+    }
+
+    if (authors.length === 1) {
+        return authorString;
+    }
+    if (authors.length === 2) {
+        return authors[0] + " & " + authors[1];
+    }
+
+    if (authors.length > 2) {
+        return authors[0] + " et al."
+    }
+}

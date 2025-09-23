@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { updateStudyStatus } from "../utils/screeningTools";
+import { updateStudyStatus, formatAuthors } from "../utils/screeningTools";
+import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
     const { 
@@ -19,7 +20,8 @@ export default function StudyCard(props) {
         searchFilter,
         setSearchFilter,
         highlighted,
-        setHighlighted
+        setHighlighted,
+        study
     } = props;
 
     function handleVote(studyId, action) {
@@ -109,31 +111,6 @@ export default function StudyCard(props) {
         )
     }
 
-    function formatAuthors(authorString) {
-        if (!authorString) return "N/A";
-
-        const parts = authorString.split(",").map(a => a.trim());
-
-        const authors = [];
-
-        for (let i = 0; i < parts.length; i +=2) {
-            const last = parts[i] || "";
-            const first = parts[i + 1] || "";
-            authors.push(`${last}`.trim());
-        }
-
-        if (authors.length === 1) {
-            return authorString;
-        }
-        if (authors.length === 2) {
-            return authors[0] + " & " + authors[1];
-        }
-
-        if (authors.length > 2) {
-            return authors[0] + " et al."
-        }
-    }
-
     function highlightContent(text, includedWords = [], excludedWords = [], filteredWords = []) {
         if (!text) return ""
 
@@ -198,77 +175,16 @@ export default function StudyCard(props) {
                 return (
                 <div key={study.id} className="study-card">
                     {/* Study information */}
-                    <div className="title-wrapper">
-                        <h3 className="study-title">
-                            {highlighted ? (
-                                <span className="highlightable">
-                                    {highlightContent(study.title, inclusionCriteria, exclusionCriteria, searchWords)}
-                                </span>
-                            ) : 
-                            <span className="highlightable">
-                                    {study.title}
-                            </span>
-                            }
-                        </h3>
-                        <div className="percentile-card">XX%</div>
-                    </div>
-                    <div className="study-info">
-                        <p><strong>Study Index: </strong>{study.id}</p>
-                        <p className="authors"><strong>Authors: </strong>{formatAuthors(study.authors)}</p>
-                        <p className="year"><strong>Year: </strong>{study.year}</p>
-                        <p className="type"><strong>Type: </strong>{study.type}</p>
-                        <p className="language"><strong>Language: </strong>{study.language}</p>
-                        <p className="journal"><strong>Journal: </strong>{study.journal}</p>
-                        <p className="volume"><strong>Volume: </strong>{study.volume}</p>
-                        <p className="issue"><strong>Issue: </strong>{study.issue}</p>
-                        <p className="doi"><strong>DOI: </strong>
-                            {(study.doi !== "N/A") ? (
-                                <a 
-                                    href={`https://doi.org/${study.doi}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {study.doi}
-                                </a>
-                            ) : ("N/A")}
-                        </p>
-                    </div>
 
-                    {/* Button to toggle keywords & abstract */}
-                    <div>
-                        <button className="adding-bottom-margin" onClick={() => (handleToggleDetails(study.id))}>
-                            {!isExpanded ? "▲ Hide details" : "▼ Show details"}
-                        </button>
-
-                        {!isExpanded && (
-                            <div>
-                                <p className="keywords">
-                                    <strong>Keywords: </strong>
-                                    {highlighted ? (
-                                        <span className="highlightable">
-                                            {highlightContent(study.keywords, inclusionCriteria, exclusionCriteria, searchWords)}
-                                        </span>
-                                    ) : 
-                                        <span className="highlightable">
-                                                {study.keywords}
-                                        </span>
-                                    }
-                                </p>
-                                <p className="abstract">
-                                    <strong>Abstract: </strong>
-                                    {highlighted ? (
-                                        <span className="highlightable">
-                                            {highlightContent(study.abstract, inclusionCriteria, exclusionCriteria, searchWords)}
-                                        </span>
-                                    ) : 
-                                        <span className="highlightable">
-                                                {study.abstract}
-                                        </span>
-                                    }
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                    <StudyInfo
+                        study={study}
+                        highlighted={highlighted}
+                        highlightContent={highlightContent}
+                        inclusionCriteria={inclusionCriteria}
+                        exclusionCriteria={exclusionCriteria}
+                        searchWords={searchWords}
+                        isExpanded={isExpanded}
+                    />
                     
                     {/* Actions section */}
 
@@ -300,7 +216,7 @@ export default function StudyCard(props) {
                             onChange={(e) => (handleAssignTag(study.id, e.target.value))}
                         >
                             <option value="">Select tag</option>
-                            {(studyTags.map((tag, tagIndex) => (
+                            {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
                                 <option key={tagIndex} value={tag}>
                                     {tag}
                                 </option>

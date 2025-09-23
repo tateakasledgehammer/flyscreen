@@ -21,11 +21,34 @@ export default function FullTextScreening(props) {
         setExclusionCriteria,
     } = props;
 
+    const [itemsPerPage, setItemsPerPage] = useState(25);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [statusFilter, setStatusFilter] = useState("ACCEPTED")
+
+    function toggleStudyStatusShowing(filter) {
+        setStatusFilter(filter)
+    }
+
+    const filterForAcceptedStudies = studies.filter(study => {
+        if (statusFilter === "ACCEPTED") {
+            return study.status === "Accepted"
+        }
+    });
+
+    const sortedStudies = handleSortByOrder(filterForAcceptedStudies);
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const screenedStudies = sortedStudies.slice(startIndex, endIndex);
+
     return (
         <>
             <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
 
-            <StudyCard />
+            <StudyCard 
+                studies={screenedStudies}
+                setStudies={setStudies}
+            />
         </>
     )
 }

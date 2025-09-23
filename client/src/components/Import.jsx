@@ -70,7 +70,12 @@ export default function Import(props) {
             language: (entry.LA && entry.LA[0] || 'N/A'),
             votes: { accept: [], reject: [] },
             status: "No votes",
-            tagStatus: ""
+            tagStatus: "",
+
+            fullTextVotes: { accept: [], reject: []},
+            notes: [],
+            probabilityScore: {}
+
         }));
     }
 
