@@ -39,7 +39,7 @@ export default function CreateProject(props) {
     }
     
     return (
-        <>
+        <div className="page-container">
             <br />
             <hr />
 
@@ -74,6 +74,6 @@ export default function CreateProject(props) {
             )}
 
             {message && <p style={{ color: "green" }}>{message}</p>}
-        </>
+        </div>
     )
 }

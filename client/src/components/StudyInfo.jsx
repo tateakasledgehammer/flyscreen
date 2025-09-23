@@ -8,7 +8,8 @@ export default function StudyInfo(props) {
         exclusionCriteria,
         searchWords,
         highlightContent,
-        isExpanded
+        isExpanded,
+        handleToggleDetails
 
     } = props
 

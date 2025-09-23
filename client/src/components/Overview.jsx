@@ -2,7 +2,7 @@ export default function Overview(props) {
     const { studies, setStudies, savedStudies, backgroundInformationForReview, studyTags } = props
 
     return (
-        <>
+        <div className="page-container">
             <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
             {/* Add class and styling for the homepage cards + progress bar */}
             <div className="homepage-section">
@@ -65,6 +65,6 @@ export default function Overview(props) {
             <div className="homepage-section">
                 <h3>Manage Your Included Studies</h3>
             </div>
-        </>
+        </div>
     )
 }

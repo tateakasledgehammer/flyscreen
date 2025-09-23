@@ -21,6 +21,7 @@ export default function ExcludedStudies(props) {
         setFullTextExclusionReasons,
         searchFilter,
         setSearchFilter,
+        showExclusionFilter
     } = props;
 
     const [sortBy, setSortBy] = useState('index_asc');
@@ -93,7 +94,7 @@ export default function ExcludedStudies(props) {
 
 
     return (
-        <>
+        <div className="page-container">
             <h2><i className="fa-solid fa-list-check"></i> Manage Excluded Studies</h2>
             <div className="filter-notice">
                 <h3>Your Excluded Studies ({rejectedStudies.length})</h3>
@@ -126,6 +127,10 @@ export default function ExcludedStudies(props) {
                 setHighlighted={setHighlighted}
                 studyTags={studyTags}
                 handleSortByTag={handleSortByTag}
+                handleSortByFullTextExclusionReason={handleSortByFullTextExclusionReason}
+                fullTextExclusionReasons={fullTextExclusionReasons}
+
+                showExclusionFilter={true}
             />
 
             {/* Filter notice */}
@@ -134,28 +139,6 @@ export default function ExcludedStudies(props) {
                     <h3 className="filter-notice">Filter: {searchFilter}</h3>
                 )}
             </div>
-
-            <select
-                onChange={(e) => (handleSortByTag(e.target.value))}
-            >
-                <option value="">Select tag</option>
-                {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
-                    <option key={tagIndex} value={tag}>
-                        {tag}
-                    </option>
-                )))}
-            </select>
-
-            <select
-                onChange={(e) => (handleSortByFullTextExclusionReason(e.target.value))}
-            >
-                <option value="">Select exclusion reason</option>
-                {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
-                    <option key={reasonIndex} value={reason}>
-                        {reason}
-                    </option>
-                )))}
-            </select>
             
             <StudyCard 
                 studies={filteredRejectedStudies}
@@ -178,6 +161,6 @@ export default function ExcludedStudies(props) {
                 setHighlighted={setHighlighted}
             />
 
-        </>
+        </div>
     )
 }

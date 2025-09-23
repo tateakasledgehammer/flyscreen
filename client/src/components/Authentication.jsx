@@ -50,7 +50,7 @@ export default function Authentication() {
     };
 
     return (
-        <>
+        <div className="page-container">
             <br />
             <hr />
 
@@ -136,6 +136,6 @@ export default function Authentication() {
             )}
 
             {message && <p style={{ color: "green" }}>{message}</p>}
-        </>
+        </div>
     )
 }

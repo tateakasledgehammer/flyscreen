@@ -120,7 +120,7 @@ export default function TAScreening(props) {
     })
 
     return (
-        <>
+        <div className="page-container">
             <h2>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
             </h2>
@@ -246,6 +246,6 @@ export default function TAScreening(props) {
                     Load more...
                 </button>
             )}
-        </>
+        </div>
     )
 }

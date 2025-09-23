@@ -135,7 +135,7 @@ export default function FullTextScreening(props) {
     })
 
     return (
-        <>
+        <div className="page-container">
             <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
 
             <ScreeningFilters
@@ -203,6 +203,6 @@ export default function FullTextScreening(props) {
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
             />
-        </>
+        </div>
     )
 }

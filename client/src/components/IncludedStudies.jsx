@@ -88,7 +88,7 @@ export default function IncludedStudies(props) {
     })
 
     return (
-        <>
+        <div className="page-container">
             <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
             <div className="filter-notice">
                 <h3>Your Included Studies ({acceptedStudies.length})</h3>
@@ -151,6 +151,6 @@ export default function IncludedStudies(props) {
                 setHighlighted={setHighlighted}
             />
 
-        </>
+        </div>
     )
 }

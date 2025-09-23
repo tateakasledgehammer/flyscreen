@@ -167,7 +167,7 @@ export default function StudyCard(props) {
                 study.id === studyId ? {...study, note } : study
             )
         )
-        alert("Function not available currently.")
+        alert("Function not currently available.")
     }
 
     function handleAssignTag(studyId, value) {
@@ -259,6 +259,7 @@ export default function StudyCard(props) {
                         exclusionCriteria={exclusionCriteria}
                         searchWords={searchWords}
                         isExpanded={isExpanded}
+                        handleToggleDetails={handleToggleDetails}
                     />
                     
                     {/* Actions section */}
@@ -291,14 +292,14 @@ export default function StudyCard(props) {
                                     className="accept-btn" 
                                     onClick={() => handleFullTextVote(study.id, "accept")}
                                 >
-                                    FT ACCEPT
+                                    ACCEPT
                                 </button>
 
                                 <button 
                                     className="reject-btn" 
                                     onClick={() => handleFullTextVote(study.id, "reject")}
                                 >
-                                    FT REJECT
+                                    REJECT
                                 </button>
                                 <select
                                     value={study.fullTextExclusionStatus || ""}
@@ -316,8 +317,8 @@ export default function StudyCard(props) {
 
                         {(study.fullTextStatus === "Full Text Conflict") && (
                             <>
-                                <button className="accept-btn" onClick={() => handleResolveFullTextConflict(study.id, "accept")}>CONFIRM FT ACCEPT</button>
-                                <button className="reject-btn" onClick={() => handleResolveFullTextConflict(study.id, "reject")}>CONFIRM FT REJECT</button>
+                                <button className="accept-btn" onClick={() => handleResolveFullTextConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
+                                <button className="reject-btn" onClick={() => handleResolveFullTextConflict(study.id, "reject")}>CONFIRM REJECT</button>
                                 <select
                                     value={study.fullTextExclusionStatus || ""}
                                     onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}
@@ -349,7 +350,7 @@ export default function StudyCard(props) {
                                 <button 
                                     onClick={() => handleFullTextVote(study.id, "remove")}
                                 >
-                                    FT REVERT
+                                    REVERT
                                 </button>
                             </>
                         )}
@@ -359,7 +360,7 @@ export default function StudyCard(props) {
                                 <button 
                                     onClick={() => handleFullTextVote(study.id, "remove")}
                                 >
-                                    FT REVERT
+                                    REVERT
                                 </button>
                             </>
                         )}
@@ -368,7 +369,7 @@ export default function StudyCard(props) {
                             <button 
                                 onClick={() => handleFullTextVote(study.id, "remove")}
                             >
-                                FT REVERT
+                                REVERT
                             </button>  
                         )}
                                               

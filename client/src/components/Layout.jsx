@@ -45,12 +45,12 @@ export default function Layout(props) {
     )
 
     return (
-        <>
+        <div className="page-container">
             { header }
             <main>
                 { children }
             </main>
             { footer }
-        </>
+        </div>
     )
 }

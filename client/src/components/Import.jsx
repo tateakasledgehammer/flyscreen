@@ -140,7 +140,7 @@ export default function Import(props) {
     }
 
     return (
-        <>
+        <div className="page-container">
             <h2><i className="fa-solid fa-upload"></i> Import Your Studies</h2>
             <input type="file" accept=".ris" onChange={handleFileUpload} />
             {error && (<p style={{ color: "red" }}>{error}</p>)}
@@ -160,6 +160,6 @@ export default function Import(props) {
             )}                
 
             <button onClick={handleClear}>Clear studies</button>
-        </>
+        </div>
     )
 }

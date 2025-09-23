@@ -264,7 +264,7 @@ export default function Setup(props) {
     }
 
     return (
-        <>
+        <div className="page-container">
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
         <div className="homepage-section">
@@ -629,6 +629,6 @@ export default function Setup(props) {
                     
             <button onClick={() => handleClearFullTextReasons()}>Clear Criteria</button>
         </div>
-        </>
+        </div>
     )
 }
