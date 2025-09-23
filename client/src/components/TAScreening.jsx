@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import StudyCard from "./StudyCard";
 import { handleSortByOrder } from "../utils/screeningTools";
+import ScreeningFilters from "./ScreeningFilters";
 
 export default function TAScreening(props) {
     const { 
@@ -28,7 +29,7 @@ export default function TAScreening(props) {
     const [searchFilterInput, setSearchFilterInput] = useState("");
     const [statusFilter, setStatusFilter] = useState("UNSCREENED")
 
-    const [highlighted, setHighlighted] = useState(true)
+    const [highlighted, setHighlighted] = useState(false)
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -112,58 +113,19 @@ export default function TAScreening(props) {
             </h2>
 
             {/* Navigation bar for the screening */}
-            <div id="screening-nav">
-                {/* Items per page */}
-                <label>Show per page:</label>
-                <select id="itemsPerPage" onChange={handleItemsPerPage} value={itemsPerPage}>
-                    <option defaultValue={25}>Select</option>
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                </select>
-
-                {/* Sort studies */}
-                <label>Sort by:</label>
-                <select id="sortBy" onChange={(e) => setSortBy(e.target.value)}>
-                    <option value="index_asc">Study Index</option>
-                    <option value="year_asc">Year (Oldest First)</option>
-                    <option value="year_des">Year (Newest First)</option>
-                    <option value="title_asc">Title (A - Z)</option>
-                    <option value="title_des">Title (Z - A)</option>
-                    <option value="author_asc">Author (A - Z)</option>
-                    <option value="author_des">Author (Z - A)</option>
-                    <option value="probability_asc">Probability Score (Ascending)</option>
-                    <option value="probability_des">Probability Score (Descending)</option>
-                </select>
-
-                {/* Filter studies */}
-                <label>Set A Filter</label>
-                <input 
-                    onChange={(e) => setSearchFilterInput(e.target.value)}
-                    value={searchFilterInput}
-                    type="text" 
-                    placeholder="Set a filter..." 
-                />
-                <button 
-                    onClick={handleSetSearchFilter}
-                    >
-                    Add Filter
-                </button>
-                <button 
-                    id="clearFilterBtn" 
-                    onClick={handleRemoveSearchFilter}
-                    >
-                    Clear Filter
-                </button>
-
-                {/* Toggle highlights / abstract */}
-                <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>▲ Hide Details</button>
-                <button id="toggleHighlightableBtn" onClick={handleToggleHighlightsGlobal}>
-                    {highlighted ? "Toggle Highlights Off" : "Toggle Highlights On"}
-                </button>
-            </div>
+            <ScreeningFilters
+                studies={studies}
+                setSortBy={setSortBy}
+                handleItemsPerPage={handleItemsPerPage}
+                itemsPerPage={itemsPerPage}
+                searchFilterInput={searchFilterInput}
+                setSearchFilterInput={setSearchFilterInput}
+                handleSetSearchFilter={handleSetSearchFilter}
+                handleRemoveSearchFilter={handleRemoveSearchFilter}
+                handleToggleDetailsGlobal={handleToggleDetailsGlobal}
+                handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
+                highlighted={highlighted}
+            />
 
             <div className="toggle-status">
                 {(statusFilter == "UNSCREENED") ? (
@@ -199,6 +161,8 @@ export default function TAScreening(props) {
                     </button>
                 )}
 
+                {/* commenting out accepted as only available at full text screening stage
+
                 {(statusFilter == "ACCEPTED") ? (
                     <button onClick={() => toggleStudyStatusShowing("ACCEPTED")}
                     style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
@@ -209,6 +173,8 @@ export default function TAScreening(props) {
                         ACCEPTED ({studies.filter(study => !study.status || study.status === "Accepted").length})
                     </button>
                 )}
+
+                */}
 
                 {(statusFilter == "REJECTED") ? (
                     <button onClick={() => toggleStudyStatusShowing("REJECTED")}
@@ -222,7 +188,8 @@ export default function TAScreening(props) {
                 )}
 
             </div>
-
+            
+            {/* Second vote notice */}
             {(statusFilter == "AWAITING SECOND VOTE") && (
                 <p className="filter-notice" style={{ color: "red" }}>Studies that you have voted on will not appear</p>
             )}

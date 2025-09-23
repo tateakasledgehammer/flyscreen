@@ -77,7 +77,7 @@ export default function StudyCard(props) {
                 if (votes.accept.length >=3) votes.accept.pop();
                 if (votes.reject.length >= 3) votes.reject.pop();
 
-                const status = updateStudyStatus(votes)
+                const status = updateStudyStatus(votes);
     
                 console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
     
@@ -193,7 +193,6 @@ export default function StudyCard(props) {
                             <>
                                 <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
-                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
 
@@ -201,14 +200,11 @@ export default function StudyCard(props) {
                             <>
                                 <button className="accept-btn" onClick={() => handleResolveConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
-                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
-
-                        {(study.status === "Accepted" || study.status === "Rejected") && (
-                            <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
-                        )}
                         
+                        <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+
                         <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
                         
                         <select
