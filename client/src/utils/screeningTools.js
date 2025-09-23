@@ -39,6 +39,20 @@ export function updateStudyStatus(votes) {
     };
 }
 
+export function updateFullTextScreeningStatus(fullTextVotes) {
+    if (fullTextVotes.accept.length >= 2) {
+        return "Full Text Accepted";
+    } else if (fullTextVotes.reject.length >= 2) {
+        return "Full Text Rejected";
+    } else if (fullTextVotes.reject.length === 1 && fullTextVotes.accept.length === 1) {
+        return "Full Text Conflict";
+    } else if (fullTextVotes.accept.length === 1 || fullTextVotes.reject.length === 1) {
+        return "Full Text Awaiting Second Vote";
+    } else {
+        return "Full Text No Votes"
+    };
+}
+
 export function formatAuthors(authorString) {
     if (!authorString) return "N/A";
 

@@ -88,7 +88,7 @@ export default function TAScreening(props) {
                 study.votes.accept.some(u => u.username === user.username) ||
                 study.votes.reject.some(u => u.username === user.username)
 
-                return study.status === "Awaiting second vote" && !userHasVotedCheck;
+            return study.status === "Awaiting second vote" && !userHasVotedCheck;
         } else if (statusFilter === "CONFLICT") {
             return study.status === "Conflict"
         } else if (statusFilter === "ACCEPTED") {
@@ -186,7 +186,6 @@ export default function TAScreening(props) {
                         REJECTED ({studies.filter(study => !study.status || study.status === "Rejected").length})
                     </button>
                 )}
-
             </div>
             
             {/* Second vote notice */}

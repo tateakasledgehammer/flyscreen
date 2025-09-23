@@ -73,6 +73,7 @@ export default function Import(props) {
             tagStatus: "",
 
             fullTextVotes: { accept: [], reject: []},
+            fullTextStatus: "Full Text No Votes",
             notes: [],
             probabilityScore: {}
 

@@ -1,6 +1,6 @@
-import StudyCard from "./StudyCard";
 import { useState, useEffect } from "react";
 import { handleSortByOrder } from "../utils/screeningTools";
+import StudyCard from "./StudyCard";
 import ScreeningFilters from "./ScreeningFilters";
 
 export default function FullTextScreening(props) {
@@ -27,16 +27,24 @@ export default function FullTextScreening(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-    const [statusFilter, setStatusFilter] = useState("ACCEPTED")
+    const [fullTextStatusFilter, setFullTextStatusFilter] = useState("UNSCREENED")
+
+    const fullTextSubheadings = [
+        { label: "UNSCREENED", key: "Full Text No Votes" },
+        { label: "AWAITING SECOND VOTE", key: "Full Text Awaiting Second Vote" },
+        { label: "CONFLICT", key: "Full Text Conflict" },
+        /* { label: "ACCEPTED", key: "Full Text Accepted" }, */
+        { label: "REJECTED", key: "Full Text Rejected" }
+    ];
+
+    useEffect(() => {
+        setStudies(prev => handleSortByOrder(prev, sortBy));
+    }, [sortBy]);
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
         setCurrentPage(1);
     }
-
-    useEffect(() => {
-        setStudies(prev => handleSortByOrder(prev, sortBy));
-    }, [sortBy]);
     
     function handleSetSearchFilter(e) {
         setSearchFilter(searchFilterInput);
@@ -48,7 +56,6 @@ export default function FullTextScreening(props) {
         setSearchFilter("");
         setCurrentPage(1);
         setSearchFilterInput("")
-
         if (searchFilter === "") alert("No filter to clear")
     }
 
@@ -65,11 +72,11 @@ export default function FullTextScreening(props) {
     }
 
     function toggleStudyStatusShowing(filter) {
-        setStatusFilter(filter)
+        setFullTextStatusFilter(filter)
     }
 
     function toggleStudyStatusShowing(filter) {
-        setStatusFilter(filter)
+        setFullTextStatusFilter(filter)
     }
 
     const filteredStudies = studies.filter(study => {
@@ -80,15 +87,37 @@ export default function FullTextScreening(props) {
             study.abstract.toLowerCase().includes(term) ||
             study.keywords.toLowerCase().includes(term)
         )
-    })
-
-    const filterForAcceptedStudies = filteredStudies.filter(study => {
-        if (statusFilter === "ACCEPTED") {
-            return study.status === "Accepted"
-        }
     });
 
-    const sortedStudies = handleSortByOrder(filterForAcceptedStudies);
+    const filterForAcceptedStudies = filteredStudies.filter(study => {
+        return study.status === "Accepted"
+    });
+
+    const filteredStudiesByFullTextStatus = filterForAcceptedStudies.filter(study => {
+        switch (fullTextStatusFilter) {
+            case "UNSCREENED":
+                return !study.fullTextStatus || study.fullTextStatus === "Full Text No Votes";
+            
+            case "AWAITING SECOND VOTE":
+                const userHasVotedCheck =
+                    study.fullTextVotes?.accept?.some(u => u.username === user.username) ||
+                    study.fullTextVotes?.reject?.some(u => u.username === user.username);
+                return study.fullTextStatus === "Full Text Awaiting Second Vote" && !userHasVotedCheck;
+            
+            case "CONFLICT":
+                return study.fullTextStatus === "Full Text Conflict";
+            
+            case "ACCEPTED":
+                return study.fullTextStatus === "Full Text Accepted";
+            
+            case "REJECTED":
+                return study.fullTextStatus === "Full Text Rejected";
+            
+            default:
+                return false;
+    }});
+
+    const sortedStudies = handleSortByOrder(filteredStudiesByFullTextStatus);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const screenedStudies = sortedStudies.slice(startIndex, endIndex);
@@ -112,8 +141,24 @@ export default function FullTextScreening(props) {
                 setHighlighted={setHighlighted}
             />
 
+            <div className="toggle-status">
+                {fullTextSubheadings.map((sub, i) => {
+                    const count = filterForAcceptedStudies.filter(study => study.fullTextStatus === sub.key).length;
+                    const isActive = fullTextStatusFilter === sub.label;
+                    return (
+                        <button
+                            key={i}
+                            onClick={() => setFullTextStatusFilter(sub.label)}
+                            style={isActive ? { fontWeight: "700", backgroundColor: "#213547", color: "white" } : {}}
+                        >
+                            {sub.label} ({count})
+                        </button>
+                    )
+                })}
+            </div>
+
             {/* Second vote notice */}
-            {(statusFilter == "AWAITING SECOND VOTE") && (
+            {(fullTextStatusFilter == "AWAITING SECOND VOTE") && (
                 <p className="filter-notice" style={{ color: "red" }}>Studies that you have voted on will not appear</p>
             )}
 

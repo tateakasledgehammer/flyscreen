@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { updateStudyStatus, formatAuthors } from "../utils/screeningTools";
+import { updateStudyStatus, formatAuthors, updateFullTextScreeningStatus } from "../utils/screeningTools";
 import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
@@ -82,6 +82,70 @@ export default function StudyCard(props) {
                 console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
     
                 return { ...study, votes, status };
+            })
+            localStorage.setItem("studies", JSON.stringify(updated));
+            return updated;
+        })
+    }
+
+    function handleFullTextVote(studyId, action) {
+        setStudies(prev => {
+            const updated = prev.map(study => {
+                if (study.id !== studyId) return study;
+                
+                let fullTextVotes = {
+                    accept: study.fullTextVotes.accept.filter(u => u.id !== user.id),
+                    reject: study.fullTextVotes.reject.filter(u => u.id !== user.id)
+                };
+
+                if (action === "accept") {
+                    fullTextVotes.accept.push(user);
+                } else if (action === "reject") {
+                    fullTextVotes.reject.push(user);
+                } else if (action === "remove") {
+                    fullTextVotes = { accept: [], reject: [] };
+                }
+
+                fullTextVotes = {
+                    accept: [...new Map(fullTextVotes.accept.map(u => [u.id, u])).values()],
+                    reject: [...new Map(fullTextVotes.reject.map(u => [u.id, u])).values()]
+                }
+
+                const fullTextStatus = updateFullTextScreeningStatus(fullTextVotes);
+
+                console.log(`Updating study ${studyId} by ${user} - action: ${action}`, fullTextVotes, "Full Text Screening Status: ", fullTextStatus);
+
+                return { ...study, fullTextVotes, fullTextStatus }
+            })
+            localStorage.setItem("studies", JSON.stringify(updated));
+            return updated;
+        })
+    }
+
+    function handleResolveFullTextConflict(studyId, action) {
+        setStudies(prev => {
+            const updated = prev.map(study => {
+                if (study.id !== studyId) return study;
+
+                let fullTextVotes = {
+                    accept: study.fullTextVotes.accept,
+                    reject: study.fullTextVotes.reject
+                };
+
+                if (action === "accept") {
+                    fullTextVotes.accept.push(user)
+                } else if (action === "reject") {
+                    fullTextVotes.reject.push(user);
+                }
+    
+                if (fullTextVotes.accept.length >=3) fullTextVotes.accept.pop();
+                if (fullTextVotes.reject.length >= 3) fullTextVotes.reject.pop();
+
+                const fullTextStatus = updateFullTextScreeningStatus(fullTextVotes);
+    
+                console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, fullTextVotes, "Status: ", fullTextStatus);
+    
+                return { ...study, fullTextVotes, fullTextStatus };
             })
             localStorage.setItem("studies", JSON.stringify(updated));
             return updated;
@@ -189,10 +253,12 @@ export default function StudyCard(props) {
                     {/* Actions section */}
 
                     <div className="actions">
+                        {/* TITLE ABSTRACT SCREENING BUTTONS */}
                         {(study.status === "No votes" || study.status === "Awaiting second vote") && (
                             <>
                                 <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
+                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
 
@@ -200,13 +266,54 @@ export default function StudyCard(props) {
                             <>
                                 <button className="accept-btn" onClick={() => handleResolveConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
+                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
-                        
-                        <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                        {(study.status === "Rejected") && (
+                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
+                        )}
 
-                        <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
+                        {/* FULL TEXT SCREENING BUTTONS */}
+                        {(study.fullTextStatus === "Full Text No Votes") || (study.fullTextStatus === "Full Text Awaiting Second Vote") && (
+                            <>
+                                <button 
+                                    className="accept-btn" 
+                                    onClick={() => handleFullTextVote(study.id, "accept")}
+                                >
+                                    FT ACCEPT
+                                </button>
+
+                                <button 
+                                    className="reject-btn" 
+                                    onClick={() => handleFullTextVote(study.id, "reject")}
+                                >
+                                    FT REJECT
+                                </button>
+                                <button 
+                                    onClick={() => handleFullTextVote(study.id, "remove")}
+                                >
+                                    FT REVERT
+                                </button>
+                            </>
+                        )}
+
+                        {(study.fullTextStatus === "Full Text Conflict") && (
+                            <>
+                                <button className="accept-btn" onClick={() => handleResolveFullTextConflict(study.id, "accept")}>CONFIRM FT ACCEPT</button>
+                                <button className="reject-btn" onClick={() => handleResolveFullTextConflict(study.id, "reject")}>CONFIRM FT REJECT</button>
+                                <button onClick={() => handleFullTextVote(study.id, "remove")}>REVERT</button>
+                            </>
+                        )}
+                        {(study.fullTextStatus === "Full Text Accepted" || study.fullTextStatus === "Full Text Rejected") && (
+                            <button 
+                                onClick={() => handleFullTextVote(study.id, "remove")}
+                            >
+                                FT REVERT
+                            </button>
+                        )}
                         
+                        {/* REVERT / NOTE / TAG for all */}
+                        <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
                         <select
                             value={study.tagStatus || ""}
                             onChange={(e) => (handleAssignTag(study.id, e.target.value))}
@@ -226,6 +333,12 @@ export default function StudyCard(props) {
                         <>
                             <p>Accept vote: {study.votes.accept.map(user => user.username).join(", ")}</p>
                             <p>Reject vote: {study.votes.reject.map(user => user.username).join(", ")}</p>
+                        </>
+                    )}
+                    {study.status === "Accepted" && (
+                        <>
+                            <p>Accept vote: {study.fullTextVotes.accept.map(user => user.username).join(", ")}</p>
+                            <p>Reject vote: {study.fullTextVotes.reject.map(user => user.username).join(", ")}</p>
                         </>
                     )}
                 </div>
