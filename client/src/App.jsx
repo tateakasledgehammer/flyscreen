@@ -208,6 +208,8 @@ function App() {
             setInclusionCriteria={setInclusionCriteria} 
             exclusionCriteria={exclusionCriteria} 
             setExclusionCriteria={setExclusionCriteria}
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            setFullTextExclusionReasons={setFullTextExclusionReasons}
             searchFilter={searchFilter}
             setSearchFilter={setSearchFilter}
           />
@@ -229,6 +231,8 @@ function App() {
             setExclusionCriteria={setExclusionCriteria}
             searchFilter={searchFilter}
             setSearchFilter={setSearchFilter}
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            setFullTextExclusionReasons={setFullTextExclusionReasons}
           />
         } />
         

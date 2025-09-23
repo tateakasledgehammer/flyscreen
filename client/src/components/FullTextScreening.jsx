@@ -20,6 +20,8 @@ export default function FullTextScreening(props) {
         setInclusionCriteria, 
         exclusionCriteria, 
         setExclusionCriteria,
+        fullTextExclusionReasons,
+        setFullTextExclusionReasons
     } = props;
 
     const [sortBy, setSortBy] = useState('index_asc');
@@ -182,6 +184,8 @@ export default function FullTextScreening(props) {
                 setInclusionCriteria={setInclusionCriteria} 
                 exclusionCriteria={exclusionCriteria} 
                 setExclusionCriteria={setExclusionCriteria}
+                fullTextExclusionReasons={fullTextExclusionReasons}
+                setFullTextExclusionReasons={setFullTextExclusionReasons}
                 searchFilter={searchFilter}
                 setSearchFilter={setSearchFilter}
                 highlighted={highlighted}

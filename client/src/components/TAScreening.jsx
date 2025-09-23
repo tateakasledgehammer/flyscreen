@@ -19,6 +19,8 @@ export default function TAScreening(props) {
         setInclusionCriteria, 
         exclusionCriteria, 
         setExclusionCriteria,
+        fullTextExclusionReasons,
+        setFullTextExclusionReasons
     } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
