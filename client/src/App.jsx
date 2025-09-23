@@ -195,7 +195,7 @@ function App() {
             setStudies={setStudies} />
         } />
 
-        <Route path="/tascreening" element={
+        <Route path="/screening" element={
           <TAScreening 
             studies={studies} 
             setStudies={setStudies} 

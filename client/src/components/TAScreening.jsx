@@ -29,6 +29,7 @@ export default function TAScreening(props) {
     const [sortBy, setSortBy] = useState('index_asc');
 
     const [searchFilterInput, setSearchFilterInput] = useState("");
+
     const [statusFilter, setStatusFilter] = useState("UNSCREENED")
 
     const [highlighted, setHighlighted] = useState(false)
@@ -42,6 +43,11 @@ export default function TAScreening(props) {
         setStudies(prev => handleSortByOrder(prev, sortBy));
     }, [sortBy]);
     
+    const [tagFilter, setTagFilter] = useState("")
+    function handleSortByTag(value) {
+        setTagFilter(value)
+    }
+
     function handleSetSearchFilter(e) {
         setSearchFilter(searchFilterInput);
         setCurrentPage(1);
@@ -108,6 +114,11 @@ export default function TAScreening(props) {
     const endIndex = startIndex + itemsPerPage;
     const visibleStudies = sortedStudies.slice(startIndex, endIndex);
 
+    const filteredVisibleStudies = visibleStudies.filter((study) => {
+        if (!tagFilter) return true;
+        return study.tagStatus === tagFilter;
+    })
+
     return (
         <>
             <h2>
@@ -127,6 +138,8 @@ export default function TAScreening(props) {
                 handleToggleDetailsGlobal={handleToggleDetailsGlobal}
                 handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
                 highlighted={highlighted}
+                studyTags={studyTags}
+                handleSortByTag={handleSortByTag}
             />
 
             <div className="toggle-status">
@@ -189,7 +202,7 @@ export default function TAScreening(props) {
                     </button>
                 )}
             </div>
-            
+
             {/* Second vote notice */}
             {(statusFilter == "AWAITING SECOND VOTE") && (
                 <p className="filter-notice" style={{ color: "red" }}>Studies that you have voted on will not appear</p>
@@ -204,7 +217,7 @@ export default function TAScreening(props) {
 
             {/* Output section */}
             <StudyCard 
-                studies={visibleStudies} 
+                studies={filteredVisibleStudies} 
                 setStudies={setStudies} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

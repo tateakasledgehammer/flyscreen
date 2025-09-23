@@ -28,7 +28,6 @@ export default function ExcludedStudies(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-    const [fullTextStatusFilter, setFullTextStatusFilter] = useState("UNSCREENED")
 
     useEffect(() => {
         setStudies(prev => handleSortByOrder(prev, sortBy));
@@ -65,8 +64,14 @@ export default function ExcludedStudies(props) {
         setItemsPerPage(itemsPerPage * 2)
     }
 
-    function toggleStudyStatusShowing(filter) {
-        setStatusFilter(filter)
+    const [tagFilter, setTagFilter] = useState("")
+    function handleSortByTag(value) {
+        setTagFilter(value)
+    }
+
+    function handleSortByFullTextExclusionReason(value) {
+        setTagFilter(value)
+        console.log(tagFilter)
     }
 
     const rejectedStudies = studies
@@ -81,11 +86,17 @@ export default function ExcludedStudies(props) {
             )
         });
 
+    const filteredRejectedStudies = rejectedStudies.filter((study) => {
+        if (!tagFilter) return true;
+        return study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter;
+    })
+
+
     return (
         <>
-            <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
+            <h2><i className="fa-solid fa-list-check"></i> Manage Excluded Studies</h2>
             <div className="filter-notice">
-                <h3>Your Included Studies ({rejectedStudies.length})</h3>
+                <h3>Your Excluded Studies ({rejectedStudies.length})</h3>
                 <button>Export studies</button>
             </div>
             {/*
@@ -113,6 +124,8 @@ export default function ExcludedStudies(props) {
                 handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
+                studyTags={studyTags}
+                handleSortByTag={handleSortByTag}
             />
 
             {/* Filter notice */}
@@ -121,9 +134,31 @@ export default function ExcludedStudies(props) {
                     <h3 className="filter-notice">Filter: {searchFilter}</h3>
                 )}
             </div>
+
+            <select
+                onChange={(e) => (handleSortByTag(e.target.value))}
+            >
+                <option value="">Select tag</option>
+                {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
+                    <option key={tagIndex} value={tag}>
+                        {tag}
+                    </option>
+                )))}
+            </select>
+
+            <select
+                onChange={(e) => (handleSortByFullTextExclusionReason(e.target.value))}
+            >
+                <option value="">Select exclusion reason</option>
+                {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
+                    <option key={reasonIndex} value={reason}>
+                        {reason}
+                    </option>
+                )))}
+            </select>
             
             <StudyCard 
-                studies={rejectedStudies}
+                studies={filteredRejectedStudies}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

@@ -43,6 +43,11 @@ export default function FullTextScreening(props) {
         setStudies(prev => handleSortByOrder(prev, sortBy));
     }, [sortBy]);
 
+    const [tagFilter, setTagFilter] = useState("")
+    function handleSortByTag(value) {
+        setTagFilter(value)
+    }
+
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
         setCurrentPage(1);
@@ -124,6 +129,11 @@ export default function FullTextScreening(props) {
     const endIndex = startIndex + itemsPerPage;
     const screenedStudies = sortedStudies.slice(startIndex, endIndex);
 
+    const filteredScreenedStudies = screenedStudies.filter((study) => {
+        if (!tagFilter) return true;
+        return study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter;
+    })
+
     return (
         <>
             <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
@@ -141,6 +151,8 @@ export default function FullTextScreening(props) {
                 handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
+                studyTags={studyTags}
+                handleSortByTag={handleSortByTag}
             />
 
             <div className="toggle-status">
@@ -172,7 +184,7 @@ export default function FullTextScreening(props) {
             </div>
             
             <StudyCard 
-                studies={screenedStudies}
+                studies={filteredScreenedStudies}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

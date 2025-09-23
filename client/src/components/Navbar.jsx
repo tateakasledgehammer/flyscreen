@@ -17,7 +17,7 @@ export default function Navbar() {
                     <button>Import</button>
                 </Link>
 
-                <Link to="/tascreening">
+                <Link to="/screening">
                     <button>Screening</button>
                 </Link>
 
@@ -30,7 +30,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link to="/excluded">
-                    <button>Excluded</button>
+                    <button>Excluded at Full Text</button>
                 </Link>
             </div>
         </>

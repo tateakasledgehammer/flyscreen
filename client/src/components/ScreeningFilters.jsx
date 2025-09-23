@@ -13,6 +13,8 @@ export default function ScreeningFilters(props) {
         handleToggleDetailsGlobal,
         handleToggleHighlightsGlobal,
         highlighted,
+        studyTags,
+        handleSortByTag
     } = props
 
     return (
@@ -68,6 +70,17 @@ export default function ScreeningFilters(props) {
             <button id="toggleHighlightableBtn" onClick={handleToggleHighlightsGlobal}>
                 {highlighted ? "Toggle Highlights Off" : "Toggle Highlights On"}
             </button>
+
+            <select
+                onChange={(e) => (handleSortByTag(e.target.value))}
+            >
+                <option value="">Select tag</option>
+                {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
+                    <option key={tagIndex} value={tag}>
+                        {tag}
+                    </option>
+                )))}
+            </select>
         </div>
     )
 }

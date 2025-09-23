@@ -34,6 +34,11 @@ export default function IncludedStudies(props) {
         setStudies(prev => handleSortByOrder(prev, sortBy));
     }, [sortBy]);
 
+    const [tagFilter, setTagFilter] = useState("")
+    function handleSortByTag(value) {
+        setTagFilter(value)
+    }
+
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
         setCurrentPage(1);
@@ -65,10 +70,6 @@ export default function IncludedStudies(props) {
         setItemsPerPage(itemsPerPage * 2)
     }
 
-    function toggleStudyStatusShowing(filter) {
-        setStatusFilter(filter)
-    }
-
     const acceptedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Accepted")
         .filter(study => {
@@ -80,6 +81,11 @@ export default function IncludedStudies(props) {
                 study.keywords.toLowerCase().includes(term)
             )
         });
+
+    const filteredAcceptedStudies = acceptedStudies.filter((study) => {
+        if (!tagFilter) return true;
+        return study.tagStatus === tagFilter;
+    })
 
     return (
         <>
@@ -113,6 +119,8 @@ export default function IncludedStudies(props) {
                 handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
+                studyTags={studyTags}
+                handleSortByTag={handleSortByTag}
             />
 
             {/* Filter notice */}
@@ -121,9 +129,9 @@ export default function IncludedStudies(props) {
                     <h3 className="filter-notice">Filter: {searchFilter}</h3>
                 )}
             </div>
-            
+
             <StudyCard 
-                studies={acceptedStudies}
+                studies={filteredAcceptedStudies}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
