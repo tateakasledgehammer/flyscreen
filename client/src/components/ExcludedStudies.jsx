@@ -3,7 +3,7 @@ import StudyCard from "./StudyCard";
 import ScreeningFilters from "./ScreeningFilters";
 import { useState, useEffect } from "react";
 
-export default function IncludedStudies(props) {
+export default function ExcludedStudies(props) {
     const {
         studies,
         setStudies,
@@ -69,8 +69,8 @@ export default function IncludedStudies(props) {
         setStatusFilter(filter)
     }
 
-    const acceptedStudies = studies
-        .filter(study => study.fullTextStatus === "Full Text Accepted")
+    const rejectedStudies = studies
+        .filter(study => study.fullTextStatus === "Full Text Rejected")
         .filter(study => {
             if (!searchFilter) return true;
             const term = searchFilter.toLocaleLowerCase();
@@ -85,7 +85,7 @@ export default function IncludedStudies(props) {
         <>
             <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
             <div className="filter-notice">
-                <h3>Your Included Studies ({acceptedStudies.length})</h3>
+                <h3>Your Included Studies ({rejectedStudies.length})</h3>
                 <button>Export studies</button>
             </div>
             {/*
@@ -123,7 +123,7 @@ export default function IncludedStudies(props) {
             </div>
             
             <StudyCard 
-                studies={acceptedStudies}
+                studies={rejectedStudies}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

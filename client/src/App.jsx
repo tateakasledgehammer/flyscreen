@@ -12,6 +12,7 @@ import StudyCard from './components/StudyCard'
 import TAScreening from './components/TAScreening'
 import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
+import ExcludedStudies from './components/ExcludedStudies'
 import CreateProject from './components/CreateProject'
 
 function App() {
@@ -238,7 +239,43 @@ function App() {
         
         <Route path="/included" element={
           <IncludedStudies
-            studies={studies}
+            studies={studies} 
+            setStudies={setStudies} 
+            studyTags={studyTags} 
+            setStudyTags={setStudyTags}
+            toggleDetails={toggleDetails} 
+            setToggleDetails={setToggleDetails}
+            user={user}
+            setUser={setUser}
+            inclusionCriteria={inclusionCriteria} 
+            setInclusionCriteria={setInclusionCriteria} 
+            exclusionCriteria={exclusionCriteria} 
+            setExclusionCriteria={setExclusionCriteria}
+            searchFilter={searchFilter}
+            setSearchFilter={setSearchFilter}
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            setFullTextExclusionReasons={setFullTextExclusionReasons}
+          />
+        } />
+
+        <Route path="/excluded" element={
+          <ExcludedStudies
+            studies={studies} 
+            setStudies={setStudies} 
+            studyTags={studyTags} 
+            setStudyTags={setStudyTags}
+            toggleDetails={toggleDetails} 
+            setToggleDetails={setToggleDetails}
+            user={user}
+            setUser={setUser}
+            inclusionCriteria={inclusionCriteria} 
+            setInclusionCriteria={setInclusionCriteria} 
+            exclusionCriteria={exclusionCriteria} 
+            setExclusionCriteria={setExclusionCriteria}
+            searchFilter={searchFilter}
+            setSearchFilter={setSearchFilter}
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            setFullTextExclusionReasons={setFullTextExclusionReasons}
           />
         } />
       </Routes>

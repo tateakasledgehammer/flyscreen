@@ -28,6 +28,10 @@ export default function Navbar() {
                 <Link to="/included">
                     <button>Included</button>
                 </Link>
+
+                <Link to="/excluded">
+                    <button>Excluded</button>
+                </Link>
             </div>
         </>
     )
