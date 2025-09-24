@@ -270,110 +270,49 @@ export default function StudyCard(props) {
                             <>
                                 <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
-                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
-
                         {(study.status === "Conflict") && (
                             <>
                                 <button className="accept-btn" onClick={() => handleResolveConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
-                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
-                        {(study.status === "Rejected") && (
+                        {(study.status !== "Accepted" && study.status !== "No votes") && (
                                 <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                         )}
 
                         {/* FULL TEXT SCREENING BUTTONS */}
                         {((study.fullTextStatus === "Full Text No Votes" && study.status === "Accepted") || study.fullTextStatus === "Full Text Awaiting Second Vote") && (
                             <>
-                                <button 
-                                    className="accept-btn" 
-                                    onClick={() => handleFullTextVote(study.id, "accept")}
-                                >
-                                    ACCEPT
-                                </button>
-
-                                <button 
-                                    className="reject-btn" 
-                                    onClick={() => handleFullTextVote(study.id, "reject")}
-                                >
-                                    REJECT
-                                </button>
-                                <select
-                                    value={study.fullTextExclusionStatus || ""}
-                                    onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}
-                                >
-                                    <option value="">Reason to exclude</option>
-                                    {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
-                                        <option key={reasonIndex} value={reason}>
-                                            {reason}
-                                        </option>
-                                    )))}
-                                </select>
+                                <button className="accept-btn" onClick={() => handleFullTextVote(study.id, "accept")}>ACCEPT</button>
+                                <button className="reject-btn" onClick={() => handleFullTextVote(study.id, "reject")}>REJECT</button>
                             </>
                         )}
-
                         {(study.fullTextStatus === "Full Text Conflict") && (
                             <>
                                 <button className="accept-btn" onClick={() => handleResolveFullTextConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleResolveFullTextConflict(study.id, "reject")}>CONFIRM REJECT</button>
-                                <select
-                                    value={study.fullTextExclusionStatus || ""}
-                                    onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}
-                                >
-                                    <option value="">Reason to exclude</option>
-                                    {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
-                                        <option key={reasonIndex} value={reason}>
-                                            {reason}
-                                        </option>
-                                    )))}
-                                </select>
+                            </>
+                        )}
+
+                        {(study.fullTextStatus === "Full Text Rejected" || study.fullTextStatus === "Full Text Conflict" || study.fullTextStatus === "Full Text Accepted") && (
+                            <>
                                 <button onClick={() => handleFullTextVote(study.id, "remove")}>REVERT</button>
                             </>
                         )}
 
-                        {(study.fullTextStatus === "Full Text Rejected") && (
-                            <>
-                                <select
-                                    value={study.fullTextExclusionStatus || ""}
-                                    onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}
-                                >
-                                    <option value="">Reason to exclude</option>
-                                    {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
-                                        <option key={reasonIndex} value={reason}>
-                                            {reason}
-                                        </option>
-                                    )))}
-                                </select>
-                                <button 
-                                    onClick={() => handleFullTextVote(study.id, "remove")}
-                                >
-                                    REVERT
-                                </button>
-                            </>
-                        )}
-
-                        {(study.fullTextStatus === "Full Text Accepted") && (
-                            <>
-                                <button 
-                                    onClick={() => handleFullTextVote(study.id, "remove")}
-                                >
-                                    REVERT
-                                </button>
-                            </>
-                        )}
-
-                        {study.fullTextStatus === "Awaiting Second Vote" || study.fullTextStatus === "Rejected" && (
-                            <button 
-                                onClick={() => handleFullTextVote(study.id, "remove")}
-                            >
-                                REVERT
-                            </button>  
-                        )}
+                        {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
+                            <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
+                                <option value="">Reason to exclude</option>
+                                {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
+                                    <option key={reasonIndex} value={reason}>
+                                        {reason}
+                                    </option>
+                                )))}
+                            </select>
+                        ))}
                                               
-                        
                         {/* NOTE / TAG for all */}
                         <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
                         
