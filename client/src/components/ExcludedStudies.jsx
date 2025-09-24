@@ -75,6 +75,10 @@ export default function ExcludedStudies(props) {
         console.log(tagFilter)
     }
 
+    function handleExportStudies() {
+        alert("This function has not been set up")
+    }
+
     const rejectedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Rejected")
         .filter(study => {
@@ -98,7 +102,7 @@ export default function ExcludedStudies(props) {
             <h2><i className="fa-solid fa-list-check"></i> Manage Excluded Studies</h2>
             <div className="filter-notice">
                 <h3>Your Excluded Studies ({rejectedStudies.length})</h3>
-                <button>Export studies</button>
+                <button onClick={handleExportStudies}>Export studies</button>
             </div>
             {/*
                 <ul>

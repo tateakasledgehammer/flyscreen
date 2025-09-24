@@ -70,6 +70,10 @@ export default function IncludedStudies(props) {
         setItemsPerPage(itemsPerPage * 2)
     }
 
+    function handleExportStudies() {
+        alert("This function has not been set up")
+    }
+
     const acceptedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Accepted")
         .filter(study => {
@@ -92,7 +96,7 @@ export default function IncludedStudies(props) {
             <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
             <div className="filter-notice">
                 <h3>Your Included Studies ({acceptedStudies.length})</h3>
-                <button>Export studies</button>
+                <button onClick={handleExportStudies}>Export studies</button>
             </div>
             {/*
                 <ul>

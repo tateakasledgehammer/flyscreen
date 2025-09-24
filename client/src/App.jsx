@@ -168,6 +168,10 @@ function App() {
             studies={studies} 
             backgroundInformationForReview={backgroundInformationForReview} 
             studyTags={studyTags}
+            inclusionCriteria={inclusionCriteria}
+            exclusionCriteria={exclusionCriteria}
+            fullTextExclusionReasons={fullTextExclusionReasons}
+            user={user}
           />
         } />        
         <Route path="/setup" element={

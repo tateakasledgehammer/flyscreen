@@ -1,5 +1,15 @@
 export default function Overview(props) {
-    const { studies, setStudies, savedStudies, backgroundInformationForReview, studyTags } = props
+    const { 
+        studies, 
+        setStudies, 
+        savedStudies, 
+        backgroundInformationForReview, 
+        studyTags,
+        inclusionCriteria,
+        exclusionCriteria,
+        fullTextExclusionReasons,
+        user
+    } = props
 
     return (
         <div className="page-container">
@@ -13,6 +23,8 @@ export default function Overview(props) {
                     <li>Reviewers needed for screening: {backgroundInformationForReview.numberOfReviewersForScreening || "Screener number not set"}</li>
                     <li>Reviewers needed for full text view: {backgroundInformationForReview.numberOfReviewersForFullText || "Reviewer number not set"}</li>
                     <li>Reviewers needed for extraction: {backgroundInformationForReview.numberOfReviewersForExtraction || "Extraction number not set"}</li>
+                    <li>Primary reviewer: {user.username}...</li>
+                    <li>Other reviewers: {user.username}</li>
                 </ul>
             </div>
             <div className="homepage-section">
@@ -24,7 +36,7 @@ export default function Overview(props) {
             <div className="homepage-section">   
                 <h3>Set Up Your Review</h3>
                 <ul>
-                    <li>Study Details: ...</li>
+                    {/* Study Tags */}
                     {(!studyTags || studyTags.length === 0) && <li>Tags: No tags provided.</li>}
 
                     {studyTags && studyTags.length > 0 && (
@@ -38,32 +50,85 @@ export default function Overview(props) {
                     </>
                     )}                  
 
-                    <li>Inclusion & Exclusion criteria: ...</li>
+                    {/* Inclusion Criteria */}
+                    <li>Inclusion Criteria:</li>
+
+                    {inclusionCriteria && inclusionCriteria.length > 0 && (
+                    <>
+                        <ul>
+                            {(!inclusionCriteria || inclusionCriteria.length === 0) && <li>No inclusion criteria set provided.</li>}
+
+                            {(inclusionCriteria.map((criteria, index) => (
+                                <li key={index}>{criteria}</li>
+                            )))}
+                        </ul>
+                    </>
+                    )}
+                    {/* Exclusion Criteria */}
+                    <li>Exclusion Criteria:</li>
+
+                    {exclusionCriteria && exclusionCriteria.length > 0 && (
+                    <>
+                        <ul>
+                            {(!exclusionCriteria || exclusionCriteria.length === 0) && <li>No exclusion criteria set provided.</li>}
+
+                            {(exclusionCriteria.map((criteria, index) => (
+                                <li key={index}>{criteria}</li>
+                            )))}
+                        </ul>
+                    </>
+                    )}
+                    {/* Full Text Exclusion Criteria */}
+                    <li>Full Text Exclusion Criteria:</li>
+
+                    {fullTextExclusionReasons && fullTextExclusionReasons.length > 0 && (
+                    <>
+                        <ul>
+                            {(!fullTextExclusionReasons || fullTextExclusionReasons.length === 0) && <li>No exclusion criteria set provided.</li>}
+
+                            {(fullTextExclusionReasons.map((criteria, index) => (
+                                <li key={index}>{criteria}</li>
+                            )))}
+                        </ul>
+                    </>
+                    )}
+
+
+
                 </ul>
             </div>
             <div className="homepage-section">
                 <h3>Title & Abstract Screening</h3>
                 <ul>
-                    <li>Unscreened: {studies.length}</li>
-                    <li>One Vote: ...</li>
-                    <li>Approved: ...</li>
-                    <li>Conflicts: ...</li>
-                    <li>Rejected: ...</li>
+                    <li>Unscreened: {studies.filter(study => study.status === "No votes").length}</li>
+                    <li>One Vote: {studies.filter(study => study.status === "Awaiting second vote").length}</li>
+                    <li>Approved: {studies.filter(study => study.status === "Accepted").length}</li>
+                    <li>Conflicts: {studies.filter(study => study.status === "Conflict").length}</li>
+                    <li>Rejected: {studies.filter(study => study.status === "Rejected").length}</li>
                 </ul>
             </div>
             <div className="homepage-section">    
                 <h3>Full Text Screening</h3>
                 {/* ? copy above rather than double up */}
                 <ul>
-                    <li>Unscreened: ...</li>
-                    <li>One Vote: ...</li>
-                    <li>Approved: ...</li>
-                    <li>Conflicts: ...</li>
-                    <li>Rejected: ...</li>
+                    <li>
+                        Unscreened: {studies.filter(study => 
+                            study.fullTextStatus === "Full Text No Votes" && 
+                            study.status === "Accepted"
+                            ).length
+                        }
+                    </li>
+                    <li>One Vote: {studies.filter(study => study.fullTextStatus === "Full Text Awaiting Second Vote").length}</li>
+                    <li>Approved: {studies.filter(study => study.fullTextStatus === "Full Text Accepted").length}</li>
+                    <li>Conflicts: {studies.filter(study => study.fullTextStatus === "Full Text Conflict").length}</li>
+                    <li>Rejected: {studies.filter(study => study.fullTextStatus === "Full Text Rejected").length}</li>
                 </ul>
             </div>
             <div className="homepage-section">
                 <h3>Manage Your Included Studies</h3>
+                <ul>
+                    <li>Approved: {studies.filter(study => study.fullTextStatus === "Full Text Accepted").length}</li>
+                </ul>
             </div>
         </div>
     )

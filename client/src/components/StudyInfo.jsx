@@ -60,6 +60,8 @@ export default function StudyInfo(props) {
                 {!isExpanded ? "▲ Hide details" : "▼ Show details"}
             </button>
 
+            <input type="file" accept=".pdf" />
+
             {!isExpanded && (
                 <div>
                     <p className="keywords">
