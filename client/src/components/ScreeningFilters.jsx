@@ -18,11 +18,9 @@ export default function ScreeningFilters(props) {
         fullTextExclusionReasons,
         handleSortByFullTextExclusionReason,
         showExclusionFilter,
-        handleSortByPublicationDate
+        handleSortByPublicationDate,
+        handleSortByLanguage
     } = props
-
-    const years = studies.map(study => study.year);
-    const filteredYears = [...new Set(years)];
 
     return (
         <div className="screening-nav">
@@ -96,11 +94,23 @@ export default function ScreeningFilters(props) {
                 <i className="fa-solid fa-calendar-days"></i>
                 <select onChange={(e) => (handleSortByPublicationDate(e.target.value))}>
                     <option value="">Select date</option>
-                    {Array.isArray(filteredYears) && (filteredYears.map((year, yearIndex) => (
+                    {[...new Set(studies.map(study => study.year))].map((year, yearIndex) => (
                         <option key={yearIndex} value={year}>
                             {year}
                         </option>
-                    )))}
+                    ))}
+                </select>
+            </div>
+
+            <div className="nav-group">
+                <i className="fa-solid fa-language"></i>
+                <select onChange={(e) => (handleSortByLanguage(e.target.value))}>
+                    <option value="">Select language</option>
+                    {[...new Set(studies.map(study => study.language))].map((lang, langIndex) => (
+                        <option key={langIndex} value={lang}>
+                            {lang}
+                        </option>
+                    ))}
                 </select>
             </div>
 

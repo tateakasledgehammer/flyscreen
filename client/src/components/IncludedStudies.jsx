@@ -74,16 +74,6 @@ export default function IncludedStudies(props) {
         alert("This function has not been set up")
     }
 
-    function handleSortByPublicationDate() {
-        const years = studies.map(study => study.year);
-        const filteredYears = [...new Set(years)]
-        console.log("Dates: ", filteredYears);
-    }
-    const [selectedYear, setSelectedYear] = useState(null);
-    function handleSortByPublicationDate(value) {
-        setSelectedYear(value);
-    }
-
     const acceptedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Accepted")
         .filter(study => {
@@ -96,12 +86,25 @@ export default function IncludedStudies(props) {
             )
         });
 
+    const [selectedYear, setSelectedYear] = useState(null);
+    function handleSortByPublicationDate(value) {
+        setSelectedYear(value);
+    }
     const filteredStudiesBySelectedYear = acceptedStudies.filter(study => {
         if (!selectedYear) return true;
         return String(selectedYear) === String(study.year);
     })
 
-    const filteredAcceptedStudies = filteredStudiesBySelectedYear.filter((study) => {
+    const [selectedLanguage, setSelectedLanguage] = useState("");
+    function handleSortByLanguage(value) {
+        setSelectedLanguage(value);
+    }
+    const filteredStudiesByLanguage = filteredStudiesBySelectedYear.filter(study => {
+        if (!selectedLanguage) return true;
+        return selectedLanguage === study.language;
+    });
+
+    const filteredAcceptedStudies = filteredStudiesByLanguage.filter((study) => {
         if (!tagFilter) return true;
         return study.tagStatus === tagFilter;
     })
@@ -141,6 +144,8 @@ export default function IncludedStudies(props) {
                 studyTags={studyTags}
                 handleSortByTag={handleSortByTag}
                 handleSortByPublicationDate={handleSortByPublicationDate}
+                handleSortByLanguage={handleSortByLanguage}
+
             />
 
             {/* Filter notice */}
