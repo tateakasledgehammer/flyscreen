@@ -24,15 +24,15 @@ export default function TAScreening(props) {
     } = props;
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(1);
 
     const [sortBy, setSortBy] = useState('index_asc');
 
     const [searchFilterInput, setSearchFilterInput] = useState("");
 
-    const [statusFilter, setStatusFilter] = useState("UNSCREENED")
+    const [statusFilter, setStatusFilter] = useState("UNSCREENED");
 
-    const [highlighted, setHighlighted] = useState(false)
+    const [highlighted, setHighlighted] = useState(false);
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -108,7 +108,16 @@ export default function TAScreening(props) {
         }
     })
     
-    const sortedStudies = handleSortByOrder(filteredStudiesByStatus);
+    const [selectedYear, setSelectedYear] = useState(null);
+    function handleSortByPublicationDate(value) {
+        setSelectedYear(value);
+    }
+    const filteredStudiesBySelectedYear = filteredStudiesByStatus.filter(study => {
+        if (!selectedYear) return true;
+        return String(selectedYear) === String(study.year);
+    })
+
+    const sortedStudies = handleSortByOrder(filteredStudiesBySelectedYear);
     
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -140,6 +149,7 @@ export default function TAScreening(props) {
                 highlighted={highlighted}
                 studyTags={studyTags}
                 handleSortByTag={handleSortByTag}
+                handleSortByPublicationDate={handleSortByPublicationDate}
             />
 
             <div className="toggle-status">

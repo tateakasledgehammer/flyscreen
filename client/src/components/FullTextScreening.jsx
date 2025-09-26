@@ -86,6 +86,12 @@ export default function FullTextScreening(props) {
         setFullTextStatusFilter(filter)
     }
 
+    function handleSortByPublicationDate() {
+        const years = studies.map(study => study.year);
+        const filteredYears = [...new Set(years)]
+        console.log("Dates: ", filteredYears);
+    }
+
     const filteredStudies = studies.filter(study => {
         if (!searchFilter) return true;
         const term = searchFilter.toLocaleLowerCase();
@@ -96,7 +102,16 @@ export default function FullTextScreening(props) {
         )
     });
 
-    const filterForAcceptedStudies = filteredStudies.filter(study => {
+    const [selectedYear, setSelectedYear] = useState(null);
+    function handleSortByPublicationDate(value) {
+        setSelectedYear(value);
+    }
+    const filteredStudiesBySelectedYear = filteredStudies.filter(study => {
+        if (!selectedYear) return true;
+        return String(selectedYear) === String(study.year);
+    })
+
+    const filterForAcceptedStudies = filteredStudiesBySelectedYear.filter(study => {
         return study.status === "Accepted"
     });
 
@@ -153,6 +168,7 @@ export default function FullTextScreening(props) {
                 setHighlighted={setHighlighted}
                 studyTags={studyTags}
                 handleSortByTag={handleSortByTag}
+                handleSortByPublicationDate={handleSortByPublicationDate}
             />
 
             <div className="toggle-status">

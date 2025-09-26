@@ -17,8 +17,12 @@ export default function ScreeningFilters(props) {
         handleSortByTag,
         fullTextExclusionReasons,
         handleSortByFullTextExclusionReason,
-        showExclusionFilter
+        showExclusionFilter,
+        handleSortByPublicationDate
     } = props
+
+    const years = studies.map(study => study.year);
+    const filteredYears = [...new Set(years)];
 
     return (
         <div className="screening-nav">
@@ -83,6 +87,18 @@ export default function ScreeningFilters(props) {
                     {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
                         <option key={tagIndex} value={tag}>
                             {tag}
+                        </option>
+                    )))}
+                </select>
+            </div>
+
+            <div className="nav-group">
+                <i className="fa-solid fa-calendar-days"></i>
+                <select onChange={(e) => (handleSortByPublicationDate(e.target.value))}>
+                    <option value="">Select date</option>
+                    {Array.isArray(filteredYears) && (filteredYears.map((year, yearIndex) => (
+                        <option key={yearIndex} value={year}>
+                            {year}
                         </option>
                     )))}
                 </select>

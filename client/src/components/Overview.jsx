@@ -11,6 +11,9 @@ export default function Overview(props) {
         user
     } = props
 
+    function handlePrismaDiagram() {
+        alert("This function has not been set up")
+    }
     return (
         <div className="page-container">
             <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
@@ -23,7 +26,7 @@ export default function Overview(props) {
                     <li>Reviewers needed for screening: {backgroundInformationForReview.numberOfReviewersForScreening || "Screener number not set"}</li>
                     <li>Reviewers needed for full text view: {backgroundInformationForReview.numberOfReviewersForFullText || "Reviewer number not set"}</li>
                     <li>Reviewers needed for extraction: {backgroundInformationForReview.numberOfReviewersForExtraction || "Extraction number not set"}</li>
-                    <li>Primary reviewer: {user.username}...</li>
+                    <li>Primary reviewer: {user.username}</li>
                     <li>Other reviewers: {user.username}</li>
                 </ul>
             </div>
@@ -99,6 +102,7 @@ export default function Overview(props) {
             </div>
             <div className="homepage-section">
                 <h3>Title & Abstract Screening</h3>
+                <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
                 <ul>
                     <li>Unscreened: {studies.filter(study => study.status === "No votes").length}</li>
                     <li>One Vote: {studies.filter(study => study.status === "Awaiting second vote").length}</li>
