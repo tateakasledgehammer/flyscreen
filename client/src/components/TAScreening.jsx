@@ -25,13 +25,9 @@ export default function TAScreening(props) {
 
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-
     const [sortBy, setSortBy] = useState('index_asc');
-
     const [searchFilterInput, setSearchFilterInput] = useState("");
-
     const [statusFilter, setStatusFilter] = useState("UNSCREENED");
-
     const [highlighted, setHighlighted] = useState(false);
 
     function handleItemsPerPage(e) {
@@ -78,15 +74,31 @@ export default function TAScreening(props) {
         setStatusFilter(filter)
     }
 
-    const filteredStudies = studies.filter(study => {
-        if (!searchFilter) return true;
-        const term = searchFilter.toLocaleLowerCase();
-        return (
-            study.title.toLowerCase().includes(term) ||
-            study.abstract.toLowerCase().includes(term) ||
-            study.keywords.toLowerCase().includes(term)
-        )
-    })
+    const [selectedYear, setSelectedYear] = useState(null);
+    function handleSortByPublicationDate(value) {
+        setSelectedYear(value);
+    }
+
+    const [selectedLanguage, setSelectedLanguage] = useState("");
+    function handleSortByLanguage(value) {
+        setSelectedLanguage(value);
+    }
+
+    const filteredStudies = studies
+        .filter(study => {
+            if (!searchFilter) return true;
+            return (
+                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
+            )
+        })
+        .filter(study => {
+            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
+            if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
+            return true;
+        });
 
     const filteredStudiesByStatus = filteredStudies.filter(study => {
         if (statusFilter === "UNSCREENED") {
@@ -108,34 +120,10 @@ export default function TAScreening(props) {
         }
     })
     
-    const [selectedYear, setSelectedYear] = useState(null);
-    function handleSortByPublicationDate(value) {
-        setSelectedYear(value);
-    }
-    const filteredStudiesBySelectedYear = filteredStudiesByStatus.filter(study => {
-        if (!selectedYear) return true;
-        return String(selectedYear) === String(study.year);
-    })
-
-    const [selectedLanguage, setSelectedLanguage] = useState("");
-    function handleSortByLanguage(value) {
-        setSelectedLanguage(value);
-    }
-    const filteredStudiesByLanguage = filteredStudiesBySelectedYear.filter(study => {
-        if (!selectedLanguage) return true;
-        return selectedLanguage === study.language;
-    });
-
-    const sortedStudies = handleSortByOrder(filteredStudiesByLanguage);
-    
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
+    const sortedStudies = handleSortByOrder(filteredStudiesByStatus);
     const visibleStudies = sortedStudies.slice(startIndex, endIndex);
-
-    const filteredVisibleStudies = visibleStudies.filter((study) => {
-        if (!tagFilter) return true;
-        return study.tagStatus === tagFilter;
-    })
 
     return (
         <div className="page-container">
@@ -237,7 +225,7 @@ export default function TAScreening(props) {
 
             {/* Output section */}
             <StudyCard 
-                studies={filteredVisibleStudies} 
+                studies={visibleStudies} 
                 setStudies={setStudies} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

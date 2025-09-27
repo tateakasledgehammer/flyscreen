@@ -28,7 +28,6 @@ export default function IncludedStudies(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-    const [fullTextStatusFilter, setFullTextStatusFilter] = useState("UNSCREENED")
 
     useEffect(() => {
         setStudies(prev => handleSortByOrder(prev, sortBy));
@@ -74,40 +73,36 @@ export default function IncludedStudies(props) {
         alert("This function has not been set up")
     }
 
-    const acceptedStudies = studies
-        .filter(study => study.fullTextStatus === "Full Text Accepted")
-        .filter(study => {
-            if (!searchFilter) return true;
-            const term = searchFilter.toLocaleLowerCase();
-            return (
-                study.title.toLowerCase().includes(term) ||
-                study.abstract.toLowerCase().includes(term) ||
-                study.keywords.toLowerCase().includes(term)
-            )
-        });
-
     const [selectedYear, setSelectedYear] = useState(null);
     function handleSortByPublicationDate(value) {
         setSelectedYear(value);
     }
-    const filteredStudiesBySelectedYear = acceptedStudies.filter(study => {
-        if (!selectedYear) return true;
-        return String(selectedYear) === String(study.year);
-    })
 
     const [selectedLanguage, setSelectedLanguage] = useState("");
     function handleSortByLanguage(value) {
         setSelectedLanguage(value);
     }
-    const filteredStudiesByLanguage = filteredStudiesBySelectedYear.filter(study => {
-        if (!selectedLanguage) return true;
-        return selectedLanguage === study.language;
-    });
 
-    const filteredAcceptedStudies = filteredStudiesByLanguage.filter((study) => {
-        if (!tagFilter) return true;
-        return study.tagStatus === tagFilter;
-    })
+    const acceptedStudies = studies
+        .filter(study => study.fullTextStatus === "Full Text Accepted")
+        .filter(study => {
+            if (!searchFilter) return true;
+            return (
+                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
+            )
+        })
+        .filter(study => {
+            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
+            if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
+            return true;
+        });
+
+    const sortedStudies = handleSortByOrder(acceptedStudies);
+    const filteredAcceptedStudies = sortedStudies.slice(startIndex, endIndex);
+    
 
     return (
         <div className="page-container">

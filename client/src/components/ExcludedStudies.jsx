@@ -78,42 +78,36 @@ export default function ExcludedStudies(props) {
         alert("This function has not been set up")
     }
 
-    const rejectedStudies = studies
-        .filter(study => study.fullTextStatus === "Full Text Rejected")
-        .filter(study => {
-            if (!searchFilter) return true;
-            const term = searchFilter.toLocaleLowerCase();
-            return (
-                study.title.toLowerCase().includes(term) ||
-                study.abstract.toLowerCase().includes(term) ||
-                study.keywords.toLowerCase().includes(term)
-            )
-        });
-
     const [selectedYear, setSelectedYear] = useState(null);
     function handleSortByPublicationDate(value) {
         setSelectedYear(value);
     }
-    const filteredStudiesBySelectedYear = rejectedStudies.filter(study => {
-        if (!selectedYear) return true;
-        return String(selectedYear) === String(study.year);
-    })
-    
+
     const [selectedLanguage, setSelectedLanguage] = useState("");
     function handleSortByLanguage(value) {
         setSelectedLanguage(value);
     }
-    const filteredStudiesByLanguage = filteredStudiesBySelectedYear.filter(study => {
-        if (!selectedLanguage) return true;
-        return selectedLanguage === study.language;
-    });
 
-    const filteredRejectedStudies = filteredStudiesByLanguage.filter((study) => {
-        if (!tagFilter) return true;
-        return study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter;
-    })
+    const rejectedStudies = studies
+        .filter(study => study.fullTextStatus === "Full Text Rejected")
+        .filter(study => {
+            if (!searchFilter) return true;
+            return (
+                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
+            )
+        })
+        .filter(study => {
+            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
+            if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
+            return true;
+        });
 
-
+    const sortedStudies = handleSortByOrder(rejectedStudies);
+    const filteredRejectedStudies = sortedStudies.slice(startIndex, endIndex);
+    
     return (
         <div className="page-container">
             <h2><i className="fa-solid fa-list-check"></i> Manage Excluded Studies</h2>

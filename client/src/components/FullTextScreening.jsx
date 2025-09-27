@@ -86,43 +86,38 @@ export default function FullTextScreening(props) {
         setFullTextStatusFilter(filter)
     }
 
-    const filteredStudies = studies.filter(study => {
-        if (!searchFilter) return true;
-        const term = searchFilter.toLocaleLowerCase();
-        return (
-            study.title.toLowerCase().includes(term) ||
-            study.abstract.toLowerCase().includes(term) ||
-            study.keywords.toLowerCase().includes(term)
-        )
-    });
-
     const [selectedYear, setSelectedYear] = useState(null);
     function handleSortByPublicationDate(value) {
         setSelectedYear(value);
     }
-    const filteredStudiesBySelectedYear = filteredStudies.filter(study => {
-        if (!selectedYear) return true;
-        return String(selectedYear) === String(study.year);
-    })
 
     const [selectedLanguage, setSelectedLanguage] = useState("");
     function handleSortByLanguage(value) {
         setSelectedLanguage(value);
     }
-    const filteredStudiesByLanguage = filteredStudiesBySelectedYear.filter(study => {
-        if (!selectedLanguage) return true;
-        return selectedLanguage === study.language;
-    });
 
-    const filterForAcceptedStudies = filteredStudiesByLanguage.filter(study => {
-        return study.status === "Accepted"
-    });
+    const filteredStudies = studies
+        .filter(study => study.status === "Accepted")
+        .filter(study => {
+            if (!searchFilter) return true;
+            return (
+                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
+                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
+            )
+        })
+        .filter(study => {
+            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
+            if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
+            return true;
+        });
 
-    const filteredStudiesByFullTextStatus = filterForAcceptedStudies.filter(study => {
+    const filteredStudiesByFullTextStatus = filteredStudies.filter(study => {
         switch (fullTextStatusFilter) {
             case "UNSCREENED":
                 return !study.fullTextStatus || study.fullTextStatus === "Full Text No Votes";
-            
+
             case "AWAITING SECOND VOTE":
                 const userHasVotedCheck =
                     study.fullTextVotes?.accept?.some(u => u.username === user.username) ||
@@ -142,15 +137,10 @@ export default function FullTextScreening(props) {
                 return false;
     }});
 
-    const sortedStudies = handleSortByOrder(filteredStudiesByFullTextStatus);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
+    const sortedStudies = handleSortByOrder(filteredStudiesByFullTextStatus);
     const screenedStudies = sortedStudies.slice(startIndex, endIndex);
-
-    const filteredScreenedStudies = screenedStudies.filter((study) => {
-        if (!tagFilter) return true;
-        return study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter;
-    })
 
     return (
         <div className="page-container">
@@ -205,7 +195,7 @@ export default function FullTextScreening(props) {
             </div>
             
             <StudyCard 
-                studies={filteredScreenedStudies}
+                studies={screenedStudies}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
