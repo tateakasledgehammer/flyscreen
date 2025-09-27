@@ -20,7 +20,8 @@ export default function ScreeningFilters(props) {
         showExclusionFilter,
         handleSortByPublicationDate,
         handleSortByLanguage,
-        handleSortByType
+        handleSortByType,
+        clearFilters
     } = props
 
     return (
@@ -142,6 +143,10 @@ export default function ScreeningFilters(props) {
                 </select>
             </div>
             )}
+
+            <div className="nav-group">
+                <button onClick={clearFilters}>Clear filters</button>
+            </div>
         </div>
     )
 }

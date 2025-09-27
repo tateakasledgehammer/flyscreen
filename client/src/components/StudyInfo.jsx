@@ -33,15 +33,15 @@ export default function StudyInfo(props) {
         </div>
         
         <div className="study-info">
-            <p><strong>Study Index: </strong>{study.id}</p>
-            <p className="authors"><strong>Authors: </strong>{formatAuthors(study.authors)}</p>
-            <p className="year"><strong>Year: </strong>{study.year}</p>
-                        <p className="type"><strong>Type: </strong>{study.type}</p>
-                        <p className="language"><strong>Language: </strong>{study.language}</p>
-                        <p className="journal"><strong>Journal: </strong>{study.journal}</p>
-                        <p className="volume"><strong>Volume: </strong>{study.volume}</p>
-                        <p className="issue"><strong>Issue: </strong>{study.issue}</p>
-            <p className="doi"><strong>DOI: </strong>
+            {/* <p className="disappear-when-reduced"><strong>Study Index: </strong>{study.id}</p> */}
+            <p><strong>Authors: </strong>{formatAuthors(study.authors)}</p>
+            <p><strong>Year: </strong>{study.year}</p>
+            <p className="disappear-when-reduced"><strong>Type: </strong>{study.type}</p>
+            <p className="disappear-when-reduced"><strong>Language: </strong>{study.language}</p>
+            <p className="disappear-when-reduced"><strong>Journal: </strong>{study.journal}</p>
+            <p className="disappear-when-reduced"><strong>Volume: </strong>{study.volume}</p>
+            <p className="disappear-when-reduced"><strong>Issue: </strong>{study.issue}</p>
+            <p><strong>DOI: </strong>
                 {(study.doi !== "N/A") ? (
                     <a 
                         href={`https://doi.org/${study.doi}`}
@@ -59,7 +59,7 @@ export default function StudyInfo(props) {
             <button className="adding-bottom-margin" onClick={() => (handleToggleDetails(study.id))}>
                 {!isExpanded ? "▲ Hide details" : "▼ Show details"}
             </button>
-
+            
             <input type="file" accept=".pdf" />
 
             {!isExpanded && (

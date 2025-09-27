@@ -86,6 +86,18 @@ export default function FullTextScreening(props) {
         setFullTextStatusFilter(filter)
     }
 
+    function clearFilters() {
+        setSelectedType("");
+        setSelectedLanguage("");
+        setSelectedYear(null);
+        setSearchFilter("");
+        setSearchFilterInput("");
+        setSortBy('index_asc');
+        setHighlighted(false);
+        setItemsPerPage(25);
+        setTagFilter("");
+    }
+
     const [selectedYear, setSelectedYear] = useState(null);
     function handleSortByPublicationDate(value) {
         setSelectedYear(value);
@@ -170,11 +182,12 @@ export default function FullTextScreening(props) {
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
                 handleSortByType={handleSortByType}
+                clearFilters={clearFilters}
             />
 
             <div className="toggle-status">
                 {fullTextSubheadings.map((sub, i) => {
-                    const count = filterForAcceptedStudies.filter(study => study.fullTextStatus === sub.key).length;
+                    const count = screenedStudies.filter(study => study.fullTextStatus === sub.key).length;
                     const isActive = fullTextStatusFilter === sub.label;
                     return (
                         <button

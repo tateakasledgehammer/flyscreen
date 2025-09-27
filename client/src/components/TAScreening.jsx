@@ -89,6 +89,19 @@ export default function TAScreening(props) {
         setSelectedType(value)
     }
 
+    function clearFilters() {
+        setSelectedType("");
+        setSelectedLanguage("");
+        setSelectedYear(null);
+        setSearchFilter("");
+        setSearchFilterInput("");
+        setStatusFilter("UNSCREENED")
+        setSortBy('index_asc');
+        setHighlighted(false);
+        setItemsPerPage(25);
+        setTagFilter("");
+    }
+
     const filteredStudies = studies
         .filter(study => {
             if (!searchFilter) return true;
@@ -155,6 +168,7 @@ export default function TAScreening(props) {
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
                 handleSortByType={handleSortByType}
+                clearFilters={clearFilters}
             />
 
             <div className="toggle-status">

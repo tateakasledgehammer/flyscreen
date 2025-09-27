@@ -78,6 +78,18 @@ export default function ExcludedStudies(props) {
         alert("This function has not been set up")
     }
 
+    function clearFilters() {
+        setSelectedType("");
+        setSelectedLanguage("");
+        setSelectedYear(null);
+        setSearchFilter("");
+        setSearchFilterInput("");
+        setSortBy('index_asc');
+        setHighlighted(false);
+        setItemsPerPage(25);
+        setTagFilter("");
+    }
+
     const [selectedYear, setSelectedYear] = useState(null);
     function handleSortByPublicationDate(value) {
         setSelectedYear(value);
@@ -111,6 +123,8 @@ export default function ExcludedStudies(props) {
             return true;
         });
 
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
     const sortedStudies = handleSortByOrder(rejectedStudies);
     const filteredRejectedStudies = sortedStudies.slice(startIndex, endIndex);
     
@@ -153,6 +167,7 @@ export default function ExcludedStudies(props) {
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
                 handleSortByType={handleSortByType}
+                clearFilters={clearFilters}
 
                 showExclusionFilter={true}
             />
