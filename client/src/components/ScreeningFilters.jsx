@@ -13,6 +13,7 @@ export default function ScreeningFilters(props) {
         handleToggleDetailsGlobal,
         handleToggleHighlightsGlobal,
         highlighted,
+        hideDetails,
         studyTags,
         handleSortByTag,
         fullTextExclusionReasons,
@@ -72,7 +73,7 @@ export default function ScreeningFilters(props) {
             {/* Toggle highlights / abstract */}
             <div className="nav-group">
                 <button id="toggleDetailsBtn" onClick={handleToggleDetailsGlobal}>
-                    ▲ Hide Details
+                    {hideDetails ? "▼ Show Details" : "▲ Hide Details"}
                 </button>
                 <button id="toggleHighlightableBtn" onClick={handleToggleHighlightsGlobal}>
                     {highlighted ? "Highlights Off" : "Highlights On"}

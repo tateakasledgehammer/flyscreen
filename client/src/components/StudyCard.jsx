@@ -23,7 +23,8 @@ export default function StudyCard(props) {
         setSearchFilter,
         highlighted,
         setHighlighted,
-        study
+        hideDetails,
+        setHideDetails,
     } = props;
 
     function handleVote(studyId, action) {
@@ -246,7 +247,10 @@ export default function StudyCard(props) {
     return (
         <div>
             {studies.map((study, index) => {
-                const isExpanded = toggleDetails?.[study.id] || false;
+                const isExpanded = 
+                    toggleDetails.hasOwnProperty(study.id)
+                        ? toggleDetails[study.id] 
+                        : hideDetails;
                 return (
                 <div key={study.id} className="study-card">
                     {/* Study information */}
@@ -263,7 +267,6 @@ export default function StudyCard(props) {
                     />
                     
                     {/* Actions section */}
-
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
                         {(study.status === "No votes" || study.status === "Awaiting second vote") && (

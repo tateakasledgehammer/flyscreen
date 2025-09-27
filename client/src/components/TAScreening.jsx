@@ -29,6 +29,7 @@ export default function TAScreening(props) {
     const [searchFilterInput, setSearchFilterInput] = useState("");
     const [statusFilter, setStatusFilter] = useState("UNSCREENED");
     const [highlighted, setHighlighted] = useState(false);
+    const [hideDetails, setHideDetails] = useState(false)
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -59,7 +60,7 @@ export default function TAScreening(props) {
     }
 
     function handleToggleDetailsGlobal() {
-        alert("This function has not been set up")
+        setHideDetails(prev => !prev);
     }
 
     function handleToggleHighlightsGlobal() {
@@ -163,6 +164,7 @@ export default function TAScreening(props) {
                 handleToggleDetailsGlobal={handleToggleDetailsGlobal}
                 handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
                 highlighted={highlighted}
+                hideDetails={hideDetails}
                 studyTags={studyTags}
                 handleSortByTag={handleSortByTag}
                 handleSortByPublicationDate={handleSortByPublicationDate}
@@ -262,6 +264,8 @@ export default function TAScreening(props) {
                 setSearchFilter={setSearchFilter}
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
+                hideDetails={hideDetails}
+                setHideDetails={setHideDetails}
             />
 
             <br />

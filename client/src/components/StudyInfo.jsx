@@ -3,6 +3,7 @@ import { formatAuthors } from "../utils/screeningTools";
 export default function StudyInfo(props) {
     const {
         study,
+        hideDetails,
         highlighted,
         inclusionCriteria,
         exclusionCriteria,
