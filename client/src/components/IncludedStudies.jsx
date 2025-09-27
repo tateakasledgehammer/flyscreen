@@ -83,6 +83,11 @@ export default function IncludedStudies(props) {
         setSelectedLanguage(value);
     }
 
+    const [selectedType, setSelectedType] = useState("");
+    function handleSortByType(value) {
+        setSelectedType(value)
+    }
+
     const acceptedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Accepted")
         .filter(study => {
@@ -96,6 +101,7 @@ export default function IncludedStudies(props) {
         .filter(study => {
             if (selectedYear && String(study.year) !== String(selectedYear)) return false;
             if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (selectedType && study.type !== selectedType) return false;
             if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
             return true;
         });
@@ -140,6 +146,7 @@ export default function IncludedStudies(props) {
                 handleSortByTag={handleSortByTag}
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
+                handleSortByType={handleSortByType}
 
             />
 

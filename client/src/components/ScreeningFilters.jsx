@@ -19,7 +19,8 @@ export default function ScreeningFilters(props) {
         handleSortByFullTextExclusionReason,
         showExclusionFilter,
         handleSortByPublicationDate,
-        handleSortByLanguage
+        handleSortByLanguage,
+        handleSortByType
     } = props
 
     return (
@@ -109,6 +110,18 @@ export default function ScreeningFilters(props) {
                     {[...new Set(studies.map(study => study.language))].map((lang, langIndex) => (
                         <option key={langIndex} value={lang}>
                             {lang}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="nav-group">
+                <i className="fa-solid fa-book"></i>
+                <select onChange={(e) => (handleSortByType(e.target.value))}>
+                    <option value="">Select type</option>
+                    {[...new Set(studies.map(study => study.type))].map((type, typeIndex) => (
+                        <option key={typeIndex} value={type}>
+                            {type}
                         </option>
                     ))}
                 </select>

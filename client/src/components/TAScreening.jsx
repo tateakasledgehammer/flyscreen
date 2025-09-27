@@ -84,6 +84,11 @@ export default function TAScreening(props) {
         setSelectedLanguage(value);
     }
 
+    const [selectedType, setSelectedType] = useState("");
+    function handleSortByType(value) {
+        setSelectedType(value)
+    }
+
     const filteredStudies = studies
         .filter(study => {
             if (!searchFilter) return true;
@@ -96,6 +101,7 @@ export default function TAScreening(props) {
         .filter(study => {
             if (selectedYear && String(study.year) !== String(selectedYear)) return false;
             if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (selectedType && study.type !== selectedType) return false;
             if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
             return true;
         });
@@ -148,6 +154,7 @@ export default function TAScreening(props) {
                 handleSortByTag={handleSortByTag}
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
+                handleSortByType={handleSortByType}
             />
 
             <div className="toggle-status">

@@ -88,6 +88,11 @@ export default function ExcludedStudies(props) {
         setSelectedLanguage(value);
     }
 
+    const [selectedType, setSelectedType] = useState("");
+    function handleSortByType(value) {
+        setSelectedType(value)
+    }
+
     const rejectedStudies = studies
         .filter(study => study.fullTextStatus === "Full Text Rejected")
         .filter(study => {
@@ -101,6 +106,7 @@ export default function ExcludedStudies(props) {
         .filter(study => {
             if (selectedYear && String(study.year) !== String(selectedYear)) return false;
             if (selectedLanguage && study.language !== selectedLanguage) return false;
+            if (selectedType && study.type !== selectedType) return false;
             if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
             return true;
         });
@@ -146,6 +152,7 @@ export default function ExcludedStudies(props) {
                 fullTextExclusionReasons={fullTextExclusionReasons}
                 handleSortByPublicationDate={handleSortByPublicationDate}
                 handleSortByLanguage={handleSortByLanguage}
+                handleSortByType={handleSortByType}
 
                 showExclusionFilter={true}
             />
