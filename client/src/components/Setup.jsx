@@ -230,13 +230,21 @@ export default function Setup(props) {
     //
 
     useEffect(() => {
-        const criteria = inclusionSection.flatMap(section => section.criteria);
-        setInclusionCriteria(criteria);
+        const criteriaObject = inclusionSection.map(section => ({
+            category: section.name,
+            criteria: section.criteria
+        }));
+
+        setInclusionCriteria(criteriaObject);
     }, [inclusionSection]);
       
     useEffect(() => {
-        const criteria = exclusionSection.flatMap(section => section.criteria);
-        setExclusionCriteria(criteria);
+        const criteriaObject = exclusionSection.map(section => ({
+            category: section.name,
+            criteria: section.criteria
+        }));
+        
+        setExclusionCriteria(criteriaObject);
     }, [exclusionSection]);
 
     useEffect(() => {

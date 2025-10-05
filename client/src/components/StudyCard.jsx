@@ -257,6 +257,7 @@ export default function StudyCard(props) {
 
                     <StudyInfo
                         study={study}
+                        studies={studies}
                         highlighted={highlighted}
                         highlightContent={highlightContent}
                         inclusionCriteria={inclusionCriteria}

@@ -3,6 +3,7 @@ import { formatAuthors } from "../utils/screeningTools";
 export default function StudyInfo(props) {
     const {
         study,
+        studies,
         hideDetails,
         highlighted,
         inclusionCriteria,
@@ -11,18 +12,22 @@ export default function StudyInfo(props) {
         highlightContent,
         isExpanded,
         handleToggleDetails
-
     } = props
 
     if (!study) return null;
-    
+
     return (
         <>
         <div className="title-wrapper">
             <h3 className="study-title">
                 {highlighted ? (
                     <span className="highlightable">
-                        {highlightContent(study.title, inclusionCriteria, exclusionCriteria, searchWords)}
+                        {highlightContent(
+                            study.title, 
+                            inclusionCriteria.flatMap(section => section.criteria), 
+                            exclusionCriteria.flatMap(section => section.criteria), 
+                            searchWords
+                        )}
                     </span>
                 ) : 
                     <span className="highlightable">
@@ -30,7 +35,9 @@ export default function StudyInfo(props) {
                     </span>
                 }
             </h3>
-            <div className="percentile-card">XX%</div>
+            <div className="percentile-card">
+                ??
+            </div>
         </div>
         
         <div className="study-info">
@@ -69,7 +76,12 @@ export default function StudyInfo(props) {
                         <strong>Keywords: </strong>
                         {highlighted ? (
                             <span className="highlightable">
-                                {highlightContent(study.keywords, inclusionCriteria, exclusionCriteria, searchWords)}
+                                {highlightContent(
+                                    study.keywords, 
+                                    inclusionCriteria.flatMap(section => section.criteria), 
+                                    exclusionCriteria.flatMap(section => section.criteria), 
+                                    searchWords
+                                )}
                             </span>
                         ) : 
                             <span className="highlightable">
@@ -81,7 +93,12 @@ export default function StudyInfo(props) {
                         <strong>Abstract: </strong>
                         {highlighted ? (
                             <span className="highlightable">
-                                {highlightContent(study.abstract, inclusionCriteria, exclusionCriteria, searchWords)}
+                                {highlightContent(
+                                    study.abstract, 
+                                    inclusionCriteria.flatMap(section => section.criteria), 
+                                    exclusionCriteria.flatMap(section => section.criteria), 
+                                    searchWords
+                                )}
                             </span>
                         ) : 
                             <span className="highlightable">
