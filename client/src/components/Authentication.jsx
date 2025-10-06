@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react"
 
 export default function Authentication() {
-    const [usernameInput, setUsernameInput] = useState("")
-    const [passwordInput, setPasswordInput] = useState("")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
     const [message, setMessage] = useState("")
     const [errors, setErrors] = useState([])
 
     const [loginNotSignUp, setLoginNotSignUp] = useState(true)
-
-    const onFinish = values => (
-        console.log('x')
-    )
 
     function handleSetLogIn() {
         setLoginNotSignUp(true)
@@ -31,10 +27,7 @@ export default function Authentication() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ 
-                    username: usernameInput, 
-                    password: passwordInput 
-                })
+                body: JSON.stringify({ username, password })
             });
             
             const data = await res.json()
@@ -42,7 +35,11 @@ export default function Authentication() {
             if (!data.success) {
                 setErrors(data.errors || ["Something went wrong"])
             } else {
-                setMessage(data.message)
+                setErrors([]);
+                setMessage(data.message);
+                setTimeout(() => {
+                    window.location.href = "/overview"
+                }, 1500);
             }
         }   catch (err) {
             setErrors(["Failed to connect"]);
@@ -69,21 +66,17 @@ export default function Authentication() {
                         <legend><strong>Create an account</strong></legend>
                         <label htmlFor="username">Username</label>
                         <input 
-                            value={usernameInput}
-                            onChange={(e) => setUsernameInput(e.target.value)}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             type="text" 
-                            id="username" 
-                            name="username"
                             placeholder="enter your username..."
                             autoComplete="off"
                         />
                         <label htmlFor="password">Password</label>
                         <input 
-                            value={passwordInput}
-                            onChange={(e) => setPasswordInput(e.target.value)}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             type="password" 
-                            id="password" 
-                            name="password" 
                             placeholder="enter your password..."
                             autoComplete="off" 
                         />
@@ -99,22 +92,18 @@ export default function Authentication() {
                         <legend><strong>Log in to your account</strong></legend>
                         <label htmlFor="username">Username</label>
                         <input 
-                            value={usernameInput}
-                            onChange={(e) => setUsernameInput(e.target.value)}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             type="text" 
-                            id="username" 
-                            name="username"
                             placeholder="enter your username..."
                             autoComplete="off"
                         />
                         
                         <label htmlFor="password">Password</label>
                         <input 
-                            value={passwordInput}
-                            onChange={(e) => setPasswordInput(e.target.value)}
-                            type="password" 
-                            id="password" 
-                            name="password" 
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            type="password"
                             placeholder="enter your password..."
                             autoComplete="off" 
                         />
@@ -128,9 +117,7 @@ export default function Authentication() {
             {errors.length > 0 && (
                 <ul style={{ color: "red" }}>
                     {errors.map((err, i) => (
-                        <li key={i} style={{ color: "red" }}>
-                            {err}
-                        </li>
+                        <li key={i}>{err}</li>
                     ))}
                 </ul>
             )}

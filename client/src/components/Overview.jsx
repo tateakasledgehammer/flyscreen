@@ -1,3 +1,5 @@
+import { capitaliseFirstLetter } from "../utils/screeningTools"
+
 export default function Overview(props) {
     const { 
         studies, 
@@ -61,8 +63,10 @@ export default function Overview(props) {
                         <ul>
                             {(!inclusionCriteria || inclusionCriteria.length === 0) && <li>No inclusion criteria set provided.</li>}
 
-                            {(inclusionCriteria.map((criteria, index) => (
-                                <li key={index}>{criteria}</li>
+                            {(inclusionCriteria.map((section, index) => (
+                                <li key={index}>
+                                    {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
+                                </li>
                             )))}
                         </ul>
                     </>
@@ -75,8 +79,10 @@ export default function Overview(props) {
                         <ul>
                             {(!exclusionCriteria || exclusionCriteria.length === 0) && <li>No exclusion criteria set provided.</li>}
 
-                            {(exclusionCriteria.map((criteria, index) => (
-                                <li key={index}>{criteria}</li>
+                            {(exclusionCriteria.map((section, index) => (
+                                <li key={index}>
+                                    {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
+                                </li>
                             )))}
                         </ul>
                     </>

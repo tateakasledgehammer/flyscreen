@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 
 import Landing from './components/Landing'
 import Authentication from './components/Authentication'
@@ -41,23 +41,17 @@ function App() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const res = await fetch("http://localhost:5005/whoami", {
-          credentials: "include"
-        })
-        const data = await res.json()
-        if (data.isAuthenticated) {
-          setIsAuthenticated(true)
-          setUser(data.user)
-        } else {
-          setIsAuthenticated(false)
-          setUser(null)
-        }
-      } catch (err) {
-        console.error("Auth check failed", err)
+      const res = await fetch("http://localhost:5005/whoami", {
+        credentials: "include"
+      })
+      const data = await res.json();
+
+      if (data.isAuthenticated) {
+        setIsAuthenticated(true)
+        setUser(data.user)
+      } else {
         setIsAuthenticated(false)
-      } finally {
-        setLoading(false)
+        setUser(null)
       }
     }
     checkAuth();
@@ -160,155 +154,179 @@ function App() {
     <>
     <Router>
       <Navbar />
-      <Routes>
-        {/* Create Project component */}
-
-        <Route path="/overview" element={
-          <Overview 
-            studies={studies} 
-            backgroundInformationForReview={backgroundInformationForReview} 
-            studyTags={studyTags}
-            inclusionCriteria={inclusionCriteria}
-            exclusionCriteria={exclusionCriteria}
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            user={user}
-          />
-        } />        
-        <Route path="/setup" element={
-          <Setup 
-            backgroundInformationForReview={backgroundInformationForReview} 
-            setBackgroundInformationForReview={setBackgroundInformationForReview} 
-            studyTags={studyTags} 
-            setStudyTags={setStudyTags} 
-            inclusionCriteria={inclusionCriteria} 
-            setInclusionCriteria={setInclusionCriteria} 
-            exclusionCriteria={exclusionCriteria} 
-            setExclusionCriteria={setExclusionCriteria} 
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            setFullTextExclusionReasons={setFullTextExclusionReasons}
-            setSearchFilter={setSearchFilter}
-            setProjectTitle={setProjectTitle}
-            setUser={setUser}
-            setStudies={setStudies}
-          />
-        } />        
-
-        <Route path="/import" element={
-          <Import 
-            studies={studies} 
-            setStudies={setStudies}
-            inclusionCriteria={inclusionCriteria}
-            exclusionCriteria={exclusionCriteria}
-          />
-        } />
-
-        <Route path="/screening" element={
-          <TAScreening 
-            studies={studies} 
-            setStudies={setStudies} 
-            studyTags={studyTags} 
-            setStudyTags={setStudyTags}
-            toggleDetails={toggleDetails} 
-            setToggleDetails={setToggleDetails}
-            user={user}
-            setUser={setUser}
-            inclusionCriteria={inclusionCriteria} 
-            setInclusionCriteria={setInclusionCriteria} 
-            exclusionCriteria={exclusionCriteria} 
-            setExclusionCriteria={setExclusionCriteria}
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            setFullTextExclusionReasons={setFullTextExclusionReasons}
-            searchFilter={searchFilter}
-            setSearchFilter={setSearchFilter}
-          />
-        } />
-
-        <Route path="/fulltext" element={
-          <FullTextScreening
-            studies={studies} 
-            setStudies={setStudies} 
-            studyTags={studyTags} 
-            setStudyTags={setStudyTags}
-            toggleDetails={toggleDetails} 
-            setToggleDetails={setToggleDetails}
-            user={user}
-            setUser={setUser}
-            inclusionCriteria={inclusionCriteria} 
-            setInclusionCriteria={setInclusionCriteria} 
-            exclusionCriteria={exclusionCriteria} 
-            setExclusionCriteria={setExclusionCriteria}
-            searchFilter={searchFilter}
-            setSearchFilter={setSearchFilter}
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            setFullTextExclusionReasons={setFullTextExclusionReasons}
-          />
-        } />
-        
-        <Route path="/included" element={
-          <IncludedStudies
-            studies={studies} 
-            setStudies={setStudies} 
-            studyTags={studyTags} 
-            setStudyTags={setStudyTags}
-            toggleDetails={toggleDetails} 
-            setToggleDetails={setToggleDetails}
-            user={user}
-            setUser={setUser}
-            inclusionCriteria={inclusionCriteria} 
-            setInclusionCriteria={setInclusionCriteria} 
-            exclusionCriteria={exclusionCriteria} 
-            setExclusionCriteria={setExclusionCriteria}
-            searchFilter={searchFilter}
-            setSearchFilter={setSearchFilter}
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            setFullTextExclusionReasons={setFullTextExclusionReasons}
-          />
-        } />
-
-        <Route path="/excluded" element={
-          <ExcludedStudies
-            studies={studies} 
-            setStudies={setStudies} 
-            studyTags={studyTags} 
-            setStudyTags={setStudyTags}
-            toggleDetails={toggleDetails} 
-            setToggleDetails={setToggleDetails}
-            user={user}
-            setUser={setUser}
-            inclusionCriteria={inclusionCriteria} 
-            setInclusionCriteria={setInclusionCriteria} 
-            exclusionCriteria={exclusionCriteria} 
-            setExclusionCriteria={setExclusionCriteria}
-            searchFilter={searchFilter}
-            setSearchFilter={setSearchFilter}
-            fullTextExclusionReasons={fullTextExclusionReasons}
-            setFullTextExclusionReasons={setFullTextExclusionReasons}
-          />
-        } />
-      </Routes>
+      
     </Router>
     </>
   )
 
+  const PrivateRoute = ({children}) => {
+    return isAuthenticated ? children : <Navigate to="/login" />;
+  }
+
   return (
-    <Layout 
-      isAuthenticated={isAuthenticated} 
-      setIsAuthenticated={setIsAuthenticated} 
-      user={user} 
-      setUser={setUser}
-    >
-      {loading && (<p>Loading...</p>)}
+    <Router>
+      <Layout 
+          isAuthenticated={isAuthenticated} 
+          setIsAuthenticated={setIsAuthenticated} 
+          user={user} 
+          setUser={setUser}
+      >
+        {isAuthenticated && <Navbar />}
+      <Routes>
+        {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={
+            <Authentication 
+              setIsAuthenticated={setIsAuthenticated}
+              setUser={setUser}
+            />}
+          />
 
-      {!isAuthenticated && (
-        <>
-          <Landing />
-          <Authentication />
-        </>
-      )}
-      <br />
+        {/* Protected Routes */}
+          {/* Create Project component */}
 
-      {isAuthenticated && (authenticatedContent)}
-    </Layout>
+          <Route path="/overview" element={
+            <PrivateRoute>
+            <Overview 
+              studies={studies} 
+              backgroundInformationForReview={backgroundInformationForReview} 
+              studyTags={studyTags}
+              inclusionCriteria={inclusionCriteria}
+              exclusionCriteria={exclusionCriteria}
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              user={user}
+            />
+            </PrivateRoute>
+          } />        
+          <Route path="/setup" element={
+            <PrivateRoute>
+            <Setup 
+              backgroundInformationForReview={backgroundInformationForReview} 
+              setBackgroundInformationForReview={setBackgroundInformationForReview} 
+              studyTags={studyTags} 
+              setStudyTags={setStudyTags} 
+              inclusionCriteria={inclusionCriteria} 
+              setInclusionCriteria={setInclusionCriteria} 
+              exclusionCriteria={exclusionCriteria} 
+              setExclusionCriteria={setExclusionCriteria} 
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              setFullTextExclusionReasons={setFullTextExclusionReasons}
+              setSearchFilter={setSearchFilter}
+              setProjectTitle={setProjectTitle}
+              setUser={setUser}
+              setStudies={setStudies}
+            />
+            </PrivateRoute>
+          } />        
+
+          <Route path="/import" element={
+            <PrivateRoute>
+            <Import 
+              studies={studies} 
+              setStudies={setStudies}
+              inclusionCriteria={inclusionCriteria}
+              exclusionCriteria={exclusionCriteria}
+            />
+            </PrivateRoute>
+          } />
+
+          <Route path="/screening" element={
+            <PrivateRoute>
+            <TAScreening 
+              studies={studies} 
+              setStudies={setStudies} 
+              studyTags={studyTags} 
+              setStudyTags={setStudyTags}
+              toggleDetails={toggleDetails} 
+              setToggleDetails={setToggleDetails}
+              user={user}
+              setUser={setUser}
+              inclusionCriteria={inclusionCriteria} 
+              setInclusionCriteria={setInclusionCriteria} 
+              exclusionCriteria={exclusionCriteria} 
+              setExclusionCriteria={setExclusionCriteria}
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              setFullTextExclusionReasons={setFullTextExclusionReasons}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
+            />
+            </PrivateRoute>
+          } />
+
+          <Route path="/fulltext" element={
+            <PrivateRoute>
+            <FullTextScreening
+              studies={studies} 
+              setStudies={setStudies} 
+              studyTags={studyTags} 
+              setStudyTags={setStudyTags}
+              toggleDetails={toggleDetails} 
+              setToggleDetails={setToggleDetails}
+              user={user}
+              setUser={setUser}
+              inclusionCriteria={inclusionCriteria} 
+              setInclusionCriteria={setInclusionCriteria} 
+              exclusionCriteria={exclusionCriteria} 
+              setExclusionCriteria={setExclusionCriteria}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              setFullTextExclusionReasons={setFullTextExclusionReasons}
+            />
+            </PrivateRoute>
+          } />
+          
+          <Route path="/included" element={
+            <PrivateRoute>
+            <IncludedStudies
+              studies={studies} 
+              setStudies={setStudies} 
+              studyTags={studyTags} 
+              setStudyTags={setStudyTags}
+              toggleDetails={toggleDetails} 
+              setToggleDetails={setToggleDetails}
+              user={user}
+              setUser={setUser}
+              inclusionCriteria={inclusionCriteria} 
+              setInclusionCriteria={setInclusionCriteria} 
+              exclusionCriteria={exclusionCriteria} 
+              setExclusionCriteria={setExclusionCriteria}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              setFullTextExclusionReasons={setFullTextExclusionReasons}
+            />
+            </PrivateRoute>
+          } />
+
+          <Route path="/excluded" element={
+            <PrivateRoute>
+            <ExcludedStudies
+              studies={studies} 
+              setStudies={setStudies} 
+              studyTags={studyTags} 
+              setStudyTags={setStudyTags}
+              toggleDetails={toggleDetails} 
+              setToggleDetails={setToggleDetails}
+              user={user}
+              setUser={setUser}
+              inclusionCriteria={inclusionCriteria} 
+              setInclusionCriteria={setInclusionCriteria} 
+              exclusionCriteria={exclusionCriteria} 
+              setExclusionCriteria={setExclusionCriteria}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
+              fullTextExclusionReasons={fullTextExclusionReasons}
+              setFullTextExclusionReasons={setFullTextExclusionReasons}
+            />
+            </PrivateRoute>
+          } />
+
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/overview" : "/"} />} />
+      </Routes>
+      </Layout>
+    </Router>
+
   )
 
 }

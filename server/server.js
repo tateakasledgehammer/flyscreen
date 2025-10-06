@@ -63,11 +63,12 @@ app.get("/whoami", (req, res) => {
     });
 });
 
-app.get("/logout", (req, res) => {
+app.post("/logout", (req, res) => {
     res.clearCookie("flyscreenCookie", {
         httpOnly: true,
         secure: false,
-        sameSite: "strict",
+        sameSite: "lax",
+        maxAge: 0,
     });
     res.json({ success: true, message: "Logged out." })
 })
@@ -135,25 +136,6 @@ app.post("/login", (req, res) => {
     }
 })
 
-app.get("/create-project", (req, res) => {
-    res.json({ success: true })
-})
-
-app.post("/create-project", (req, res) => {
-    const { projectTitle } = req.body;
-
-    if (!projectTitle) {
-        return res.status(400).json({ error: "Title is required" });
-    }
-
-    console.log("New project: ", projectTitle)
-
-    res.json({
-        success: true,
-        project: {projectTitle}
-    })
-})
-
 app.post("/authentication", (req, res) => {
     console.log("POST /authentication hit with body:", req.body);
 
@@ -165,35 +147,26 @@ app.post("/authentication", (req, res) => {
     }
 
     const trimmedUsername = username.trim();
-    if (!trimmedUsername) { errors.push("No username") }
-    if (trimmedUsername.length < 4) { errors.push("Username must be longer than 4 characters") }
-    if (trimmedUsername.length > 10) { errors.push("Username must be less than 11 characters") }
-    
-    const usernameStatement = db.prepare("SELECT * FROM users WHERE username = ?");
-    const usernameCheck = usernameStatement.get(req.body.username);
+    if (!trimmedUsername) errors.push("No username");
+    if (trimmedUsername.length < 4) errors.push("Username must be longer than 4 characters");
+    if (trimmedUsername.length > 10) errors.push("Username must be less than 11 characters");
 
+    const trimmedPassword = password.trim();
+    if (!trimmedPassword) errors.push("No password");
+    if (trimmedPassword.length < 6) errors.push("Password must be longer than 6 characters");
+    if (trimmedPassword.length > 10) errors.push("Password must be less than 11 characters");
+
+    const usernameStatement = db.prepare("SELECT * FROM users WHERE username = ?");
+    const usernameCheck = usernameStatement.get(trimmedUsername);
     if (usernameCheck) errors.push("Username has been taken")
 
-    const trimmedPassword = password.trim()
-    if (!trimmedPassword) { errors.push("No password") }
-    if (trimmedPassword.length < 6) { errors.push("Password must be longer than 6 characters") }
-    if (trimmedPassword.length > 10) { errors.push("Password must be less than 11 characters") }
-
     if (errors.length > 0) {
-        return res.json({
-            success: false,
-            errors: errors
-        })
-    }
-
-    const existingUsername = db.prepare("SELECT * FROM users WHERE username = ?").get(trimmedUsername);
-    if (existingUsername) {
-        return res.json({ success: false, errors: ["Username already exists"] });
+        return res.json({ success: false, errors });
     }
 
     // saving new user
     const salt = bcrypt.genSaltSync(10)
-    const hashedPassword = bcrypt.hashSync(req.body.password, salt)
+    const hashedPassword = bcrypt.hashSync(trimmedPassword, salt)
 
     const userStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
 
@@ -201,10 +174,10 @@ app.post("/authentication", (req, res) => {
         const result = userStatement.run(trimmedUsername, hashedPassword);
         console.log("User saved: ", result)
 
-        const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
+        const lookupStatement = db.prepare("SELECT * FROM users WHERE id = ?");
         const selectedUser = lookupStatement.get(result.lastInsertRowid)
 
-        // cookies
+        // sign cookie
         const tokenValue = jwt.sign({
             exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, 
             userid: selectedUser.id, 
@@ -218,12 +191,12 @@ app.post("/authentication", (req, res) => {
             maxAge: 1000 * 60 * 60 * 24
         })
 
-        console.log("New cookie set: ", tokenValue)
+        console.log("New cookie set: ", tokenValue);
 
         res.json({
             success: true,
             message: "Thank you for joining"
-        })
+        });
     } catch (err) {
         console.error("Error saving user: ", err);
         return res.json({ success: false, errors: ["Could not save user"] })

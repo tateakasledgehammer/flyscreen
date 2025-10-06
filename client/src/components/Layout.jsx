@@ -1,15 +1,20 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function Layout(props) {
     const { children, user, setUser, isAuthenticated, setIsAuthenticated } = props
 
+    const navigate = useNavigate();
+
     const handleLogout = async () => {
         try {
             await fetch("http://localhost:5005/logout", {
+                method: "POST",
                 credentials: "include",
             });
             setIsAuthenticated(false);
             setUser(null)
+            navigate("/login")
         } catch (err) {
             console.error("Logout failed: ", err)
         }
