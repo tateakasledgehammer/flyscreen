@@ -1,4 +1,4 @@
-import { formatAuthors } from "../utils/screeningTools";
+import { formatAuthors, capitaliseFirstLetter } from "../utils/screeningTools";
 
 export default function StudyInfo(props) {
     const {
@@ -15,6 +15,17 @@ export default function StudyInfo(props) {
     } = props
 
     if (!study) return null;
+
+    const { score, details } = study.probabilityScore;
+    const total = inclusionCriteria.length;
+    const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+
+    let probabilityClass = "low-probability";
+    if (percentage >= 67) {
+        probabilityClass = "high-probability";
+    } else if (percentage >= 34) {
+        probabilityClass = "medium-probability";
+    }
 
     return (
         <>
@@ -35,11 +46,26 @@ export default function StudyInfo(props) {
                     </span>
                 }
             </h3>
-            <div className="percentile-card">
-                ??
+
+            <div className={`percentile-card ${probabilityClass}`}>
+                {study.probabilityScore.score}/{inclusionCriteria.length}
+                <div className="percentile-contents">
+                    <h4>Inclusion Matches:</h4>
+                    {Object.entries(study.probabilityScore.details.inclusionMatches).map(([category, terms]) => (
+                        <p key={capitaliseFirstLetter(category)}>
+                            {capitaliseFirstLetter(category)}: {terms.join(", ")}
+                        </p>
+                    ))}
+                    <h4>Exclusion Matches:</h4>
+                    {Object.entries(study.probabilityScore.details.exclusionMatches).map(([category, terms]) => (
+                        <p key={category}>
+                            {capitaliseFirstLetter(category)}: {terms.join(", ")}
+                        </p>
+                    ))}
+                </div>
             </div>
         </div>
-        
+
         <div className="study-info">
             {/* <p className="disappear-when-reduced"><strong>Study Index: </strong>{study.id}</p> */}
             <p><strong>Authors: </strong>{formatAuthors(study.authors)}</p>

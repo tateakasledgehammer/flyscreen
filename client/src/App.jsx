@@ -196,7 +196,10 @@ function App() {
         <Route path="/import" element={
           <Import 
             studies={studies} 
-            setStudies={setStudies} />
+            setStudies={setStudies}
+            inclusionCriteria={inclusionCriteria}
+            exclusionCriteria={exclusionCriteria}
+          />
         } />
 
         <Route path="/screening" element={

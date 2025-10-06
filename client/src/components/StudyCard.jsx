@@ -27,6 +27,9 @@ export default function StudyCard(props) {
         setHideDetails,
     } = props;
 
+    console.log("Inclusion: ", inclusionCriteria, "Exclusion: ", exclusionCriteria)
+    console.log(studies)
+
     function handleVote(studyId, action) {
         setStudies(prev => {
             const updated = prev.map(study => {

@@ -77,3 +77,10 @@ export function formatAuthors(authorString) {
         return authors[0] + " et al."
     }
 }
+
+export function capitaliseFirstLetter(str) {
+    if (typeof str !== 'string' || str.length === 0) {
+        return str;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
