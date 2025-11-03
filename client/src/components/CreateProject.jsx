@@ -40,8 +40,6 @@ export default function CreateProject(props) {
     
     return (
         <div className="page-container">
-            <br />
-            <hr />
 
             <h2><i className="fa-solid fa-pencil"></i> Create Project</h2>
 

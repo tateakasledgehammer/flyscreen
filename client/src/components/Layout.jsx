@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 
 export default function Layout(props) {
@@ -31,10 +32,12 @@ export default function Layout(props) {
             
             {isAuthenticated && (
                 <>
+                    <Link to="/dashboard">
                     <button>
                         <p>Welcome {user.username}</p>
                         <i className="fa-regular fa-user"></i>
                     </button>
+                    </Link>
                     <button onClick={() => handleLogout()}>
                         <p>Log out</p>
                         <i className="fa-solid fa-right-from-bracket"></i>
@@ -47,15 +50,7 @@ export default function Layout(props) {
 
     const footer = (
         <footer>
-            <p>Flyscreen Academics was developed by 
-                <a 
-                    target="_blank" 
-                    href="https://github.com/tateakasledgehammer"
-                    >
-                        tateakasledgehammer
-                </a> 
-                using React.js<br/>
-            </p>
+            <p>Flyscreen Academics was developed by <a target="_blank" href="https://github.com/tateakasledgehammer"> tateakasledgehammer</a> using React.js<br/></p>
         </footer>
     )
 

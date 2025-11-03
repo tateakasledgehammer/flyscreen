@@ -5,6 +5,10 @@ export default function Navbar() {
     return (
         <>
             <div className="nav-bar">
+                <Link to="/dashboard">
+                    <button>Dashboard</button>
+                </Link>
+
                 <Link to="/overview">
                     <button>Home</button>
                 </Link>

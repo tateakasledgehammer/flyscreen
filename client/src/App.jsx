@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Landing from './components/Landing'
 import Authentication from './components/Authentication'
 import Navbar from './components/Navbar'
+import Dashboard from './components/Dashboard'
 import Layout from './components/Layout'
 import Overview from './components/Overview'
 import Setup from './components/Setup'
@@ -189,6 +190,16 @@ function App() {
 
             {/* Protected Routes */}
             {/* Create Project component */}
+            <Route path="/dashboard"
+            element={
+              <PrivateRoute isAuthenticated={isAuthenticated}>
+                <Dashboard 
+                  projectTitle={projectTitle}
+                  setProjectTitle={setProjectTitle}
+                />
+              </PrivateRoute>
+            } />
+
             <Route path="/overview" 
             element={
               <PrivateRoute isAuthenticated={isAuthenticated}>
