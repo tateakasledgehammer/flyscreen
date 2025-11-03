@@ -30,7 +30,7 @@ export default function Navbar() {
                 </Link>
 
                 <Link to="/excluded">
-                    <button>Excluded at Full Text</button>
+                    <button>Excluded</button>
                 </Link>
             </div>
         </>

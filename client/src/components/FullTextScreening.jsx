@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { handleSortByOrder } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
+import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
 
 export default function FullTextScreening(props) {
@@ -38,10 +39,6 @@ export default function FullTextScreening(props) {
         /* { label: "ACCEPTED", key: "Full Text Accepted" }, */
         { label: "REJECTED", key: "Full Text Rejected" }
     ];
-
-    useEffect(() => {
-        setStudies(prev => handleSortByOrder(prev, sortBy));
-    }, [sortBy]);
 
     const [tagFilter, setTagFilter] = useState("")
     function handleSortByTag(value) {
@@ -157,10 +154,12 @@ export default function FullTextScreening(props) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(filteredStudiesByFullTextStatus);
+    const sortedStudies = handleSortByOrder(filteredStudiesByFullTextStatus, sortBy);
     const screenedStudies = sortedStudies.slice(startIndex, endIndex);
 
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
 
@@ -234,5 +233,6 @@ export default function FullTextScreening(props) {
                 setHighlighted={setHighlighted}
             />
         </div>
+        </>
     )
 }

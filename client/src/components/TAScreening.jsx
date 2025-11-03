@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import StudyCard from "./StudyCard";
+import Navbar from "./Navbar";
 import { handleSortByOrder } from "../utils/screeningTools";
 import ScreeningFilters from "./ScreeningFilters";
 
@@ -35,10 +36,6 @@ export default function TAScreening(props) {
         setItemsPerPage(e.target.value);
         setCurrentPage(1);
     }
-
-    useEffect(() => {
-        setStudies(prev => handleSortByOrder(prev, sortBy));
-    }, [sortBy]);
     
     const [tagFilter, setTagFilter] = useState("")
     function handleSortByTag(value) {
@@ -142,10 +139,12 @@ export default function TAScreening(props) {
     
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(filteredStudiesByStatus);
+    const sortedStudies = handleSortByOrder(filteredStudiesByStatus, sortBy);
     const visibleStudies = sortedStudies.slice(startIndex, endIndex);
 
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
@@ -280,5 +279,6 @@ export default function TAScreening(props) {
                 </button>
             )}
         </div>
+    </>
     )
 }

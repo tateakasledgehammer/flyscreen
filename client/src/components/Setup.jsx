@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import Navbar from "./Navbar";
 
 export default function Setup(props) {
     const { 
@@ -235,7 +236,11 @@ export default function Setup(props) {
             criteria: section.criteria
         }));
 
-        setInclusionCriteria(criteriaObject);
+        setInclusionCriteria(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(criteriaObject);
+            return prevStr === newStr ? prev : criteriaObject;
+        });
     }, [inclusionSection]);
       
     useEffect(() => {
@@ -244,12 +249,20 @@ export default function Setup(props) {
             criteria: section.criteria
         }));
         
-        setExclusionCriteria(criteriaObject);
+        setExclusionCriteria(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(criteriaObject);
+            return prevStr === newStr ? prev : criteriaObject;
+        });
     }, [exclusionSection]);
 
     useEffect(() => {
         const criteria = fullTextSub.flatMap(term => term);
-        setFullTextExclusionReasons(criteria);
+        setFullTextExclusionReasons(prev => {
+            const prevStr = JSON.stringify(prev);
+            const newStr = JSON.stringify(criteria);
+            return prevStr === newStr ? prev : criteria;
+        });
     }, [fullTextSub]);
 
     function resetApp() {
@@ -272,6 +285,8 @@ export default function Setup(props) {
     }
 
     return (
+        <>
+        <Navbar />
         <div className="page-container">
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
@@ -638,5 +653,6 @@ export default function Setup(props) {
             <button onClick={() => handleClearFullTextReasons()}>Clear Criteria</button>
         </div>
         </div>
+        </>
     )
 }

@@ -45,7 +45,7 @@ export default function CreateProject(props) {
 
             <h2><i className="fa-solid fa-pencil"></i> Create Project</h2>
 
-                <form onSubmit={handleNewProject}>
+                <form id="create-project" onSubmit={handleNewProject}>
                     <fieldset className="new-project">
                         <legend><strong>Create New Project</strong></legend>
                         

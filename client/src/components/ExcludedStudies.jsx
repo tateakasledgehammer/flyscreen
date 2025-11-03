@@ -1,5 +1,6 @@
 import { formatAuthors, handleSortByOrder } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
+import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
 import { useState, useEffect } from "react";
 
@@ -29,10 +30,6 @@ export default function ExcludedStudies(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-
-    useEffect(() => {
-        setStudies(prev => handleSortByOrder(prev, sortBy));
-    }, [sortBy]);
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -125,10 +122,12 @@ export default function ExcludedStudies(props) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(rejectedStudies);
+    const sortedStudies = handleSortByOrder(rejectedStudies, sortBy);
     const filteredRejectedStudies = sortedStudies.slice(startIndex, endIndex);
     
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-list-check"></i> Manage Excluded Studies</h2>
             <div className="filter-notice">
@@ -201,5 +200,6 @@ export default function ExcludedStudies(props) {
             />
 
         </div>
+        </>
     )
 }

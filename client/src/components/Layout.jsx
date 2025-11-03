@@ -1,22 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
 export default function Layout(props) {
-    const { children, user, setUser, isAuthenticated, setIsAuthenticated } = props
+    const { user, setUser, isAuthenticated, setIsAuthenticated } = props
 
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            await fetch("http://localhost:5005/logout", {
+            const res = await fetch("http://localhost:5005/api/logout", {
                 method: "POST",
                 credentials: "include",
             });
-            setIsAuthenticated(false);
-            setUser(null)
-            navigate("/login")
+            if (!res.ok) throw new Error("Logout failed");
         } catch (err) {
             console.error("Logout failed: ", err)
+        } finally {
+            setIsAuthenticated(false);
+            setUser(null)
+            navigate("/")
         }
     }
 
@@ -44,7 +47,14 @@ export default function Layout(props) {
 
     const footer = (
         <footer>
-            <p>Flyscreen Academics was developed by <a target="_blank" href="https://github.com/tateakasledgehammer">tateakasledgehammer</a> using React.js<br/>
+            <p>Flyscreen Academics was developed by 
+                <a 
+                    target="_blank" 
+                    href="https://github.com/tateakasledgehammer"
+                    >
+                        tateakasledgehammer
+                </a> 
+                using React.js<br/>
             </p>
         </footer>
     )
@@ -53,7 +63,7 @@ export default function Layout(props) {
         <div className="page-container">
             { header }
             <main>
-                { children }
+                <Outlet />
             </main>
             { footer }
         </div>

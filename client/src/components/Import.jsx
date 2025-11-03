@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import Navbar from "./Navbar";
 
 export default function Import(props) {
     const { 
@@ -209,6 +210,8 @@ export default function Import(props) {
     }
 
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-upload"></i> Import Your Studies</h2>
             <input type="file" accept=".ris" onChange={handleFileUpload} />
@@ -230,5 +233,6 @@ export default function Import(props) {
 
             <button onClick={handleClear}>Clear studies</button>
         </div>
+        </>
     )
 }

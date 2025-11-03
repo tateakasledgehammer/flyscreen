@@ -1,5 +1,6 @@
 import { formatAuthors, handleSortByOrder } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
+import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
 import { useState, useEffect } from "react";
 
@@ -28,10 +29,6 @@ export default function IncludedStudies(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-
-    useEffect(() => {
-        setStudies(prev => handleSortByOrder(prev, sortBy));
-    }, [sortBy]);
 
     const [tagFilter, setTagFilter] = useState("")
     function handleSortByTag(value) {
@@ -120,11 +117,13 @@ export default function IncludedStudies(props) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(acceptedStudies);
+    const sortedStudies = handleSortByOrder(acceptedStudies, sortBy);
     const filteredAcceptedStudies = sortedStudies.slice(startIndex, endIndex);
     
 
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
             <div className="filter-notice">
@@ -194,5 +193,6 @@ export default function IncludedStudies(props) {
             />
 
         </div>
+        </>
     )
 }

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
-export default function Authentication() {
+export default function Authentication(props) {
+    const { isAuthenticated, setIsAuthenticated, setUser } = props
+    const navigate = useNavigate();
+
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [message, setMessage] = useState("")
@@ -33,20 +37,34 @@ export default function Authentication() {
             const data = await res.json()
 
             if (!data.success) {
-                setErrors(data.errors || ["Something went wrong"])
+                setErrors(data.errors || ["Something went wrong"]);
+                return;
+            } 
+            
+            const whoamiRes = await fetch("http://localhost:5005/api/whoami", {
+                credentials: "include"
+            });
+            if (whoamiRes.ok) {
+                const whoamiData = await whoamiRes.json();
+                setIsAuthenticated(Boolean(whoamiData.isAuthenticated));
+                setUser(whoamiData.user || null)
             } else {
-                setErrors([]);
-                setMessage(data.message);
-                setTimeout(() => {
-                    window.location.href = "/overview"
-                }, 1500);
+                setIsAuthenticated(true);
+                setUser({ username });
             }
+
+            setMessage(data.message || "Success")
+
+            navigate("/overview")
+
         }   catch (err) {
+            console.error(err)
             setErrors(["Failed to connect"]);
         }
     };
 
     return (
+        (!isAuthenticated && (
         <div className="page-container">
             <br />
             <hr />
@@ -61,7 +79,7 @@ export default function Authentication() {
             </button>
 
             {!loginNotSignUp && (
-                <form onSubmit={handleSubmit}>
+                <form id="loginorsignup" onSubmit={handleSubmit}>
                     <fieldset className="log-in">
                         <legend><strong>Create an account</strong></legend>
                         <label htmlFor="username">Username</label>
@@ -124,5 +142,6 @@ export default function Authentication() {
 
             {message && <p style={{ color: "green" }}>{message}</p>}
         </div>
-    )
+        )
+    ));
 }

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"
+import Authentication from "./Authentication"
 
-export default function Landing() {
-    
+export default function Landing(props) {
+    const { isAuthenticated, setIsAuthenticated, setUser } = props
+
     return (
         <div className="page-container">
             <h1>Welcome to...<br></br>FLYSCREEN ACADEMICS <i className="fa-regular fa-paper-plane"></i></h1>
@@ -14,6 +16,13 @@ export default function Landing() {
                 <h3><i className="fa-solid fa-chart-line"></i> Streamlined process to get work done now</h3>
                     <p>Clear step by step process with intuitive design to help you get straight into the zone to get this over with!</p>
             </div>
+
+            <Authentication
+                isAuthenticated={isAuthenticated}
+                setIsAuthenticated={setIsAuthenticated}
+                setUser={setUser}
+            />
+
         </div>
     )
 }

@@ -1,4 +1,5 @@
 import { capitaliseFirstLetter } from "../utils/screeningTools"
+import Navbar from "./Navbar"
 
 export default function Overview(props) {
     const { 
@@ -17,6 +18,8 @@ export default function Overview(props) {
         alert("This function has not been set up")
     }
     return (
+        <>
+        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
             {/* Add class and styling for the homepage cards + progress bar */}
@@ -141,5 +144,6 @@ export default function Overview(props) {
                 </ul>
             </div>
         </div>
+    </>
     )
 }
