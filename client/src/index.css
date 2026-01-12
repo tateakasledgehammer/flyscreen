@@ -56,11 +56,15 @@ header button {
   display: flex;
   align-items: center;
   background-color: #213547;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgba(255, 255, 255, 0.87);;
   gap: 1rem;
   border: none;
   padding: 10px 20px;
+  border-bottom: 3px solid #213547;
 }
+
+/* 213547 */
+/* rgba(255, 255, 255, 0.87); */
 
 header {
   align-items: center;

@@ -1,3 +1,12 @@
+# Env
 .env
 .env.local
 .env.*.local
+
+# SQLite
+*.db
+*.db-wal
+*.db-shm
+
+# Node
+node_modules/

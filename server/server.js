@@ -5,26 +5,10 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
-const mysql = require('mysql2')
-const path = require("path");
-const db = require("better-sqlite3")(path.join(__dirname, "flyscreen.db"));
-db.pragma("journal_mode = WAL");
 
-console.log("server.js loaded successfully")
+const db = require("./db");
 
-// database set up
-const createTables = db.transaction(() => {
-    db.prepare(`
-        CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
-        )
-    `).run()
-});
-createTables();
-
-// the rest of the server
+console.log("server.js loaded successfully");
 
 const app = express();
 const PORT = 5005;
@@ -116,7 +100,7 @@ app.post("/login", (req, res) => {
     );
     
     res.cookie("flyscreenCookie", token, COOKIE_OPTIONS)
-    console.log("New cookie se for: ", user.username)
+    console.log("New cookie set for: ", user.username)
 
     res.json({ success: true, message: "Logged in" })
 })
