@@ -126,7 +126,7 @@ export default function Import(props) {
 
     function handleStudyDetails(records) {
         return records.map((entry) => ({
-            id: (entry.id || crypto.randomUUID()),
+            // id: (entry.id || crypto.randomUUID()), - handled in backend
             title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
             year: (entry.PY && entry.PY[0] || 'N/A'),
             type: (entry.M3 && entry.M3[0] || 'N/A'),
@@ -160,6 +160,27 @@ export default function Import(props) {
         localStorage.setItem('fileName', file.name)
         setIsLoading(true);
 
+        async function sendBulkStudiesToServer(studiesArray) {
+            try {
+                const response = await fetch("http://localhost:5005/api/studies/bulk", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studies: studiesArray}),
+                });
+    
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to upload studies");
+                }
+                console.log("Bulk upload successful", data);
+    
+            } catch (error) {
+                console.error("Error uploading bulk studies:", error)
+            }
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
@@ -185,13 +206,14 @@ export default function Import(props) {
                 const updatedUploadHistory = [...uploadHistory, newEntryDetails];
                 setUploadHistory(updatedUploadHistory);
                 localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
-            
+                
+                sendBulkStudiesToServer(studiesInDetail);
             } catch (err) {
                 setError('Error parsing the file');
                 console.log(err);
             } finally {
                 setIsLoading(false);
-            }    
+            }
         };
         reader.readAsText(file);
     }

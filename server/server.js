@@ -17,7 +17,8 @@ const {
     createStudy,
     getAllStudies,
     getStudyById,
-    deleteStudy
+    deleteStudy,
+    insertManyStudies
 } = require("./db");
 
 const COOKIE_OPTIONS = {
@@ -61,13 +62,31 @@ app.get("/api/studies", (req, res) => {
     res.json(studies);
 });
 
+app.post("/api/studies/bulk", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const studies = req.body.studies;
+    if (!Array.isArray(studies) || studies.length === 0) {
+        return res.status(400).json({ error: "Studies array required" });
+    }
+
+    try {
+        insertManyStudies(studies);
+        res.json({ success: true, message: `Inserted ${studies.length} studies.` });
+    } catch (error) {
+        console.error("Bulk insert error:", error);
+        res.status(500).json({ error: "Failed to insert studies" })
+    }
+})
+
 app.post("/api/studies", (req, res) => {
     if (!req.user) {
         return res.status(401).json({ error: "Not authenticated!" })
     }
 
     const { 
-        id,
         title, 
         abstract, 
         authors, 
@@ -86,11 +105,8 @@ app.post("/api/studies", (req, res) => {
         return res.status(400).json({ error: "Title required" });
     }
 
-    const studyId = id || crypto.randomUUID();
-
     try {
-        createStudy.run({
-            id: studyId,
+        const result = createStudy.run({
             title,
             abstract: abstract || null,
             authors: authors || null,
@@ -105,7 +121,7 @@ app.post("/api/studies", (req, res) => {
             language: language || null
         });
 
-        const study = getStudyById.get(studyId);
+        const study = getStudyById.get(result.lastInsertRowid);
         res.json(study);
     } catch (err) {
         console.error("Error creating study", err);

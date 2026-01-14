@@ -86,13 +86,31 @@ db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_studies_year ON studies(year)    
 `).run();
 
+
+const insertManyStudies = db.transaction((studies) => {
+    const statement = db.prepare(`
+        INSERT INTO studies (
+            title, abstract, authors, year, type,
+            journal, volume, issue, doi, link,
+            keywords, language
+        ) VALUES (
+            @title, @abstract, @authors, @year, @type,
+            @journal, @volume, @issue, @doi, @link,
+            @keywords, @language
+        )
+    `);
+
+    for (const study of studies) {
+        statement.run(study);
+    }
+})
+
 module.exports = {
     db,
 
     // studies
     createStudy: db.prepare(`
         INSERT INTO studies (
-            id,
             title, 
             abstract, 
             authors, 
@@ -107,7 +125,6 @@ module.exports = {
             language
         )
         VALUES (
-            @id,
             @title, 
             @abstract, 
             @authors, 
@@ -133,5 +150,7 @@ module.exports = {
 
     deleteStudy: db.prepare(`
         DELETE FROM studies WHERE id = ?
-    `)
+    `),
+
+    insertManyStudies
 };
