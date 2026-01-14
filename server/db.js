@@ -30,11 +30,23 @@ const initSchema = db.transaction(() => {
     db.prepare(`
         CREATE TABLE IF NOT EXISTS studies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            
             title TEXT NOT NULL,
             abstract TEXT,
             authors TEXT,
             year INTEGER,
+            type TEXT,
+            
             journal TEXT,
+            volume TEXT,
+            issue TEXT,
+            
+            doi TEXT,
+            link TEXT,
+
+            keywords TEXT,
+            language TEXT,
+
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `).run();
@@ -70,5 +82,56 @@ const initSchema = db.transaction(() => {
 
 initSchema();
 
-module.exports = db;
+db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_studies_year ON studies(year)    
+`).run();
 
+module.exports = {
+    db,
+
+    // studies
+    createStudy: db.prepare(`
+        INSERT INTO studies (
+            id,
+            title, 
+            abstract, 
+            authors, 
+            year, 
+            type,
+            journal,
+            volume,
+            issue,
+            doi,
+            link,
+            keywords,
+            language
+        )
+        VALUES (
+            @id,
+            @title, 
+            @abstract, 
+            @authors, 
+            @year, 
+            @type,
+            @journal,
+            @volume,
+            @issue,
+            @doi,
+            @link,
+            @keywords,
+            @language
+        )    
+    `),
+
+    getAllStudies: db.prepare(`
+        SELECT * FROM studies ORDER BY created_at DESC    
+    `),
+
+    getStudyById: db.prepare(`
+        SELECT * FROM studies WHERE id = ?  
+    `),
+
+    deleteStudy: db.prepare(`
+        DELETE FROM studies WHERE id = ?
+    `)
+};

@@ -5,13 +5,20 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
-
-const db = require("./db");
+const crypto = require("crypto");
 
 console.log("server.js loaded successfully");
 
 const app = express();
 const PORT = 5005;
+
+const {
+    db,
+    createStudy,
+    getAllStudies,
+    getStudyById,
+    deleteStudy
+} = require("./db");
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -20,6 +27,8 @@ const COOKIE_OPTIONS = {
     path: "/",
     maxAge: 1000 * 60 * 60 * 24
 };
+
+// middleware
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -38,6 +47,82 @@ app.use((req, res, next) => {
     }
     next()
 })
+
+
+// ---- STUDIES ----
+
+// get all studies
+app.get("/api/studies", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated!" })
+    }
+
+    const studies = getAllStudies.all();
+    res.json(studies);
+});
+
+app.post("/api/studies", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated!" })
+    }
+
+    const { 
+        id,
+        title, 
+        abstract, 
+        authors, 
+        year, 
+        type,
+        doi,
+        link,
+        journal,
+        volume,
+        issue,
+        keywords,
+        language
+    } = req.body;
+    
+    if (!title || typeof title !== "string") {
+        return res.status(400).json({ error: "Title required" });
+    }
+
+    const studyId = id || crypto.randomUUID();
+
+    try {
+        createStudy.run({
+            id: studyId,
+            title,
+            abstract: abstract || null,
+            authors: authors || null,
+            year: year ? Number(year) : null,
+            type: type || null,
+            doi: doi || null,
+            link: link || null,
+            volume: volume || null,
+            journal: journal || null,
+            issue: issue || null,
+            keywords: keywords || null,
+            language: language || null
+        });
+
+        const study = getStudyById.get(studyId);
+        res.json(study);
+    } catch (err) {
+        console.error("Error creating study", err);
+        res.status(500).json({ error: "Failed to create study" });
+    }
+})
+
+app.delete("/api/studies/:id", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated!" })
+    }
+
+    deleteStudy.run(req.params.id);
+    res.json({ success: true });
+});
+
+///////////////////////
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Flyscreen Academics server");
