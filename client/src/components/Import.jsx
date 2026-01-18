@@ -129,7 +129,7 @@ export default function Import(props) {
             id: null, // backend assigns - clever,
             title: entry.TI?.[0] ?? entry.T1?.[0] ?? "",
             abstract: entry.AB?.[0] ?? "",
-            authors: entry.AB?.[0] ?? "",
+            authors: entry.AU ? entry.AU.join(", ") : entry.A1 ? entry.A1.join(",") : "",
             year: entry.PY ? parseInt(entry.PY[0], 10) || null : null,
             journal: entry.T2?.[0] ?? "",
             volume: entry.VL?.[0] ?? "",

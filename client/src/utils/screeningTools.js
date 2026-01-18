@@ -1,3 +1,18 @@
+/**
+ * Study shape (post-import, canonical):
+ * {
+ *   id: number
+ *   title: string
+ *   abstract: string
+ *   authors: string
+ *   year: number | null
+ *   journal: string
+ *   keywords: string
+ *   votes: { accept: User[], reject: User[] }
+ *   fullTextVotes: { accept: User[], reject: User[] }
+ * }
+ */
+
 const safeString = (val) => 
     typeof val === "string" ? val : "";
 
@@ -5,6 +20,18 @@ const safeNumber = (val) =>
     typeof val === "number"
         ? val
         : parseInt(val, 10) || 0;
+
+export function ensureStudyShape(study) {
+    return {
+        ...study,
+        title: study.title ?? "",
+        authors: study.authors ?? "",
+        year: study.year ?? null,
+        votes: study.votes ?? { accept: [], reject: [] },
+        fullTextVotes: study.fullTextVotes ?? { accept: [], reject: [] },
+        probabilityScore: study.probabilityScore ?? { score: 0, details: {} }
+    };
+}
 
 export function handleSortByOrder(studies, sortBy) {
     return [...studies].sort((a, b) => {

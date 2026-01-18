@@ -4,7 +4,7 @@ import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
     const { 
-        studies, 
+        studies,
         setStudies, 
         savedStudies, 
         toggleDetails, 
@@ -45,9 +45,12 @@ export default function StudyCard(props) {
                 } else if (action === "reject") {
                     votes.reject.push(user);
                 } else if (action === "remove") {
-                    votes = { accept: [], reject: [] };
+                    votes = { 
+                        accept: study.votes.accept.filter(u => u.id !== user.id), 
+                        reject: study.votes.reject.filter(u => u.id !== user.id), 
+                    };
                 }
-                
+
                 votes = {
                     accept: [...new Map(votes.accept.map(u => [u.id, u])).values()],
                     reject: [...new Map(votes.reject.map(u => [u.id, u])).values()]
@@ -55,7 +58,7 @@ export default function StudyCard(props) {
     
                 const status = updateStudyStatus(votes)
     
-                console.log(`Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
+                console.log(`Updating study ${studyId} by ${user.username} - action: ${action}`, votes, "Status: ", status);
     
                 return { ...study, votes, status };
             })
@@ -109,7 +112,10 @@ export default function StudyCard(props) {
                 } else if (action === "reject") {
                     fullTextVotes.reject.push(user);
                 } else if (action === "remove") {
-                    fullTextVotes = { accept: [], reject: [] };
+                    fullTextVotes = { 
+                        accept: study.votes.accept.filter(u => u.id !== user.id), 
+                        reject: study.votes.reject.filter(u => u.id !== user.id) 
+                    };
                 }
 
                 fullTextVotes = {
@@ -119,7 +125,7 @@ export default function StudyCard(props) {
 
                 const fullTextStatus = updateFullTextScreeningStatus(fullTextVotes);
 
-                console.log(`Updating study ${studyId} by ${user} - action: ${action}`, fullTextVotes, "Full Text Screening Status: ", fullTextStatus);
+                console.log(`Updating study ${studyId} by ${user.username} - action: ${action}`, fullTextVotes, "Full Text Screening Status: ", fullTextStatus);
 
                 return { ...study, fullTextVotes, fullTextStatus }
             })
@@ -167,11 +173,12 @@ export default function StudyCard(props) {
 
     function handleAddNote(studyId, note) {
         setStudies(prev => 
-            prev.map(study =>
-                study.id === studyId ? {...study, note } : study
-            )
-        )
-        alert("Function not currently available.")
+            prev.map(study => {
+                if (study.id !== studyId) return study;
+                const newNotes = [...(study.notes || []), note];
+                return { ...study, notes: newNotes };
+            })
+        );
     }
 
     function handleAssignTag(studyId, value) {
@@ -309,6 +316,7 @@ export default function StudyCard(props) {
                             </>
                         )}
 
+                        {/* FULL TEXT EXCLUSION DROPDOWN */}
                         {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
                             <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
                                 <option value="">Reason to exclude</option>
@@ -335,25 +343,6 @@ export default function StudyCard(props) {
                             )))}
                         </select>
                     </div>
-
-                    {/* Temporarily added checkers for status / votes
-
-                    <h3>Title & Abstract Screening Status: {study.status}</h3> 
-                    {(study.status === "Conflict" || study.status === "Awaiting second vote") && (
-                        <>
-                            <p>Accept vote: {study.votes.accept.map(user => user.username).join(", ")}</p>
-                            <p>Reject vote: {study.votes.reject.map(user => user.username).join(", ")}</p>
-                        </>
-                    )}
-
-                    <h3>Full Text Status: {study.fullTextStatus}</h3>
-                    {study.status === "Accepted" && (
-                        <>
-                            <p>Accept vote: {study.fullTextVotes.accept.map(user => user.username).join(", ")}</p>
-                            <p>Reject vote: {study.fullTextVotes.reject.map(user => user.username).join(", ")}</p>
-                        </>
-                    )}
-                    */}
 
                     {study.fullTextExclusionStatus && (
                         <>

@@ -130,17 +130,6 @@ export default function IncludedStudies(props) {
                 <h3>Your Included Studies ({acceptedStudies.length})</h3>
                 <button onClick={handleExportStudies}>Export studies</button>
             </div>
-            {/*
-                <ul>
-                    {acceptedStudies.map((study) => (
-                        <>
-                            <h4 key={study.id}>"{study.title}"" by <i>{formatAuthors(study.authors)}</i></h4>
-                            <p key={study.id}>{study.abstract}</p>
-                            <hr />
-                        </>
-                    ))}
-                </ul>
-            */}
 
             <ScreeningFilters
                 studies={studies}

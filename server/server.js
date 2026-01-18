@@ -107,18 +107,18 @@ app.post("/api/studies", (req, res) => {
 
     try {
         const result = createStudy.run({
-            title,
-            abstract: abstract || null,
-            authors: authors || null,
-            year: year ? Number(year) : null,
-            type: type || null,
-            doi: doi || null,
-            link: link || null,
-            volume: volume || null,
-            journal: journal || null,
-            issue: issue || null,
-            keywords: keywords || null,
-            language: language || null
+            title, 
+            abstract, 
+            authors, 
+            year, 
+            type,
+            journal,
+            volume,
+            issue,
+            doi,
+            link,
+            keywords,
+            language
         });
 
         const study = getStudyById.get(result.lastInsertRowid);
