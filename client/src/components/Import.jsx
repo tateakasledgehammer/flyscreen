@@ -126,11 +126,13 @@ export default function Import(props) {
 
     function normaliseStudy(entry, probabilityScore) {
         return {
+            _clientId: crypto.randomUUID(),
             id: null, // backend assigns - clever,
             title: entry.TI?.[0] ?? entry.T1?.[0] ?? "",
             abstract: entry.AB?.[0] ?? "",
             authors: entry.AU ? entry.AU.join(", ") : entry.A1 ? entry.A1.join(",") : "",
             year: entry.PY ? parseInt(entry.PY[0], 10) || null : null,
+            type: entry.TY?.[0] ?? null,
             journal: entry.T2?.[0] ?? "",
             volume: entry.VL?.[0] ?? "",
             issue: entry.IS?.[0] ?? "",

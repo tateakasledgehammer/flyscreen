@@ -262,7 +262,7 @@ export default function StudyCard(props) {
                         ? toggleDetails[study.id] 
                         : hideDetails;
                 return (
-                <div key={study.id} className="study-card">
+                <div key={study.id ?? study._clientId} study={study} className="study-card">
                     {/* Study information */}
 
                     <StudyInfo

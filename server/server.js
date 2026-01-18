@@ -62,18 +62,35 @@ app.get("/api/studies", (req, res) => {
     res.json(studies);
 });
 
-app.post("/api/studies/bulk", (req, res) => {
+app.post("/api/studies/bulk", (req, res) => {      
     if (!req.user) {
         return res.status(401).json({ error: "Not authenticated" });
     }
 
     const studies = req.body.studies;
+
     if (!Array.isArray(studies) || studies.length === 0) {
         return res.status(400).json({ error: "Studies array required" });
     }
 
+    const dbSafeStudy = study => ({
+        title: study.title,
+        abstract: study.abstract,
+        authors: study.authors,
+        year: study.year,
+        type: study.type,
+        journal: study.journal,
+        volume: study.volume,
+        issue: study.issue,
+        doi: study.doi,
+        link: study.link,
+        keywords: study.keywords,
+        language: study.language
+      });
+
     try {
-        insertManyStudies(studies);
+        const cleanStudies = studies.map(dbSafeStudy);
+        insertManyStudies(cleanStudies);
         res.json({ success: true, message: `Inserted ${studies.length} studies.` });
     } catch (error) {
         console.error("Bulk insert error:", error);
