@@ -1,24 +1,34 @@
+const safeString = (val) => 
+    typeof val === "string" ? val : "";
+
+const safeNumber = (val) => 
+    typeof val === "number"
+        ? val
+        : parseInt(val, 10) || 0;
+
 export function handleSortByOrder(studies, sortBy) {
     return [...studies].sort((a, b) => {
         switch (sortBy) {
             case 'year_asc':
-                return (a.year - b.year);
+                return safeNumber(a.year) - safeNumber(b.year);
             case 'year_des':
-                return (b.year - a.year);
+                return safeNumber(b.year) - safeNumber(a.year);
             case 'title_asc':
-                return a.title.localeCompare(b.title);
+                return safeString(a.title).localeCompare(safeString(b.title));
             case 'title_des':
-                return b.title.localeCompare(a.title);
+                return safeString(b.title).localeCompare(safeString(a.title));
             case 'author_asc':
-                return a.authors.localeCompare(b.authors);
+                return safeString(a.authors).localeCompare(safeString(b.authors));
             case 'author_des':
-                return b.authors.localeCompare(a.authors);
+                return safeString(b.authors).localeCompare(safeString(a.authors));
             case 'index_asc':
-                return a.id.localeCompare(b.id)
+                return safeNumber(a.id) - safeNumber(b.id);
             case 'probability_asc':
-                return 0;
+                return (a.probabilityScore?.score || 0) -
+                    (b.probabilityScore?.score || 0);
             case 'probability_des':
-                return 0;
+                return (b.probabilityScore?.score || 0) -
+                    (a.probabilityScore?.score || 0);
             default:
                 return 0;
         }

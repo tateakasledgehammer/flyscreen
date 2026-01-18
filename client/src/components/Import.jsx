@@ -124,30 +124,40 @@ export default function Import(props) {
         }
     }
 
-    function handleStudyDetails(records) {
-        return records.map((entry) => ({
-            // id: (entry.id || crypto.randomUUID()), - handled in backend
-            title: (entry.TI && entry.TI[0] || entry.T1 && entry.T1[0] || 'N/A'),
-            year: (entry.PY && entry.PY[0] || 'N/A'),
-            type: (entry.M3 && entry.M3[0] || 'N/A'),
-            authors: entry.AU ? entry.AU.join(', ') : 'N/A',
-            doi: (entry.DO && entry.DO[0] || 'N/A'),
-            link: (entry.UR && entry.UR[0] || 'N/A'),
-            journal: (entry.T2 && entry.T2[0] || 'N/A'),
-            volume: (entry.VL && entry.VL[0] || ''),
-            issue: (entry.IS && entry.IS[0] || ''),
-            abstract: (entry.AB && entry.AB[0] || 'N/A'),
-            keywords: entry.KW ? entry.KW.join(', ') : 'N/A',
-            language: (entry.LA && entry.LA[0] || 'N/A'),
+    function normaliseStudy(entry, probabilityScore) {
+        return {
+            id: null, // backend assigns - clever,
+            title: entry.TI?.[0] ?? entry.T1?.[0] ?? "",
+            abstract: entry.AB?.[0] ?? "",
+            authors: entry.AB?.[0] ?? "",
+            year: entry.PY ? parseInt(entry.PY[0], 10) || null : null,
+            journal: entry.T2?.[0] ?? "",
+            volume: entry.VL?.[0] ?? "",
+            issue: entry.IS?.[0] ?? "",
+            doi: entry.DO?.[0] ?? "",
+            link: entry.UR?.[0] ?? "",
+            keywords: entry.KW ? entry.KW.join(", ") : "",
+            language: entry.LA?.[0] ?? "",
+
+            // screening
             votes: { accept: [], reject: [] },
             status: "No votes",
+
+            fullTextVotes: { accept: [], reject: [] },
+            fullTextStatus: "Full Text No Votes",
+
+            notes: [],
             tagStatus: "",
 
-            fullTextVotes: { accept: [], reject: []},
-            fullTextStatus: "Full Text No Votes",
-            notes: [],
-            probabilityScore: handleProbabilityScore(entry),
-        }));
+            probabilityScore
+        };
+    }
+
+    function handleStudyDetails(records) {
+        return records.map(entry => {
+            const probabilityScore = handleProbabilityScore(entry);
+            return normaliseStudy(entry, probabilityScore);
+        });
     }
 
     function handleFileUpload(e) {
