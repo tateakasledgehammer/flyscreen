@@ -3,8 +3,6 @@ import { formatAuthors, capitaliseFirstLetter } from "../utils/screeningTools";
 export default function StudyInfo(props) {
     const {
         study,
-        studies,
-        hideDetails,
         highlighted,
         inclusionCriteria,
         exclusionCriteria,
@@ -12,14 +10,35 @@ export default function StudyInfo(props) {
         highlightContent,
         isExpanded,
         handleToggleDetails
-    } = props
+    } = props;
 
     if (!study) return null;
 
-    const { score, details } = study.probabilityScore;
-    const total = inclusionCriteria.length;
-    const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+    // Tracking scores
+    const probabilityScore = study.probabilityScore ?? { 
+        score: 0, 
+        details: { inclusionMatches: {}, exclusionMatches: {} } 
+    };
 
+    const details = 
+        typeof probabilityScore.details === "object" && probabilityScore.details !== null
+            ? probabilityScore.details
+            : { inclusionMatches: {}, exclusionMatches: {} };
+
+    const inclusionMatches = details.inclusionMatches ?? {};
+    const exclusionMatches = details.exclusionMatches ?? {};
+    
+    const score = Object.values(inclusionMatches)
+        .filter(terms => Array.isArray(terms) && terms.length > 0)
+        .length
+
+    const totalCriteria = Array.isArray(inclusionCriteria) 
+        ? inclusionCriteria.length 
+        : 0;
+
+    const percentage = totalCriteria > 0 ? Math.round((score / totalCriteria) * 100) : 0;
+
+    // Colours for scores
     let probabilityClass = "low-probability";
     if (percentage >= 67) {
         probabilityClass = "high-probability";
@@ -48,17 +67,26 @@ export default function StudyInfo(props) {
             </h3>
 
             <div className={`percentile-card ${probabilityClass}`}>
-                {study.probabilityScore.score}/{inclusionCriteria.length}
+                {totalCriteria === 0 ? "N/A" : `${score}/${totalCriteria}`}
+
                 <div className="percentile-contents">
+                    {totalCriteria === 0 && (
+                        <p>
+                            No criteria set - probability score N/A
+                        </p>
+                    )}
+
                     <h4>Inclusion Matches:</h4>
-                    {Object.entries(study.probabilityScore.details.inclusionMatches).map(([category, terms]) => (
+                    {Object.keys(inclusionMatches).length === 0 && <p>None</p>}
+                    {Object.entries(inclusionMatches).map(([category, terms]) => (
                         <p key={capitaliseFirstLetter(category)}>
                             {capitaliseFirstLetter(category)}: {terms.join(", ")}
                         </p>
                     ))}
                     <h4>Exclusion Matches:</h4>
-                    {Object.entries(study.probabilityScore.details.exclusionMatches).map(([category, terms]) => (
-                        <p key={category}>
+                    {Object.keys(exclusionMatches).length === 0 && <p>None</p>}
+                    {Object.entries(exclusionMatches).map(([category, terms]) => (
+                        <p key={capitaliseFirstLetter(category)}>
                             {capitaliseFirstLetter(category)}: {terms.join(", ")}
                         </p>
                     ))}
@@ -75,7 +103,8 @@ export default function StudyInfo(props) {
             <p className="disappear-when-reduced"><strong>Journal: </strong>{study.journal}</p>
             <p className="disappear-when-reduced"><strong>Volume: </strong>{study.volume}</p>
             <p className="disappear-when-reduced"><strong>Issue: </strong>{study.issue}</p>
-            <p><strong>DOI: </strong>
+            <p>
+                <strong>DOI: </strong>
                 {(study.doi !== "N/A") ? (
                     <a 
                         href={`https://doi.org/${study.doi}`}
@@ -94,8 +123,6 @@ export default function StudyInfo(props) {
                 {!isExpanded ? "▲ Hide details" : "▼ Show details"}
             </button>
             
-            <input type="file" accept=".pdf" />
-
             {!isExpanded && (
                 <div>
                     <p className="keywords">
@@ -104,8 +131,8 @@ export default function StudyInfo(props) {
                             <span className="highlightable">
                                 {highlightContent(
                                     study.keywords, 
-                                    inclusionCriteria.flatMap(section => section.criteria), 
-                                    exclusionCriteria.flatMap(section => section.criteria), 
+                                    inclusionCriteria.flatMap(s => s.criteria), 
+                                    exclusionCriteria.flatMap(s => s.criteria), 
                                     searchWords
                                 )}
                             </span>
@@ -121,8 +148,8 @@ export default function StudyInfo(props) {
                             <span className="highlightable">
                                 {highlightContent(
                                     study.abstract, 
-                                    inclusionCriteria.flatMap(section => section.criteria), 
-                                    exclusionCriteria.flatMap(section => section.criteria), 
+                                    inclusionCriteria.flatMap(s => s.criteria), 
+                                    exclusionCriteria.flatMap(s => s.criteria), 
                                     searchWords
                                 )}
                             </span>

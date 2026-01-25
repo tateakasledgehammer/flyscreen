@@ -57,69 +57,70 @@ export default function Import(props) {
         return records;
     };
 
-    function handleProbabilityScore(entry) {
-        const abstract = (entry.AB && entry.AB[0] || 'N/A');
-        const keywords = (entry.KW ? entry.KW.join(', ') : 'N/A');
-        const mainString = (abstract + " " + keywords).toLowerCase();
+    // REMOVE!! - handling all scoring in StudyInfo.jsx rather than storing, allows for more flexibility rather than locking in
+    // function handleProbabilityScore(entry) {
+    //     const abstract = (entry.AB && entry.AB[0] || 'N/A');
+    //     const keywords = (entry.KW ? entry.KW.join(', ') : 'N/A');
+    //     const mainString = (abstract + " " + keywords).toLowerCase();
 
-        let score = 0;
-        let details = {};
+    //     let score = 0;
+    //     let details = {};
 
-        if (mainString.length < 10) {
-            return {
-                score: 0, 
-                details: "Insufficient information available for study"    
-            };
-        }
+    //     if (mainString.length < 10) {
+    //         return {
+    //             score: 0, 
+    //             details: "Insufficient information available for study"    
+    //         };
+    //     }
 
-        if (!inclusionCriteria || inclusionCriteria.length === 0 && 
-            (!exclusionCriteria || exclusionCriteria.length === 0)) {
-            return {
-                score: 0,
-                details: "No criteria set, unable to score"
-            };
-        }
+    //     if (!inclusionCriteria || inclusionCriteria.length === 0 && 
+    //         (!exclusionCriteria || exclusionCriteria.length === 0)) {
+    //         return {
+    //             score: 0,
+    //             details: "No criteria set, unable to score"
+    //         };
+    //     }
 
-        let inclusionMatches = {};
-        if (inclusionCriteria && Array.isArray(inclusionCriteria)) {
-            inclusionCriteria.forEach(section => {
-                const foundIncludedWords = section.criteria.filter(w => 
-                    mainString.includes(w.toLowerCase())
-                );
+    //     let inclusionMatches = {};
+    //     if (inclusionCriteria && Array.isArray(inclusionCriteria)) {
+    //         inclusionCriteria.forEach(section => {
+    //             const foundIncludedWords = section.criteria.filter(w => 
+    //                 mainString.includes(w.toLowerCase())
+    //             );
 
-                inclusionMatches[section.category] = 
-                    foundIncludedWords.length > 0 ? foundIncludedWords : ["N/A"];
+    //             inclusionMatches[section.category] = 
+    //                 foundIncludedWords.length > 0 ? foundIncludedWords : ["N/A"];
 
-                if (foundIncludedWords.length > 0) {
-                    score += 1;
-                }
-            });
-        }
+    //             if (foundIncludedWords.length > 0) {
+    //                 score += 1;
+    //             }
+    //         });
+    //     }
 
-        let exclusionMatches = {};
-        if (exclusionCriteria && Array.isArray(exclusionCriteria)) {
-            exclusionCriteria.forEach(section => {
-                const foundExcludedWords = section.criteria.filter(w => 
-                    mainString.includes(w.toLowerCase())
-                );
+    //     let exclusionMatches = {};
+    //     if (exclusionCriteria && Array.isArray(exclusionCriteria)) {
+    //         exclusionCriteria.forEach(section => {
+    //             const foundExcludedWords = section.criteria.filter(w => 
+    //                 mainString.includes(w.toLowerCase())
+    //             );
 
-                exclusionMatches[section.category] = 
-                    foundExcludedWords.length > 0 ? foundExcludedWords : ["N/A"];
+    //             exclusionMatches[section.category] = 
+    //                 foundExcludedWords.length > 0 ? foundExcludedWords : ["N/A"];
 
-                if (foundExcludedWords.length > 0) {
-                    score -= 1;
-                }
-            });
-        }
+    //             if (foundExcludedWords.length > 0) {
+    //                 score -= 1;
+    //             }
+    //         });
+    //     }
 
-        return {
-            score,
-            details: {
-                inclusionMatches,
-                exclusionMatches
-            }
-        }
-    }
+    //     return {
+    //         score,
+    //         details: {
+    //             inclusionMatches,
+    //             exclusionMatches
+    //         }
+    //     }
+    // }
 
     function normaliseStudy(entry, probabilityScore) {
         return {
