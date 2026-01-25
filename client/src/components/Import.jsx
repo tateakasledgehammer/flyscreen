@@ -15,6 +15,7 @@ export default function Import(props) {
     const [uploadTimestamp, setUploadTimestamp] = useState('')
     const [uploadHistory, setUploadHistory] = useState([])
     const [isLoading, setIsLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState('');
 
     useEffect(() => {
         const savedFileName = localStorage.getItem('fileName');
@@ -162,6 +163,30 @@ export default function Import(props) {
         });
     }
 
+    async function uploadStudiesInBatches(studies, batchSize = 100) {
+        for (let i = 0; i < studies.length; i+= batchSize) {
+            const batch = studies.slice(i, i + batchSize);
+
+            const response = await fetch("http://localhost:5005/api/studies/bulk", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ studies: batch }),
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || "Batch upload failed");
+            }
+
+            console.log(
+                `Uploaded batch ${i / batchsize + 1} / ${Math.ceil(studies.length / batchSize)}`
+            );
+
+            setUploadProgress(`Uploading ${i + batch.length} / ${studies.length}`);
+        }
+    }
+
     function handleFileUpload(e) {
         const file = e.target.files[0];
         if (!file) return setError("No files uploaded");
@@ -172,29 +197,29 @@ export default function Import(props) {
         localStorage.setItem('fileName', file.name)
         setIsLoading(true);
 
-        async function sendBulkStudiesToServer(studiesArray) {
-            try {
-                const response = await fetch("http://localhost:5005/api/studies/bulk", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ studies: studiesArray}),
-                });
+        // async function sendBulkStudiesToServer(studiesArray) {
+        //     try {
+        //         const response = await fetch("http://localhost:5005/api/studies/bulk", {
+        //             method: "POST",
+        //             credentials: "include",
+        //             headers: { "Content-Type": "application/json" },
+        //             body: JSON.stringify({ studies: studiesArray}),
+        //         });
     
-                const data = await response.json();
+        //         const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.error || "Failed to upload studies");
-                }
-                console.log("Bulk upload successful", data);
+        //         if (!response.ok) {
+        //             throw new Error(data.error || "Failed to upload studies");
+        //         }
+        //         console.log("Bulk upload successful", data);
     
-            } catch (error) {
-                console.error("Error uploading bulk studies:", error)
-            }
-        }
+        //     } catch (error) {
+        //         console.error("Error uploading bulk studies:", error)
+        //     }
+        // }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
             try {
                 const parsedStudies = parseRIS(e.target.result);
                 const studiesInDetail = handleStudyDetails(parsedStudies);
@@ -219,7 +244,8 @@ export default function Import(props) {
                 setUploadHistory(updatedUploadHistory);
                 localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
                 
-                sendBulkStudiesToServer(studiesInDetail);
+                // sendBulkStudiesToServer(studiesInDetail);
+                await uploadStudiesInBatches(studiesInDetail, 100);
             } catch (err) {
                 setError('Error parsing the file');
                 console.log(err);
@@ -293,7 +319,9 @@ export default function Import(props) {
                         </li>
                     ))}
                 </ul>
-            )}                
+            )}
+
+            {uploadProgress && <p>{uploadProgress}</p>}                
 
             <button onClick={handleClear}>Clear studies</button>
         </div>

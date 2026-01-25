@@ -88,7 +88,7 @@ db.prepare(`
 
 
 const insertManyStudies = db.transaction((studies) => {
-    const statement = db.prepare(`
+    const insert = db.prepare(`
         INSERT INTO studies (
             title, abstract, authors, year, type,
             journal, volume, issue, doi, link,
@@ -101,7 +101,7 @@ const insertManyStudies = db.transaction((studies) => {
     `);
 
     for (const study of studies) {
-        statement.run(study);
+        insert.run(study);
     }
 });
 

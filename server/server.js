@@ -157,7 +157,21 @@ app.delete("/api/studies/:id", (req, res) => {
     res.json({ success: true });
 });
 
+// clear studies
+app.delete('/api/studies', async (req, res) => {
+    try {
+        const stmt = db.prepare("DELETE FROM studies");
+        stmt.run();
+        res.status(200).json({ message: "All studies deleted" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || "Failed to delete studies" })
+    }
+});
+
 ///////////////////////
+
+// ---- GENERAL & AUTH ----
 
 app.get("/", (req, res) => {
     res.send("Welcome to the Flyscreen Academics server");
@@ -283,6 +297,8 @@ app.post("/authentication", (req, res) => {
     }
 });
 
+// ---- TRACKING VOTES ----
+
 app.post("/api/screenings", (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Not authenticated" });
 
@@ -303,17 +319,6 @@ app.get("/api/screenings", (req, res) => {
 
     const rows = getScreeningsForStudies.all();
     res.json(rows);
-});
-
-app.delete('/api/studies', async (req, res) => {
-    try {
-        const stmt = db.prepare("DELETE FROM studies");
-        stmt.run();
-        res.status(200).json({ message: "All studies deleted" })
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message || "Failed to delete studies" })
-    }
 });
 
 app.listen(PORT, () => {
