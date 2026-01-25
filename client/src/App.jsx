@@ -74,12 +74,6 @@ function App() {
     localStorage.setItem("projectTitle", projectTitle)
   }, [projectTitle]);
 
-  useEffect(() => {
-    if (studies && Array.isArray(studies)) {
-      localStorage.setItem("studies", JSON.stringify(studies))
-    }
-  }, [studies]);
-
   const [studyTags, setStudyTags] = useState(() => {
     const savedStudyTags = localStorage.getItem('studyTags');
     return savedStudyTags ? JSON.parse(savedStudyTags) : [];

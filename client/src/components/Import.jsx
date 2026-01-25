@@ -28,10 +28,6 @@ export default function Import(props) {
         if (savedUploadHistory) setUploadHistory(JSON.parse(savedUploadHistory));
     }, [])
 
-    useEffect(() => {
-        localStorage.setItem('studies', JSON.stringify(studies));
-    }, [studies])
-
     function parseRIS(content) {
         const lines = content.split(/\r?\n/);
         const records = []; 
@@ -180,11 +176,19 @@ export default function Import(props) {
             }
 
             console.log(
-                `Uploaded batch ${i / batchsize + 1} / ${Math.ceil(studies.length / batchSize)}`
+                `Uploaded batch ${i / batchSize + 1} / ${Math.ceil(studies.length / batchSize)}`
             );
 
             setUploadProgress(`Uploading ${i + batch.length} / ${studies.length}`);
         }
+    }
+
+    async function fetchStudiesFromServer() {
+        const res = await fetch("http://localhost:5005/api/studies", {
+            credentials: "include"
+        });
+        const data = await res.json();
+        setStudies(data)
     }
 
     function handleFileUpload(e) {
@@ -197,38 +201,11 @@ export default function Import(props) {
         localStorage.setItem('fileName', file.name)
         setIsLoading(true);
 
-        // async function sendBulkStudiesToServer(studiesArray) {
-        //     try {
-        //         const response = await fetch("http://localhost:5005/api/studies/bulk", {
-        //             method: "POST",
-        //             credentials: "include",
-        //             headers: { "Content-Type": "application/json" },
-        //             body: JSON.stringify({ studies: studiesArray}),
-        //         });
-    
-        //         const data = await response.json();
-                
-        //         if (!response.ok) {
-        //             throw new Error(data.error || "Failed to upload studies");
-        //         }
-        //         console.log("Bulk upload successful", data);
-    
-        //     } catch (error) {
-        //         console.error("Error uploading bulk studies:", error)
-        //     }
-        // }
-
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
                 const parsedStudies = parseRIS(e.target.result);
                 const studiesInDetail = handleStudyDetails(parsedStudies);
-
-                setStudies(prev => {
-                    const fullStudies = [...prev, ...studiesInDetail];
-                    localStorage.setItem('studies', JSON.stringify(fullStudies));
-                    return fullStudies;
-                });
 
                 const timeOfUpload = new Date().toLocaleString();
                 setUploadTimestamp(timeOfUpload);
@@ -244,8 +221,8 @@ export default function Import(props) {
                 setUploadHistory(updatedUploadHistory);
                 localStorage.setItem('uploadHistory', JSON.stringify(updatedUploadHistory));
                 
-                // sendBulkStudiesToServer(studiesInDetail);
                 await uploadStudiesInBatches(studiesInDetail, 100);
+                fetchStudiesFromServer();
             } catch (err) {
                 setError('Error parsing the file');
                 console.log(err);
@@ -286,7 +263,6 @@ export default function Import(props) {
             setUploadTimestamp('');
             setUploadHistory([]);
 
-            localStorage.removeItem('studies');
             localStorage.removeItem('fileName');
             localStorage.removeItem('uploadTimestamp');
             localStorage.removeItem('uploadHistory');
