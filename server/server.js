@@ -305,6 +305,17 @@ app.get("/api/screenings", (req, res) => {
     res.json(rows);
 });
 
+app.delete('/api/studies', async (req, res) => {
+    try {
+        const stmt = db.prepare("DELETE FROM studies");
+        stmt.run();
+        res.status(200).json({ message: "All studies deleted" })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message || "Failed to delete studies" })
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

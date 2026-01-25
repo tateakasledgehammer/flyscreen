@@ -230,17 +230,47 @@ export default function Import(props) {
         reader.readAsText(file);
     }
     
-    function handleClear() {
-        setStudies([]);
-        setFileName('');
-        setUploadTimestamp('');
-        setUploadHistory([]);
-        setIsLoading(false);
+    async function handleClear() {
+        setIsLoading(true);
 
-        localStorage.removeItem('studies');
-        localStorage.removeItem('fileName');
-        localStorage.removeItem('uploadTimestamp');
-        localStorage.removeItem('uploadHistory')
+        try {
+            const response = await fetch("http://localhost:5005/api/studies", {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                let errorMessage = "Failed to clear studies from the backend";
+
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.error) {
+                        errorMessage = errorData.error;
+                    } else if (typeof errorData === "string") {
+                        errorMessage = errorData;
+                    }
+                } catch {
+
+                }
+                throw new Error(errorMessage);
+            }
+            
+            setStudies([]);
+            setFileName('');
+            setUploadTimestamp('');
+            setUploadHistory([]);
+
+            localStorage.removeItem('studies');
+            localStorage.removeItem('fileName');
+            localStorage.removeItem('uploadTimestamp');
+            localStorage.removeItem('uploadHistory');
+
+        } catch (err) {
+            console.error("Error clearing studies: ", err);
+            setError("Failed to clear studies from backend. Try again.");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
