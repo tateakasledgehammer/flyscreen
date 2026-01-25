@@ -113,8 +113,8 @@ export default function Overview(props) {
                 <h3>Title & Abstract Screening</h3>
                 <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
                 <ul>
-                    <li>Unscreened: {studies.filter(study => study.status === "No votes").length}</li>
-                    <li>One Vote: {studies.filter(study => study.status === "Awaiting second vote").length}</li>
+                    <li>Unscreened: {studies.filter(study => study.status === "No Votes").length}</li>
+                    <li>One Vote: {studies.filter(study => study.status === "Awaiting Second Vote").length}</li>
                     <li>Approved: {studies.filter(study => study.status === "Accepted").length}</li>
                     <li>Conflicts: {studies.filter(study => study.status === "Conflict").length}</li>
                     <li>Rejected: {studies.filter(study => study.status === "Rejected").length}</li>

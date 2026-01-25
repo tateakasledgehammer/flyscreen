@@ -70,9 +70,9 @@ export function updateStudyStatus(votes) {
     } else if (votes.reject.length === 1 && votes.accept.length === 1) {
         return "Conflict";
     } else if (votes.accept.length === 1 || votes.reject.length === 1) {
-        return "Awaiting second vote";
+        return "Awaiting Second Vote";
     } else {
-        return "No votes"
+        return "No Votes"
     };
 }
 

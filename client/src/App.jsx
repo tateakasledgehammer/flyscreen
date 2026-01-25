@@ -32,7 +32,7 @@ function App() {
           accept: [...new Set(study.votes?.accept || [])],
           reject: [...new Set(study.votes?.reject || [])]
         },
-        status: study.status || "No votes"
+        status: study.status || "No Votes"
       }));
     } catch (e) {
       console.error("Failed to parse studies from localStorage", e);

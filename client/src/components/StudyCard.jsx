@@ -280,7 +280,7 @@ export default function StudyCard(props) {
                     {/* Actions section */}
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
-                        {(study.status === "No votes" || study.status === "Awaiting second vote") && (
+                        {(study.status === "No Votes" || study.status === "Awaiting Second Vote") && (
                             <>
                                 <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
                                 <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
@@ -292,7 +292,7 @@ export default function StudyCard(props) {
                                 <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
                             </>
                         )}
-                        {(study.status !== "Accepted" && study.status !== "No votes") && (
+                        {(study.status !== "Accepted" && study.status !== "No Votes") && (
                                 <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                         )}
 

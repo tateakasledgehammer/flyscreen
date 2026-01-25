@@ -143,7 +143,7 @@ export default function Import(props) {
 
             // screening
             votes: { accept: [], reject: [] },
-            status: "No votes",
+            status: "No Votes",
 
             fullTextVotes: { accept: [], reject: [] },
             fullTextStatus: "Full Text No Votes",

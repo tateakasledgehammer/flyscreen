@@ -40,7 +40,7 @@ export default function TAScreening(props) {
             .then(res => res.json())
             .then(setScreenings)
     }, []);
-    
+
     const safeStudies = studies.map(ensureStudyShape);
 
     const studiesWithStatus = safeStudies.map(study => ({
@@ -135,13 +135,12 @@ export default function TAScreening(props) {
 
     const filteredStudiesByStatus = filteredStudies.filter(study => {
         if (statusFilter === "UNSCREENED") {
-            return study.status === "No votes"
+            return study.status === "No Votes"
         } else if (statusFilter === "AWAITING SECOND VOTE") {
             const userHasVotedCheck =
                 study.votes.accept.some(u => u.username === user.username) ||
                 study.votes.reject.some(u => u.username === user.username)
-
-            return study.status === "Awaiting second vote" && !userHasVotedCheck;
+            return study.status === "Awaiting Second Vote" && !userHasVotedCheck;
         } else if (statusFilter === "CONFLICT") {
             return study.status === "Conflict"
         } else if (statusFilter === "ACCEPTED") {
@@ -149,7 +148,7 @@ export default function TAScreening(props) {
         } else if (statusFilter === "REJECTED") {
             return study.status === "Rejected"
         } else {
-            return study.status === "No votes"
+            return study.status === "No Votes"
         }
     })
     
@@ -192,22 +191,22 @@ export default function TAScreening(props) {
                 {(statusFilter == "UNSCREENED") ? (
                     <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}
                     style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        UNSCREENED ({studiesWithStatus.filter(study => !study.status || study.status === "No votes").length})
+                        UNSCREENED ({studiesWithStatus.filter(study => !study.status || study.status === "No Votes").length})
                     </button>
                 ) : (
                     <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}>
-                        UNSCREENED ({studiesWithStatus.filter(study => !study.status || study.status === "No votes").length})
+                        UNSCREENED ({studiesWithStatus.filter(study => !study.status || study.status === "No Votes").length})
                     </button>
                 )}
 
                 {(statusFilter == "AWAITING SECOND VOTE") ? (
                     <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}
                     style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        AWAITING SECOND VOTE ({studiesWithStatus.filter(study => !study.status || study.status === "Awaiting second vote").length})
+                        AWAITING SECOND VOTE ({studiesWithStatus.filter(study => !study.status || study.status === "Awaiting Second Vote").length})
                     </button>
                 ) : (
                     <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}>
-                        AWAITING SECOND VOTE ({studiesWithStatus.filter(study => !study.status || study.status === "Awaiting second vote").length})
+                        AWAITING SECOND VOTE ({studiesWithStatus.filter(study => !study.status || study.status === "Awaiting Second Vote").length})
                     </button>
                 )}    
 
