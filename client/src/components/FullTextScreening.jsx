@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { handleSortByOrder, getStudyStatus } from "../utils/screeningTools";
+import { handleSortByOrder, ensureStudyShape, getStudyStatus, getFullTextStudyStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
@@ -31,6 +31,7 @@ export default function FullTextScreening(props) {
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
     const [fullTextStatusFilter, setFullTextStatusFilter] = useState("UNSCREENED")
+    const [hideDetails, setHideDetails] = useState(false);
 
     const [screenings, setScreenings] = useState([]);
     useEffect(() => {
@@ -40,6 +41,15 @@ export default function FullTextScreening(props) {
             .then(res => res.json())
             .then(setScreenings)
     }, []);
+
+    const safeStudies = studies.map(ensureStudyShape);
+
+    const taAcceptedStudies = safeStudies.filter(study => getStudyStatus(study.id, screenings) === "Accepted");
+    
+    const studiesWithFullTextStatus = taAcceptedStudies.map(study => ({
+        ...study,
+        status: getFullTextStudyStatus(study)
+    }));
 
     const fullTextSubheadings = [
         { label: "UNSCREENED", key: "Full Text No Votes" },
@@ -73,7 +83,7 @@ export default function FullTextScreening(props) {
     }
 
     function handleToggleDetailsGlobal() {
-        alert("This function has not been set up")
+        setHideDetails(prev => !prev);
     }
 
     function handleToggleHighlightsGlobal() {
@@ -86,22 +96,6 @@ export default function FullTextScreening(props) {
 
     function toggleStudyStatusShowing(filter) {
         setFullTextStatusFilter(filter)
-    }
-
-    function toggleStudyStatusShowing(filter) {
-        setFullTextStatusFilter(filter)
-    }
-
-    function clearFilters() {
-        setSelectedType("");
-        setSelectedLanguage("");
-        setSelectedYear(null);
-        setSearchFilter("");
-        setSearchFilterInput("");
-        setSortBy('index_asc');
-        setHighlighted(false);
-        setItemsPerPage(25);
-        setTagFilter("");
     }
 
     const [selectedYear, setSelectedYear] = useState(null);
@@ -119,8 +113,19 @@ export default function FullTextScreening(props) {
         setSelectedType(value)
     }
 
-    const filteredStudies = studies
-        .filter(study => study.status === "Accepted")
+    function clearFilters() {
+        setSelectedType("");
+        setSelectedLanguage("");
+        setSelectedYear(null);
+        setSearchFilter("");
+        setSearchFilterInput("");
+        setSortBy('index_asc');
+        setHighlighted(false);
+        setItemsPerPage(25);
+        setTagFilter("");
+    }
+    
+    const filteredStudies = studiesWithFullTextStatus
         .filter(study => {
             if (!searchFilter) return true;
             return (
@@ -173,7 +178,7 @@ export default function FullTextScreening(props) {
             <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
 
             <ScreeningFilters
-                studies={studies}
+                studies={studiesWithFullTextStatus}
                 setSortBy={setSortBy}
                 handleItemsPerPage={handleItemsPerPage}
                 itemsPerPage={itemsPerPage}
@@ -240,6 +245,8 @@ export default function FullTextScreening(props) {
                 setSearchFilter={setSearchFilter}
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
+                hideDetails={hideDetails}
+                setHideDetails={setHideDetails}
             />
         </div>
         </>

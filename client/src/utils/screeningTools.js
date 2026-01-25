@@ -131,7 +131,21 @@ export function getStudyStatus(studyId, screenings) {
     if (included >= 2) return "Accepted"
     if (excluded >= 2) return "Rejected"
     if (included > 0 && excluded > 0) return "Conflict";
-    if (included === 1 || excluded === 1) return "Awaiting second vote"
-    return "No votes"
+    if (included === 1 || excluded === 1) return "Awaiting Second Vote"
+    return "No Votes"
+}
 
+export function getFullTextStudyStatus(study) {
+    const acceptVotes = Array.isArray(study.fullTextVotes?.accept) ? study.fullTextVotes.accept : [];
+    const rejectVotes = Array.isArray(study.fullTextVotes?.reject) ? study.fullTextVotes.reject : [];
+
+    const acceptCount = acceptVotes.length;
+    const rejectCount = rejectVotes.length;
+
+    if (acceptCount >= 2) return "Full Text Accepted"
+    if (rejectCount >= 2) return "Full Text Rejected"
+    if (acceptCount > 0 && rejectCount > 0) return "Full Text Conflict";
+    if (acceptCount === 1 || rejectCount === 1) return "Full Text Awaiting Second Vote"
+    
+    return "Full Text No Votes"
 }
