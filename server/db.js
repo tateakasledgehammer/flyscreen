@@ -103,10 +103,29 @@ const insertManyStudies = db.transaction((studies) => {
     for (const study of studies) {
         statement.run(study);
     }
-})
+});
+
+const upsertScreening = db.prepare(`
+    INSERT INTO screenings (user_id, study_id, status, reason)
+    VALUES (@user_id, @study_id, @status, @reason)
+    ON CONFLICT(user_id, study_id)
+    DO UPDATE SET
+     status = excluded.status,
+     reason = excluded.reason,
+     updated_at = CURRENT_TIMESTAMP
+ `);
+ 
+ const getScreeningsForStudies = db.prepare(`
+     SELECT * FROM screenings
+     WHERE study_id IN (
+         SELECT id FROM studies
+     )
+ `);
 
 module.exports = {
     db,
+    upsertScreening,
+    getScreeningsForStudies,
 
     // studies
     createStudy: db.prepare(`

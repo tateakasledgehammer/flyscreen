@@ -1,4 +1,4 @@
-import { formatAuthors, handleSortByOrder } from "../utils/screeningTools";
+import { formatAuthors, handleSortByOrder, getStudyStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
@@ -30,6 +30,15 @@ export default function ExcludedStudies(props) {
     const [highlighted, setHighlighted] = useState(false)
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
+
+    const [screenings, setScreenings] = useState([]);
+    useEffect(() => {
+        fetch("http://localhost:5005/api/screenings", {
+            credentials: "include"
+        })
+            .then(res => res.json())
+            .then(setScreenings)
+    }, []);
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);

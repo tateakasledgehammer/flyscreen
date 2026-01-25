@@ -121,3 +121,17 @@ export function capitaliseFirstLetter(str) {
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function getStudyStatus(studyId, screenings) {
+    const votes = screenings.filter(s => s.study_id === studyId);
+
+    const included = votes.filter(v => v.status === "included").length;
+    const excluded = votes.filter(v => v.status === "excluded").length;
+
+    if (included >= 2) return "Accepted"
+    if (excluded >= 2) return "Rejected"
+    if (included > 0 && excluded > 0) return "Conflict";
+    if (included === 1 || excluded === 1) return "Awaiting second vote"
+    return "No votes"
+
+}

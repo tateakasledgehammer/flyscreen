@@ -18,7 +18,9 @@ const {
     getAllStudies,
     getStudyById,
     deleteStudy,
-    insertManyStudies
+    insertManyStudies,
+    upsertScreening,
+    getScreeningsForStudies
 } = require("./db");
 
 const COOKIE_OPTIONS = {
@@ -279,6 +281,28 @@ app.post("/authentication", (req, res) => {
         console.error("Error saving user: ", err);
         return res.json({ success: false, errors: ["Could not save user"] })
     }
+});
+
+app.post("/api/screenings", (req, res) => {
+    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+
+    const { study_id, status, reason } = req.body;
+
+    upsertScreening.run({
+        user_id: req.user.userid,
+        study_id,
+        status,
+        reason: reason ?? null
+    });
+
+    res.json({ success: true });
+});
+
+app.get("/api/screenings", (req, res) => {
+    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+
+    const rows = getScreeningsForStudies.all();
+    res.json(rows);
 });
 
 app.listen(PORT, () => {

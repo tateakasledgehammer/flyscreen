@@ -33,7 +33,7 @@ export default function StudyCard(props) {
     function handleVote(studyId, action) {
         setStudies(prev => {
             const updated = prev.map(study => {
-                if (study.id !== studyId) return study;
+                if ((study.id ?? study._clientId) !== studyId) return study;
 
                 let votes = {
                     accept: study.votes.accept.filter(u => u.id !== user.id),

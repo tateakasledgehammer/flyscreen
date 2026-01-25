@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { handleSortByOrder } from "../utils/screeningTools";
+import { handleSortByOrder, getStudyStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
@@ -31,6 +31,15 @@ export default function FullTextScreening(props) {
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
     const [fullTextStatusFilter, setFullTextStatusFilter] = useState("UNSCREENED")
+
+    const [screenings, setScreenings] = useState([]);
+    useEffect(() => {
+        fetch("http://localhost:5005/api/screenings", {
+            credentials: "include"
+        })
+            .then(res => res.json())
+            .then(setScreenings)
+    }, []);
 
     const fullTextSubheadings = [
         { label: "UNSCREENED", key: "Full Text No Votes" },
