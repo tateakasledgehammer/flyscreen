@@ -1,4 +1,4 @@
-import { formatAuthors, capitaliseFirstLetter } from "../utils/screeningTools";
+import { formatAuthors, capitaliseFirstLetter, handleProbabilityScore } from "../utils/screeningTools";
 
 export default function StudyInfo(props) {
     const {
@@ -13,38 +13,39 @@ export default function StudyInfo(props) {
     } = props;
 
     if (!study) return null;
+    console.group("📊 StudyInfo debug");
+    console.log("Study title:", study.title);
+    console.log("Inclusion criteria:", inclusionCriteria);
+    console.log("Exclusion criteria:", exclusionCriteria);
+    console.log("Abstract snippet:", study.abstract?.slice(0, 200));
+    console.log("Keywords:", study.keywords);
+    console.groupEnd();
+
 
     // Tracking scores
-    const probabilityScore = study.probabilityScore ?? { 
-        score: 0, 
-        details: { inclusionMatches: {}, exclusionMatches: {} } 
-    };
-
-    const details = 
-        typeof probabilityScore.details === "object" && probabilityScore.details !== null
-            ? probabilityScore.details
-            : { inclusionMatches: {}, exclusionMatches: {} };
-
-    const inclusionMatches = details.inclusionMatches ?? {};
-    const exclusionMatches = details.exclusionMatches ?? {};
-    
-    const score = Object.values(inclusionMatches)
-        .filter(terms => Array.isArray(terms) && terms.length > 0)
-        .length
+    const {
+        score,
+        inclusionMatches,
+        exclusionMatches
+    } = handleProbabilityScore({
+        abstract: study.abstract,
+        keywords: study.keywords,
+        inclusionCriteria,
+        exclusionCriteria
+    })
 
     const totalCriteria = Array.isArray(inclusionCriteria) 
         ? inclusionCriteria.length 
         : 0;
 
-    const percentage = totalCriteria > 0 ? Math.round((score / totalCriteria) * 100) : 0;
+    const percentage = totalCriteria > 0 
+        ? Math.round((score / totalCriteria) * 100) 
+        : 0;
 
     // Colours for scores
     let probabilityClass = "low-probability";
-    if (percentage >= 67) {
-        probabilityClass = "high-probability";
-    } else if (percentage >= 34) {
-        probabilityClass = "medium-probability";
-    }
+    if (percentage >= 67) probabilityClass = "high-probability";
+    else if (percentage >= 34) probabilityClass = "medium-probability";
 
     return (
         <>
@@ -70,24 +71,19 @@ export default function StudyInfo(props) {
                 {totalCriteria === 0 ? "N/A" : `${score}/${totalCriteria}`}
 
                 <div className="percentile-contents">
-                    {totalCriteria === 0 && (
-                        <p>
-                            No criteria set - probability score N/A
-                        </p>
-                    )}
-
                     <h4>Inclusion Matches:</h4>
                     {Object.keys(inclusionMatches).length === 0 && <p>None</p>}
+
                     {Object.entries(inclusionMatches).map(([category, terms]) => (
                         <p key={capitaliseFirstLetter(category)}>
-                            {capitaliseFirstLetter(category)}: {terms.join(", ")}
+                            {capitaliseFirstLetter(category)}: {terms.length > 0 ? terms.join(", "): "None"}
                         </p>
                     ))}
                     <h4>Exclusion Matches:</h4>
                     {Object.keys(exclusionMatches).length === 0 && <p>None</p>}
                     {Object.entries(exclusionMatches).map(([category, terms]) => (
                         <p key={capitaliseFirstLetter(category)}>
-                            {capitaliseFirstLetter(category)}: {terms.join(", ")}
+                            {capitaliseFirstLetter(category)}: {terms.length > 0 ? terms.join(", "): "None"}
                         </p>
                     ))}
                 </div>

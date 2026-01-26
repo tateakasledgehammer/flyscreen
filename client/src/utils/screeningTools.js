@@ -149,3 +149,49 @@ export function getFullTextStudyStatus(study) {
     
     return "Full Text No Votes"
 }
+
+export function handleProbabilityScore({
+    abstract = "",
+    keywords = "",
+    inclusionCriteria = [],
+    exclusionCriteria = []    
+}) {
+
+    const mainString = `${abstract} ${keywords}`.toLowerCase();
+
+    let score = 0;
+    const inclusionMatches = {};
+    const exclusionMatches = {};
+
+    inclusionCriteria.forEach(section => {
+        const matches = (section.criteria || [])
+            .map(term => term.trim().toLowerCase())
+            .filter(Boolean)
+            .filter(term => mainString.includes(term.toLowerCase())
+        );
+
+        inclusionMatches[section.category] = 
+            matches.length > 0 ? matches : [];
+
+        if (matches.length > 0) score +=1
+    });
+
+    exclusionCriteria.forEach(section => {
+        const matches = (section.criteria || [])
+            .map(term => term.trim().toLowerCase())
+            .filter(Boolean)
+            .filter(term => mainString.includes(term.toLowerCase())
+        );
+
+        exclusionMatches[section.category] = 
+            matches.length > 0 ? matches : [];
+
+        if (matches.length > 0) score -=1
+    });
+
+    return {
+        score,
+        inclusionMatches,
+        exclusionMatches
+    };
+}
