@@ -35,9 +35,10 @@ export default function StudyCard(props) {
             const updated = prev.map(study => {
                 if ((study.id ?? study._clientId) !== studyId) return study;
 
+                const existingVotes = study.votes ?? { accept: [], reject: [] }
                 let votes = {
-                    accept: study.votes.accept.filter(u => u.id !== user.id),
-                    reject: study.votes.reject.filter(u => u.id !== user.id)
+                    accept: existingVotes.accept.filter(u => u.id !== user.id),
+                    reject: existingVotes.reject.filter(u => u.id !== user.id)
                 };
 
                 if (action === "accept") {
@@ -100,9 +101,10 @@ export default function StudyCard(props) {
             const updated = prev.map(study => {
                 if (study.id !== studyId) return study;
                 
+                const existingFullTextVotes = study.fullTextVotes ?? { accept: [], reject: [] }
                 let fullTextVotes = {
-                    accept: study.fullTextVotes.accept.filter(u => u.id !== user.id),
-                    reject: study.fullTextVotes.reject.filter(u => u.id !== user.id)
+                    accept: existingFullTextVotes.accept.filter(u => u.id !== user.id),
+                    reject: existingFullTextVotes.reject.filter(u => u.id !== user.id)
                 };
 
                 if (action === "accept") {

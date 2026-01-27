@@ -13,13 +13,13 @@ export default function StudyInfo(props) {
     } = props;
 
     if (!study) return null;
-    console.group("📊 StudyInfo debug");
-    console.log("Study title:", study.title);
-    console.log("Inclusion criteria:", inclusionCriteria);
-    console.log("Exclusion criteria:", exclusionCriteria);
-    console.log("Abstract snippet:", study.abstract?.slice(0, 200));
-    console.log("Keywords:", study.keywords);
-    console.groupEnd();
+    // console.group("📊 StudyInfo debug");
+    // console.log("Study title:", study.title);
+    // console.log("Inclusion criteria:", inclusionCriteria);
+    // console.log("Exclusion criteria:", exclusionCriteria);
+    // console.log("Abstract snippet:", study.abstract?.slice(0, 200));
+    // console.log("Keywords:", study.keywords);
+    // console.groupEnd();
 
 
     // Tracking scores

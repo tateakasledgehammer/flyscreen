@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
-import { handleSortByOrder, ensureStudyShape, getStudyStatus } from "../utils/screeningTools";
+import { handleSortByOrder, ensureStudyShape, getStudyStatus, updateStudyStatus } from "../utils/screeningTools";
 import ScreeningFilters from "./ScreeningFilters";
 
 export default function TAScreening(props) {
@@ -45,10 +45,19 @@ export default function TAScreening(props) {
         ? studies.map(ensureStudyShape)
         : [];
 
-    const studiesWithStatus = safeStudies.map(study => ({
-        ...study,
-        status: getStudyStatus(study.id, screenings)
-    }));
+    function getVotesForStudy(studyId, screenings) {
+        return screenings.filter(s => s.study_id === studyId && s.stage === "TA");
+    }
+
+    const studiesWithStatus = safeStudies.map(study => {
+        const votes = getVotesForStudy(study.id, screenings);
+
+        return {
+            ...study,
+            votes,
+            status: updateStudyStatus(votes)
+        };
+    });
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);

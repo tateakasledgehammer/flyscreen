@@ -75,11 +75,11 @@ export default function Import(props) {
             language: entry.LA?.[0] ?? "",
 
             // screening
-            votes: { accept: [], reject: [] },
-            status: "No Votes",
+            // votes: { accept: [], reject: [] },
+            // status: "No Votes",
 
-            fullTextVotes: { accept: [], reject: [] },
-            fullTextStatus: "Full Text No Votes",
+            // fullTextVotes: { accept: [], reject: [] },
+            // fullTextStatus: "Full Text No Votes",
 
             notes: [],
             tagStatus: "",

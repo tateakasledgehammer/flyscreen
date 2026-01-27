@@ -63,17 +63,16 @@ export function handleSortByOrder(studies, sortBy) {
 }
 
 export function updateStudyStatus(votes) {
-    if (votes.accept.length >= 2) {
-        return "Accepted";
-    } else if (votes.reject.length >= 2) {
-        return "Rejected";
-    } else if (votes.reject.length === 1 && votes.accept.length === 1) {
-        return "Conflict";
-    } else if (votes.accept.length === 1 || votes.reject.length === 1) {
-        return "Awaiting Second Vote";
-    } else {
-        return "No Votes"
-    };
+    if (votes.length === 0) return "No Votes";
+
+    const accepts = votes.filter(v => v.vote === "ACCEPT").length;
+    const rejects = votes.filter(v => v.vote === "REJECT").length;
+
+    if (accepts === 2) return "Accepted";
+    if (rejects === 2) return "Rejected";
+    if (accepts > 0 && rejects > 0) return "Rejected";
+
+    return "Awaiting Second Vote"
 }
 
 export function updateFullTextScreeningStatus(fullTextVotes) {
