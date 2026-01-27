@@ -57,12 +57,15 @@ const initSchema = db.transaction(() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             study_id INTEGER NOT NULL,
-            status TEXT CHECK(status IN ('unscreened','included','excluded')) NOT NULL DEFAULT 'unscreened',
+            stage TEXT CHECK(stage IN ('TA','FULLTEXT')) NOT NULL,
+            vote TEXT CHECK(stage IN ('ACCEPT','REJECT')) NOT NULL,
             reason TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
-            UNIQUE(user_id, study_id)
+            
+            UNIQUE(user_id, study_id, stage)
         )
     `).run();
 
@@ -106,11 +109,12 @@ const insertManyStudies = db.transaction((studies) => {
 });
 
 const upsertScreening = db.prepare(`
-    INSERT INTO screenings (user_id, study_id, status, reason)
-    VALUES (@user_id, @study_id, @status, @reason)
-    ON CONFLICT(user_id, study_id)
+    INSERT INTO screenings (user_id, study_id, stage, vote, reason, updated_at)
+    VALUES (@user_id, @study_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
+    
+    ON CONFLICT(user_id, study_id, stage)
     DO UPDATE SET
-     status = excluded.status,
+     vote = excluded.vote,
      reason = excluded.reason,
      updated_at = CURRENT_TIMESTAMP
  `);

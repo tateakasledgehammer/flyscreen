@@ -303,12 +303,13 @@ app.post("/authentication", (req, res) => {
 app.post("/api/screenings", (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Not authenticated" });
 
-    const { study_id, status, reason } = req.body;
+    const { study_id, stage, vote, reason } = req.body;
 
     upsertScreening.run({
         user_id: req.user.userid,
         study_id,
-        status,
+        stage,
+        vote,
         reason: reason ?? null
     });
 
