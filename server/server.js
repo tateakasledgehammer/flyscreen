@@ -7,6 +7,8 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 const crypto = require("crypto");
 
+import screeningRoutes from "./routes/screenings.js";
+
 console.log("server.js loaded successfully");
 
 const app = express();
@@ -49,9 +51,10 @@ app.use((req, res, next) => {
     } catch {
         req.user = null;
     }
-    next()
+    next();
 })
 
+app.use("/api", screeningRoutes)
 
 // ---- STUDIES ----
 
@@ -296,24 +299,6 @@ app.post("/authentication", (req, res) => {
         console.error("Error saving user: ", err);
         return res.json({ success: false, errors: ["Could not save user"] })
     }
-});
-
-// ---- TRACKING VOTES ----
-
-app.post("/api/screenings", (req, res) => {
-    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
-
-    const { study_id, stage, vote, reason } = req.body;
-
-    upsertScreening.run({
-        user_id: req.user.userid,
-        study_id,
-        stage,
-        vote,
-        reason: reason ?? null
-    });
-
-    res.json({ success: true });
 });
 
 app.get("/api/screenings", (req, res) => {

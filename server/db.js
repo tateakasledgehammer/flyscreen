@@ -107,17 +107,6 @@ const insertManyStudies = db.transaction((studies) => {
         insert.run(study);
     }
 });
-
-const upsertScreening = db.prepare(`
-    INSERT INTO screenings (user_id, study_id, stage, vote, reason, updated_at)
-    VALUES (@user_id, @study_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
-    
-    ON CONFLICT(user_id, study_id, stage)
-    DO UPDATE SET
-     vote = excluded.vote,
-     reason = excluded.reason,
-     updated_at = CURRENT_TIMESTAMP
- `);
  
  const getScreeningsForStudies = db.prepare(`
      SELECT * FROM screenings
