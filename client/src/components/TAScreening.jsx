@@ -41,7 +41,9 @@ export default function TAScreening(props) {
             .then(setScreenings)
     }, []);
 
-    const safeStudies = studies.map(ensureStudyShape);
+    const safeStudies = Array.isArray(studies)
+        ? studies.map(ensureStudyShape)
+        : [];
 
     const studiesWithStatus = safeStudies.map(study => ({
         ...study,

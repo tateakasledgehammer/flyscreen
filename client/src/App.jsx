@@ -21,24 +21,25 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [studies, setStudies] = useState(() => {
-    try {
-      const savedStudies = JSON.parse(localStorage.getItem("studies"));
-      if (!Array.isArray(savedStudies)) return [];
+  // STUDIES
+  const [studies, setStudies] = useState()
+  useEffect(() => {
+    if (!isAuthenticated) return;
 
-      return savedStudies.map(study => ({
-        ...study,
-        votes: {
-          accept: [...new Set(study.votes?.accept || [])],
-          reject: [...new Set(study.votes?.reject || [])]
-        },
-        status: study.status || "No Votes"
-      }));
-    } catch (e) {
-      console.error("Failed to parse studies from localStorage", e);
-      return [];
-    }
-  })
+    const fetchStudies = async () => {
+      try {
+        const res = await fetch("http://localhost:5005/api/studies", {
+          credentials: "include"
+        });
+        const data = await res.json();
+        setStudies(data);
+      } catch (err) {
+        console.error("Failed to fetch studies", err);
+      }
+    };
+
+    fetchStudies();
+  }, [isAuthenticated])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -65,6 +66,7 @@ function App() {
     checkAuth();
   }, []);
 
+  // PROJECT TITLE
   const [projectTitle, setProjectTitle] = useState(() => {
     const savedProject = localStorage.getItem('projectTitle');
     if (!savedProject || savedProject === "undefined") return "";
@@ -74,6 +76,7 @@ function App() {
     localStorage.setItem("projectTitle", projectTitle)
   }, [projectTitle]);
 
+  // STUDY TAGS
   const [studyTags, setStudyTags] = useState(() => {
     const savedStudyTags = localStorage.getItem('studyTags');
     return savedStudyTags ? JSON.parse(savedStudyTags) : [];
@@ -85,6 +88,7 @@ function App() {
     );
   }, [studyTags]);
 
+  // INCLUSION CRITERIA
   const [inclusionCriteria, setInclusionCriteria] = useState(() => {
     const savedInclusionCriteria = localStorage.getItem('inclusionCriteria');
     if (!savedInclusionCriteria || savedInclusionCriteria === "undefined") return [];
@@ -97,6 +101,7 @@ function App() {
     )
   }, [inclusionCriteria]);
 
+  // EXCLUSION CRITERIA
   const [exclusionCriteria, setExclusionCriteria] = useState(() => {
     const savedExclusionCriteria = localStorage.getItem('exclusionCriteria');
     if (!savedExclusionCriteria || savedExclusionCriteria === "undefined") return [];
@@ -109,6 +114,7 @@ function App() {
     )
   }, [exclusionCriteria]);
   
+  // SEARCH FILTER
   const [searchFilter, setSearchFilter] = useState(() => {
     const savedFilter = localStorage.getItem('searchFilter');
     if (!savedFilter || savedFilter === "undefined") return "";
@@ -118,6 +124,7 @@ function App() {
     localStorage.setItem("searchFilter", searchFilter)
   }, [searchFilter]);
 
+  // FULL TEXT EXCLUSION
   const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState(() => {
     const savedFullTextExclusion = localStorage.getItem("fullTextExclusionReasons");
     if (!savedFullTextExclusion || savedFullTextExclusion === "undefined") return [];
@@ -130,6 +137,7 @@ function App() {
     )
   }, [fullTextExclusionReasons])
 
+  // BACKGROUND INFO
   const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
     const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
     return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
@@ -150,6 +158,7 @@ function App() {
     );
   }, [backgroundInformationForReview]);
   
+  // TOGGLE DETAILS
   const [toggleDetails, setToggleDetails] = useState({});
 
   const PrivateRoute = ({ children, isAuthenticated }) => {

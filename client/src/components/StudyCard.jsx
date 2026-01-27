@@ -62,7 +62,6 @@ export default function StudyCard(props) {
     
                 return { ...study, votes, status };
             })
-            localStorage.setItem("studies", JSON.stringify(updated));
             return updated;
         })
     }
@@ -92,7 +91,6 @@ export default function StudyCard(props) {
     
                 return { ...study, votes, status };
             })
-            localStorage.setItem("studies", JSON.stringify(updated));
             return updated;
         })
     }
@@ -129,7 +127,6 @@ export default function StudyCard(props) {
 
                 return { ...study, fullTextVotes, fullTextStatus }
             })
-            localStorage.setItem("studies", JSON.stringify(updated));
             return updated;
         })
     }
@@ -159,7 +156,6 @@ export default function StudyCard(props) {
     
                 return { ...study, fullTextVotes, fullTextStatus };
             })
-            localStorage.setItem("studies", JSON.stringify(updated));
             return updated;
         })
     }
