@@ -62,31 +62,27 @@ export function handleSortByOrder(studies, sortBy) {
     });
 }
 
-export function updateStudyStatus(votes) {
-    if (votes.length === 0) return "No Votes";
+export function getTAStatus(screening) {
+        if (!screening?.TA) return "PENDING";
+        
+        const a = screening.TA.ACCEPT.length;
+        const r = screening.TA.REJECT.length;
+    
+        if (a >= 2) return "ACCEPTED";
+        if (r >= 2) return "REJECTED";
+        if (a > 0 && r > 0) return "CONFLICT";
+        return "PENDING";
+    }
+export function getFullTextStatus(screening) {
+    if (!screening?.FULLTEXT) return "PENDING";
 
-    const accepts = votes.filter(v => v.vote === "ACCEPT").length;
-    const rejects = votes.filter(v => v.vote === "REJECT").length;
+    const a = screening.FULLTEXT.ACCEPT.length;
+    const r = screening.FULLTEXT.REJECT.length;
 
-    if (accepts === 2) return "Accepted";
-    if (rejects === 2) return "Rejected";
-    if (accepts > 0 && rejects > 0) return "Rejected";
-
-    return "Awaiting Second Vote"
-}
-
-export function updateFullTextScreeningStatus(fullTextVotes) {
-    if (fullTextVotes.accept.length >= 2) {
-        return "Full Text Accepted";
-    } else if (fullTextVotes.reject.length >= 2) {
-        return "Full Text Rejected";
-    } else if (fullTextVotes.reject.length === 1 && fullTextVotes.accept.length === 1) {
-        return "Full Text Conflict";
-    } else if (fullTextVotes.accept.length === 1 || fullTextVotes.reject.length === 1) {
-        return "Full Text Awaiting Second Vote";
-    } else {
-        return "Full Text No Votes"
-    };
+    if (a >= 2) return "ACCEPTED";
+    if (r >= 2) return "REJECTED";
+    if (a > 0 && r > 0) return "CONFLICT";
+    return "PENDING";
 }
 
 export function formatAuthors(authorString) {
@@ -119,34 +115,6 @@ export function capitaliseFirstLetter(str) {
         return str;
     }
     return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-export function getStudyStatus(studyId, screenings) {
-    const votes = screenings.filter(s => s.study_id === studyId);
-
-    const included = votes.filter(v => v.status === "included").length;
-    const excluded = votes.filter(v => v.status === "excluded").length;
-
-    if (included >= 2) return "Accepted"
-    if (excluded >= 2) return "Rejected"
-    if (included > 0 && excluded > 0) return "Conflict";
-    if (included === 1 || excluded === 1) return "Awaiting Second Vote"
-    return "No Votes"
-}
-
-export function getFullTextStudyStatus(study) {
-    const acceptVotes = Array.isArray(study.fullTextVotes?.accept) ? study.fullTextVotes.accept : [];
-    const rejectVotes = Array.isArray(study.fullTextVotes?.reject) ? study.fullTextVotes.reject : [];
-
-    const acceptCount = acceptVotes.length;
-    const rejectCount = rejectVotes.length;
-
-    if (acceptCount >= 2) return "Full Text Accepted"
-    if (rejectCount >= 2) return "Full Text Rejected"
-    if (acceptCount > 0 && rejectCount > 0) return "Full Text Conflict";
-    if (acceptCount === 1 || rejectCount === 1) return "Full Text Awaiting Second Vote"
-    
-    return "Full Text No Votes"
 }
 
 export function handleProbabilityScore({

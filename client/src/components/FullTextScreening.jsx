@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { handleSortByOrder, ensureStudyShape, getStudyStatus, getFullTextStudyStatus } from "../utils/screeningTools";
+import { handleSortByOrder, ensureStudyShape } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";

@@ -38,7 +38,7 @@ export default function Overview(props) {
             <div className="homepage-section">
                 <h3>Import Your Studies</h3>
                 <ul>
-                    <li>Number of imported studies: {studies.length}</li>
+                    <li>Number of imported studies: </li>
                 </ul>
             </div>
             <div className="homepage-section">   
@@ -113,11 +113,11 @@ export default function Overview(props) {
                 <h3>Title & Abstract Screening</h3>
                 <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
                 <ul>
-                    <li>Unscreened: {studies.filter(study => study.status === "No Votes").length}</li>
-                    <li>One Vote: {studies.filter(study => study.status === "Awaiting Second Vote").length}</li>
-                    <li>Approved: {studies.filter(study => study.status === "Accepted").length}</li>
-                    <li>Conflicts: {studies.filter(study => study.status === "Conflict").length}</li>
-                    <li>Rejected: {studies.filter(study => study.status === "Rejected").length}</li>
+                    <li>Unscreened: </li>
+                    <li>One Vote: </li>
+                    <li>Approved: </li>
+                    <li>Conflicts: </li>
+                    <li>Rejected: </li>
                 </ul>
             </div>
             <div className="homepage-section">    
@@ -125,22 +125,18 @@ export default function Overview(props) {
                 {/* ? copy above rather than double up */}
                 <ul>
                     <li>
-                        Unscreened: {studies.filter(study => 
-                            study.fullTextStatus === "Full Text No Votes" && 
-                            study.status === "Accepted"
-                            ).length
-                        }
+                        Unscreened: 
                     </li>
-                    <li>One Vote: {studies.filter(study => study.fullTextStatus === "Full Text Awaiting Second Vote").length}</li>
-                    <li>Approved: {studies.filter(study => study.fullTextStatus === "Full Text Accepted").length}</li>
-                    <li>Conflicts: {studies.filter(study => study.fullTextStatus === "Full Text Conflict").length}</li>
-                    <li>Rejected: {studies.filter(study => study.fullTextStatus === "Full Text Rejected").length}</li>
+                    <li>One Vote: </li>
+                    <li>Approved: </li>
+                    <li>Conflicts: </li>
+                    <li>Rejected: </li>
                 </ul>
             </div>
             <div className="homepage-section">
                 <h3>Manage Your Included Studies</h3>
                 <ul>
-                    <li>Approved: {studies.filter(study => study.fullTextStatus === "Full Text Accepted").length}</li>
+                    <li>Approved: </li>
                 </ul>
             </div>
         </div>

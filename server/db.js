@@ -58,7 +58,7 @@ const initSchema = db.transaction(() => {
             user_id INTEGER NOT NULL,
             study_id INTEGER NOT NULL,
             stage TEXT CHECK(stage IN ('TA','FULLTEXT')) NOT NULL,
-            vote TEXT CHECK(stage IN ('ACCEPT','REJECT')) NOT NULL,
+            vote TEXT CHECK(vote IN ('ACCEPT','REJECT')) NOT NULL,
             reason TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             
@@ -110,9 +110,17 @@ const insertManyStudies = db.transaction((studies) => {
  
  const getScreeningsForStudies = db.prepare(`
      SELECT * FROM screenings
-     WHERE study_id IN (
-         SELECT id FROM studies
-     )
+ `);
+
+ export const upsertScreening = db.prepare(`
+    INSERT INTO screenings (user_id, study_id, stage, vote, reason, updated_at)
+    VALUES (@user_id, @study_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
+    
+    ON CONFLICT(user_id, study_id, stage)
+    DO UPDATE SET
+     vote = excluded.vote,
+     reason = excluded.reason,
+     updated_at = CURRENT_TIMESTAMP
  `);
 
 module.exports = {

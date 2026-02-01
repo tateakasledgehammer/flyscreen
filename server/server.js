@@ -6,8 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const crypto = require("crypto");
-
-import screeningRoutes from "./routes/screenings.js";
+const screeningRoutes = require("./routes/screenings.js");
 
 console.log("server.js loaded successfully");
 
@@ -307,6 +306,31 @@ app.get("/api/screenings", (req, res) => {
     const rows = getScreeningsForStudies.all();
     res.json(rows);
 });
+
+app.get("/api/screenings/summary", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const rows = getScreeningsForStudies.all();
+
+    const summary = {};
+
+    for (const row of rows) {
+        const { study_id, stage, vote, user_id } = row;
+
+        if (!summary[study_id]) {
+            summary[study_id] = {
+                TA: { ACCEPT: [], REJECT: [] },
+                FULLTEXT: { ACCEPT: [], REJECT: [] }
+            };
+        }
+        summary[study_id][stage][vote].push(user_id);
+    }
+    
+    res.json(summary);
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { updateStudyStatus, formatAuthors, updateFullTextScreeningStatus } from "../utils/screeningTools";
+import { getTAStatus, getFullTextStatus, formatAuthors } from "../utils/screeningTools";
 import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
     const { 
         studies,
-        setStudies, 
         savedStudies, 
         toggleDetails, 
         setToggleDetails, 
@@ -25,190 +24,26 @@ export default function StudyCard(props) {
         setHighlighted,
         hideDetails,
         setHideDetails,
+        refreshScreenings
     } = props;
 
     console.log("Inclusion: ", inclusionCriteria, "Exclusion: ", exclusionCriteria)
     console.log(studies)
 
-    async function postVoteToServer(studyId, stage, vote, reason = null) {
-        try {
-            const response = await fetch("http://localhost:5005/api/screenings", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    study_id: studyId,
-                    stage: stage,
-                    vote: vote,
-                    reason: reason
-                }),
-            });
-        if (!response.ok) throw new Error(`Failed to submit vote: ${response.statusText}`);
-        
-        const updatedScreening = await response.json();
-        return updatedScreening;
-        
-        } catch (error) {
-            console.error("Error posting vote:", error);
-            return null;
-        }
-    }
-
-    async function handleVote(studyId, action) {
-        let voteValue = null;
-        if (action === "accept") voteValue = "ACCEPT";
-        else if (action === "reject") voteValue = "REJECT";
-        else if (action === "remove") voteValue = null;
-
-        const result = await postVoteToServer(studyId, "TA", voteValue);
-
-        if (result) {
-            setStudies(prev => {
-                const updated = prev.map(study => {
-                    if ((study.id ?? study._clientId) !== studyId) return study;
-
-                    const existingVotes = study.votes ?? { accept: [], reject: [] }
-                    let votes = {
-                        accept: existingVotes.accept.filter(u => u.id !== user.id),
-                        reject: existingVotes.reject.filter(u => u.id !== user.id)
-                    };
-
-                    if (voteValue === "ACCEPT") votes.accept.push(user);
-                    else if (voteValue === "REJECT") votes.reject.push(user);
-
-                    votes = {
-                        accept: [...new Map(votes.accept.map(u => [u.id, u])).values()],
-                        reject: [...new Map(votes.reject.map(u => [u.id, u])).values()]
-                    }
-        
-                    const status = updateStudyStatus([
-                        ...votes.accept.map(u => ({ vote: "ACCEPT" })),
-                        ...votes.reject.map(u => ({ vote: "REJECT" }))
-                    ])
-        
-                    return { ...study, votes, status };
-                })
-                return updated;
-            });
-        } else {
-            alert("Failed to update vote on server")
-        }
-    }
-
-    async function handleResolveConflict(studyId, action) {
-        const vote = action === "accept" ? "ACCEPT" : "REJECT";
-        const stage = "TA"
-
-        const result = await postVoteToServer(studyId, stage, vote);
-        if (!result) {
-            alert("Failed to update vote on server");
-            return;
-        }
-        
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-
-                let votes = {
-                    accept: study.votes.accept.filter(u => u.id !== user.id),
-                    reject: study.votes.reject.filter(u => u.id !== user.id)
-                };
-
-                if (vote === "ACCEPT") votes.accept.push(user)
-                else votes.reject.push(user);
-    
-                if (votes.accept.length > 2) votes.accept.pop();
-                if (votes.reject.length > 2) votes.reject.pop();
-
-                const status = updateStudyStatus([
-                    ...votes.accept.map(u => ({ vote: "ACCEPT" })),
-                    ...votes.reject.map(u => ({ vote: "ACCEPT" }))
-                ]);
-    
-                console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, votes, "Status: ", status);
-    
-                return { ...study, votes, status };
-            });
-        });
-    }
-
-    async function handleFullTextVote(studyId, action) {
-        let vote = null;
-        if (action === "accept") vote = "ACCEPT";
-        else if (action === "reject") vote = "REJECT";
-
-        const stage = "FULLTEXT"
-
-        const result = await postVoteToServer(studyId, stage, vote);
-        if (!result) {
-            alert("Failed to update vote on server");
-            return;
-        }
-        
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-                
-                let fullTextVotes = {
-                    accept: study.fullTextVotes?.accept.filter(u => u.id !== user.id),
-                    reject: study.fullTextVotes?.reject.filter(u => u.id !== user.id)
-                };
-
-                if (vote === "ACCEPT") fullTextVotes.accept.push(user);
-                else if (vote === "REJECT") fullTextVotes.reject.push(user);
-
-                fullTextVotes = {
-                    accept: [...new Map(fullTextVotes.accept.map(u => [u.id, u])).values()],
-                    reject: [...new Map(fullTextVotes.reject.map(u => [u.id, u])).values()]
-                }
-
-                const fullTextStatus = updateFullTextScreeningStatus([
-                    ...fullTextVotes.accept.map(u => ({ vote: "ACCEPT" })),
-                    ...fullTextVotes.reject.map(u => ({ vote: "REJECT" }))
-                ]);
-
-                console.log(`Updating study ${studyId} by ${user.username} - action: ${action}`, fullTextVotes, "Full Text Screening Status: ", fullTextStatus);
-
-                return { ...study, fullTextVotes, fullTextStatus }
-            });
-        });
-    }
-
-    async function handleResolveFullTextConflict(studyId, action) {
-        const vote = action === "accept" ? "ACCEPT" : "REJECT";
-        const stage = "FULLTEXT";
-
-        const result = await postVoteToServer(studyId, stage, vote);
-        if (!result) {
-            alert("Failed to update vote on server");
-            return;
-        }
-        
-        setStudies(prev => {
-            return prev.map(study => {
-                if (study.id !== studyId) return study;
-
-                let fullTextVotes = {
-                    accept: study.fullTextVotes?.accept.filter(u => u.id !== user.id),
-                    reject: study.fullTextVotes?.reject.filter(u => u.id !== user.id)
-                };
-
-                if (vote === "ACCEPT") fullTextVotes.accept.push(user);
-                else fullTextVotes.reject.push(user);
-                
-                if (fullTextVotes.accept.length > 2) fullTextVotes.accept.pop();
-                if (fullTextVotes.reject.length > 2) fullTextVotes.reject.pop();
-
-                const fullTextStatus = updateFullTextScreeningStatus([
-                    ...fullTextVotes.accept.map(u => ({ vote: "ACCEPT" })),
-                    ...fullTextVotes.reject.map(u => ({ vote: "REJECT" }))
-                ]);
-
-                console.log("Conflict resolved", `Updating study ${studyId} by ${user} - action: ${action}`, fullTextVotes, "Status: ", fullTextStatus);
-    
-                return { ...study, fullTextVotes, fullTextStatus };
-            });
-        });
+    function submitVote(studyId, stage, vote) {
+        fetch("http://localhost:5005/api/screenings", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                study_id: studyId,
+                stage,
+                vote
+            })
+        })
+        .then(refreshScreenings)
     }
 
     function handleToggleDetails(studyID) {
@@ -216,32 +51,6 @@ export default function StudyCard(props) {
             ...prev,
             [studyID]: !prev[studyID]
         }));
-    }
-
-    function handleAddNote(studyId, note) {
-        setStudies(prev => 
-            prev.map(study => {
-                if (study.id !== studyId) return study;
-                const newNotes = [...(study.notes || []), note];
-                return { ...study, notes: newNotes };
-            })
-        );
-    }
-
-    function handleAssignTag(studyId, value) {
-        setStudies(prev => 
-            prev.map(study =>
-                study.id === studyId ? {...study, tagStatus: value} : study
-            )
-        )
-    }
-
-    function handleFullTextExclusion(studyId, value) {
-        setStudies(prev => 
-            prev.map(study =>
-                study.id === studyId ? {...study, fullTextExclusionStatus: value} : study
-            )
-        )
     }
 
     function highlightContent(text, includedWords = [], excludedWords = [], filteredWords = []) {
@@ -308,6 +117,10 @@ export default function StudyCard(props) {
                     toggleDetails.hasOwnProperty(study.id)
                         ? toggleDetails[study.id] 
                         : hideDetails;
+
+                const taStatus = getTAStatus(study.screening);
+                const ftStatus = getFullTextStatus(study.screening);
+
                 return (
                 <div key={study.id ?? study._clientId} study={study} className="study-card">
                     {/* Study information */}
@@ -327,39 +140,34 @@ export default function StudyCard(props) {
                     {/* Actions section */}
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
-                        {(study.status === "No Votes" || study.status === "Awaiting Second Vote") && (
+                        {taStatus === "PENDING" && (
                             <>
-                                <button className="accept-btn" onClick={() => handleVote(study.id, "accept")}>ACCEPT</button>
-                                <button className="reject-btn" onClick={() => handleVote(study.id, "reject")}>REJECT</button>
+                                <button onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
+                                <button onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
+                
                             </>
                         )}
-                        {(study.status === "Conflict") && (
+                        {taStatus === "CONFLICT" && (
                             <>
-                                <button className="accept-btn" onClick={() => handleResolveConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
-                                <button className="reject-btn" onClick={() => handleResolveConflict(study.id, "reject")}>CONFIRM REJECT</button>
+                                <button onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
+                                <button onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
+                
                             </>
-                        )}
-                        {(study.status !== "Accepted" && study.status !== "No Votes") && (
-                                <button onClick={() => handleVote(study.id, "remove")}>REVERT</button>
                         )}
 
                         {/* FULL TEXT SCREENING BUTTONS */}
-                        {((study.fullTextStatus === "Full Text No Votes" && study.status === "Accepted") || study.fullTextStatus === "Full Text Awaiting Second Vote") && (
+                        {ftStatus === "PENDING" && (
                             <>
-                                <button className="accept-btn" onClick={() => handleFullTextVote(study.id, "accept")}>ACCEPT</button>
-                                <button className="reject-btn" onClick={() => handleFullTextVote(study.id, "reject")}>REJECT</button>
+                                <button onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
+                                <button onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
+                
                             </>
                         )}
-                        {(study.fullTextStatus === "Full Text Conflict") && (
+                        {ftStatus === "CONFLICT" && (
                             <>
-                                <button className="accept-btn" onClick={() => handleResolveFullTextConflict(study.id, "accept")}>CONFIRM ACCEPT</button>
-                                <button className="reject-btn" onClick={() => handleResolveFullTextConflict(study.id, "reject")}>CONFIRM REJECT</button>
-                            </>
-                        )}
-
-                        {(study.fullTextStatus === "Full Text Rejected" || study.fullTextStatus === "Full Text Conflict" || study.fullTextStatus === "Full Text Accepted") && (
-                            <>
-                                <button onClick={() => handleFullTextVote(study.id, "remove")}>REVERT</button>
+                                <button onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
+                                <button onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
+                
                             </>
                         )}
 

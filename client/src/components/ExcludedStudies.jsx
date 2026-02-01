@@ -1,4 +1,4 @@
-import { formatAuthors, handleSortByOrder, ensureStudyShape, getStudyStatus } from "../utils/screeningTools";
+import { formatAuthors, handleSortByOrder, ensureStudyShape } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
