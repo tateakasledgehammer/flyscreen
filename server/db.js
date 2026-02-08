@@ -109,7 +109,7 @@ const insertManyStudies = db.transaction((studies) => {
 });
  
  const getScreeningsForStudies = db.prepare(`
-     SELECT * FROM screenings
+     SELECT * FROM screenings WHERE user_id = ?
  `);
 
  export const upsertScreening = db.prepare(`

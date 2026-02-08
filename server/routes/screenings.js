@@ -1,5 +1,5 @@
-import express from "express";
-import { upsertScreening } from "../db.js";
+const express = require("express");
+const { upsertScreening } = require("../db.js");
 
 const router = express.Router();
 

@@ -5,7 +5,6 @@ import StudyInfo from "./StudyInfo";
 export default function StudyCard(props) {
     const { 
         studies,
-        savedStudies, 
         toggleDetails, 
         setToggleDetails, 
         studyTags, 
@@ -30,7 +29,7 @@ export default function StudyCard(props) {
     console.log("Inclusion: ", inclusionCriteria, "Exclusion: ", exclusionCriteria)
     console.log(studies)
 
-    function submitVote(studyId, stage, vote) {
+    async function submitVote(studyId, stage, vote) {
         fetch("http://localhost:5005/api/screenings", {
             method: "POST",
             credentials: "include",
@@ -42,8 +41,15 @@ export default function StudyCard(props) {
                 stage,
                 vote
             })
-        })
-        .then(refreshScreenings)
+        });
+
+        if (!res.ok) {
+            const msg = await res.text();
+            console.error("Vote failed", msg);
+            return;
+        }
+
+        refreshScreenings();
     }
 
     function handleToggleDetails(studyID) {
@@ -140,38 +146,23 @@ export default function StudyCard(props) {
                     {/* Actions section */}
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
-                        {taStatus === "PENDING" && (
+                        {(taStatus === "PENDING" || taStatus === "CONFLICT") && (
                             <>
                                 <button onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
                                 <button onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
-                
-                            </>
-                        )}
-                        {taStatus === "CONFLICT" && (
-                            <>
-                                <button onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
-                                <button onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
-                
                             </>
                         )}
 
                         {/* FULL TEXT SCREENING BUTTONS */}
-                        {ftStatus === "PENDING" && (
+                        {(ftStatus === "PENDING" || ftStatus === "CONFLICT") && (
                             <>
                                 <button onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
                                 <button onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
-                
-                            </>
-                        )}
-                        {ftStatus === "CONFLICT" && (
-                            <>
-                                <button onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
-                                <button onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
-                
                             </>
                         )}
 
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
+                        {/* commenting out
                         {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
                             <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
                                 <option value="">Reason to exclude</option>
@@ -182,10 +173,14 @@ export default function StudyCard(props) {
                                 )))}
                             </select>
                         ))}
+                        */}
                                               
                         {/* NOTE / TAG for all */}
-                        <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
-                        
+                        {/* commenting out
+                            <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
+                        */}
+
+                        {/* commenting out
                         <select
                             value={study.tagStatus || ""}
                             onChange={(e) => (handleAssignTag(study.id, e.target.value))}
@@ -197,6 +192,7 @@ export default function StudyCard(props) {
                                 </option>
                             )))}
                         </select>
+                        */}
                     </div>
 
                     {study.fullTextExclusionStatus && (

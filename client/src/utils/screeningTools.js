@@ -1,18 +1,3 @@
-/**
- * Study shape (post-import, canonical):
- * {
- *   id: number
- *   title: string
- *   abstract: string
- *   authors: string
- *   year: number | null
- *   journal: string
- *   keywords: string
- *   votes: { accept: User[], reject: User[] }
- *   fullTextVotes: { accept: User[], reject: User[] }
- * }
- */
-
 const safeString = (val) => 
     typeof val === "string" ? val : "";
 
@@ -27,8 +12,10 @@ export function ensureStudyShape(study) {
         title: study.title ?? "",
         authors: study.authors ?? "",
         year: study.year ?? null,
-        votes: study.votes ?? { accept: [], reject: [] },
-        fullTextVotes: study.fullTextVotes ?? { accept: [], reject: [] },
+        screening: study.screening ?? {
+            TA: { ACCEPT: [], REJECT: [] },
+            FULLTEXT: { ACCEPT: [], REJECT: [] }
+        },
         probabilityScore: study.probabilityScore ?? { score: 0, details: {} }
     };
 }
@@ -62,17 +49,19 @@ export function handleSortByOrder(studies, sortBy) {
     });
 }
 
+/* SCREENING STATUS */
 export function getTAStatus(screening) {
-        if (!screening?.TA) return "PENDING";
-        
-        const a = screening.TA.ACCEPT.length;
-        const r = screening.TA.REJECT.length;
+    if (!screening?.TA) return "PENDING";
     
-        if (a >= 2) return "ACCEPTED";
-        if (r >= 2) return "REJECTED";
-        if (a > 0 && r > 0) return "CONFLICT";
-        return "PENDING";
-    }
+    const a = screening.TA.ACCEPT.length;
+    const r = screening.TA.REJECT.length;
+
+    if (a >= 2) return "ACCEPTED";
+    if (r >= 2) return "REJECTED";
+    if (a > 0 && r > 0) return "CONFLICT";
+    return "PENDING";
+}
+
 export function getFullTextStatus(screening) {
     if (!screening?.FULLTEXT) return "PENDING";
 
@@ -85,38 +74,29 @@ export function getFullTextStatus(screening) {
     return "PENDING";
 }
 
+/* FORMATTING */
 export function formatAuthors(authorString) {
     if (!authorString) return "N/A";
 
     const parts = authorString.split(",").map(a => a.trim());
-
     const authors = [];
 
     for (let i = 0; i < parts.length; i +=2) {
         const last = parts[i] || "";
-        const first = parts[i + 1] || "";
         authors.push(`${last}`.trim());
     }
 
-    if (authors.length === 1) {
-        return authorString;
-    }
-    if (authors.length === 2) {
-        return authors[0] + " & " + authors[1];
-    }
-
-    if (authors.length > 2) {
-        return authors[0] + " et al."
-    }
+    if (authors.length === 1) return authorString;
+    if (authors.length === 2) return `${authors[0]} & ${authors[1]}`;
+    if (authors.length > 2) return `${authors[0]} et al.`
 }
 
 export function capitaliseFirstLetter(str) {
-    if (typeof str !== 'string' || str.length === 0) {
-        return str;
-    }
+    if (typeof str !== 'string' || str.length === 0) return str;
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/* PROBABILIY SCORE MANGEMENT */
 export function handleProbabilityScore({
     abstract = "",
     keywords = "",
@@ -140,7 +120,7 @@ export function handleProbabilityScore({
         inclusionMatches[section.category] = 
             matches.length > 0 ? matches : [];
 
-        if (matches.length > 0) score +=1
+        if (matches.length > 0) score +=1;
     });
 
     exclusionCriteria.forEach(section => {
@@ -153,7 +133,7 @@ export function handleProbabilityScore({
         exclusionMatches[section.category] = 
             matches.length > 0 ? matches : [];
 
-        if (matches.length > 0) score -=1
+        if (matches.length > 0) score -=1;
     });
 
     return {
