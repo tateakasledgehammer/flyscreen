@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { handleSortByOrder, ensureStudyShape } from "../utils/screeningTools";
+import { handleSortByOrder, ensureStudyShape, getFullTextStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import ScreeningFilters from "./ScreeningFilters";
@@ -42,13 +42,21 @@ export default function FullTextScreening(props) {
             .then(setScreenings)
     }, []);
 
+    function refreshScreenings() {
+        fetch("http://localhost:5005/api/screenings/summary", {
+            credentials: "include"
+        })
+            .then(res => res.json())
+            .then(setScreenings);
+    }
+
     const safeStudies = studies.map(ensureStudyShape);
 
     const taAcceptedStudies = safeStudies.filter(study => getStudyStatus(study.id, screenings) === "Accepted");
     
     const studiesWithFullTextStatus = taAcceptedStudies.map(study => ({
         ...study,
-        status: getFullTextStudyStatus(study)
+        status: getFullTextStatus(study)
     }));
 
     const fullTextSubheadings = [
@@ -143,28 +151,14 @@ export default function FullTextScreening(props) {
         });
 
     const filteredStudiesByFullTextStatus = filteredStudies.filter(study => {
-        switch (fullTextStatusFilter) {
-            case "UNSCREENED":
-                return !study.fullTextStatus || study.fullTextStatus === "Full Text No Votes";
-
-            case "AWAITING SECOND VOTE":
-                const userHasVotedCheck =
-                    study.fullTextVotes?.accept?.some(u => u.username === user.username) ||
-                    study.fullTextVotes?.reject?.some(u => u.username === user.username);
-                return study.fullTextStatus === "Full Text Awaiting Second Vote" && !userHasVotedCheck;
-            
-            case "CONFLICT":
-                return study.fullTextStatus === "Full Text Conflict";
-            
-            case "ACCEPTED":
-                return study.fullTextStatus === "Full Text Accepted";
-            
-            case "REJECTED":
-                return study.fullTextStatus === "Full Text Rejected";
-            
-            default:
-                return false;
-    }});
+        const status = getFullTextStatus(study.screening);
+        
+        if(statusFilter === "UNSCREENED") return status === "UNSCREENED";
+        if(statusFilter === "PENDING") return status === "PENDING";
+        if(statusFilter === "CONFLICT") return status === "CONFLICT";
+        if(statusFilter === "REJECTED") return status === "REJECTED";
+        return true;
+    });
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -228,6 +222,7 @@ export default function FullTextScreening(props) {
             
             <StudyCard 
                 studies={screenedStudies}
+                refreshScreenings={refreshScreenings}
                 setStudies={setStudies}
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
