@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { getTAStatus, getFullTextStatus, formatAuthors } from "../utils/screeningTools";
+import { getTAStatus, getFullTextStatus, canUserVoteTA, canUserVoteFT, formatAuthors } from "../utils/screeningTools";
 import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
     const { 
         studies,
+        savedStudies, 
         toggleDetails, 
         setToggleDetails, 
         studyTags, 
@@ -124,8 +125,10 @@ export default function StudyCard(props) {
                         ? toggleDetails[study.id] 
                         : hideDetails;
 
-                const taStatus = getTAStatus(study.screening);
-                const ftStatus = getFullTextStatus(study.screening);
+                const taStatus = getTAStatus(study.screening, user?.userid);
+                const ftStatus = getFullTextStatus(study.screening, user?.userid);
+                const canVoteTA = canUserVoteTA(study.screening, user?.userid);
+                const canVoteFT = canUserVoteFT(study.screening, user?.userid);
 
                 return (
                 <div key={study.id ?? study._clientId} study={study} className="study-card">
@@ -146,23 +149,38 @@ export default function StudyCard(props) {
                     {/* Actions section */}
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
-                        {(taStatus === "PENDING" || taStatus === "CONFLICT") && (
+                        {(taStatus === "UNSCREENED" || taStatus === "PENDING" || taStatus === "CONFLICT") && (
                             <>
-                                <button onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
-                                <button onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
+                                <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
+                                <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
+                                {!canVoteTA && (
+                                    <p>
+                                        {taStatus === "ACCEPTED" || taStatus === "REJECTED"
+                                            ? "Decision finalised"
+                                            : "Waiting for another reviewer"
+                                        }
+                                    </p>
+                                )}
                             </>
                         )}
 
                         {/* FULL TEXT SCREENING BUTTONS */}
-                        {(ftStatus === "PENDING" || ftStatus === "CONFLICT") && (
+                        {((ftStatus === "UNSCREENED" || ftStatus === "PENDING" || ftStatus === "CONFLICT") && taStatus === "ACCEPTED") && (
                             <>
-                                <button onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
-                                <button onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
+                                <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
+                                <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
+                                {!canVoteFT && (
+                                    <p>
+                                        {ftStatus === "ACCEPTED" || ftStatus === "REJECTED"
+                                            ? "Decision finalised"
+                                            : "Waiting for another reviewer"
+                                        }
+                                    </p>
+                                )}
                             </>
                         )}
 
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
-                        {/* commenting out
                         {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
                             <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
                                 <option value="">Reason to exclude</option>
@@ -173,14 +191,10 @@ export default function StudyCard(props) {
                                 )))}
                             </select>
                         ))}
-                        */}
                                               
                         {/* NOTE / TAG for all */}
-                        {/* commenting out
                             <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
-                        */}
 
-                        {/* commenting out
                         <select
                             value={study.tagStatus || ""}
                             onChange={(e) => (handleAssignTag(study.id, e.target.value))}
@@ -192,7 +206,6 @@ export default function StudyCard(props) {
                                 </option>
                             )))}
                         </select>
-                        */}
                     </div>
 
                     {study.fullTextExclusionStatus && (

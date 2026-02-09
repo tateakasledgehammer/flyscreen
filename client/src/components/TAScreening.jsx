@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
-import { handleSortByOrder, getTAStatus } from "../utils/screeningTools";
+import { handleSortByOrder, getTAStatus, canUserVoteTA } from "../utils/screeningTools";
 import ScreeningFilters from "./ScreeningFilters";
 
 export default function TAScreening(props) {
@@ -48,14 +48,6 @@ export default function TAScreening(props) {
             .then(res => res.json())
             .then(setScreenings);
     }
-
-    const studiesWithScreening = studies.map(study => ({
-        ...study,
-        screening: screenings[study.id] ?? {
-            TA: { ACCEPT: [], REJECT: [] },
-            FULLTEXT: { ACCEPT: [], REJECT: [] }
-        }
-    }))
 
     function handleItemsPerPage(e) {
         setItemsPerPage(e.target.value);
@@ -125,6 +117,22 @@ export default function TAScreening(props) {
         setTagFilter("");
     }
 
+    function countByStatus(status) {
+        return studiesWithScreening.filter(
+            study => getTAStatus(study.screening, user?.userid) === status
+        ).length;
+    }
+
+    const studiesSafe = Array.isArray(studies) ? studies : [];
+    
+    const studiesWithScreening = studiesSafe.map(study => ({
+        ...study,
+        screening: screenings[study.id] ?? {
+            TA: { ACCEPT: [], REJECT: [] },
+            FULLTEXT: { ACCEPT: [], REJECT: [] }
+        }
+    }))
+
     const filteredStudies = studiesWithScreening
         .filter(study => {
             if (!searchFilter) return true;
@@ -143,12 +151,13 @@ export default function TAScreening(props) {
         });
     
     const filteredStudiesByStatus = filteredStudies.filter(study => {
-        const status = getTAStatus(study.screening);
+        const status = getTAStatus(study.screening, user?.userid);
 
         if(statusFilter === "UNSCREENED") return status === "UNSCREENED";
         if(statusFilter === "PENDING") return status === "PENDING";
         if(statusFilter === "CONFLICT") return status === "CONFLICT";
         if(statusFilter === "REJECTED") return status === "REJECTED";
+        if(statusFilter === "ALREADY VOTED") return status === "ALREADY VOTED";
         return true;
     })
     
@@ -188,54 +197,60 @@ export default function TAScreening(props) {
             />
 
             <div className="toggle-status">
-                {(statusFilter == "UNSCREENED") ? (
-                    <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}
-                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        UNSCREENED ({studiesWithScreening.filter(study => !study.status || study.status === "No Votes").length})
-                    </button>
-                ) : (
-                    <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}>
-                        UNSCREENED ({studiesWithScreening.filter(study => !study.status || study.status === "No Votes").length})
-                    </button>
-                )}
+                <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}
+                style={ statusFilter === "UNSCREENED" ? { 
+                    fontWeight: "700", 
+                    backgroundColor: "#213547", 
+                    color: "white" 
+                    } : {}}
+                >
+                    UNSCREENED ({countByStatus("UNSCREENED")})
+                </button>
 
-                {(statusFilter == "AWAITING SECOND VOTE") ? (
-                    <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}
-                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        AWAITING SECOND VOTE ({studiesWithScreening.filter(study => !study.status || study.status === "Awaiting Second Vote").length})
-                    </button>
-                ) : (
-                    <button onClick={() => toggleStudyStatusShowing("AWAITING SECOND VOTE")}>
-                        AWAITING SECOND VOTE ({studiesWithScreening.filter(study => !study.status || study.status === "Awaiting Second Vote").length})
-                    </button>
-                )}    
+                <button onClick={() => toggleStudyStatusShowing("PENDING")}
+                style={ statusFilter === "PENDING" ? { 
+                    fontWeight: "700", 
+                    backgroundColor: "#213547", 
+                    color: "white" 
+                    } : {}}
+                >
+                    PENDING ({countByStatus("PENDING")})
+                </button>
 
-                {(statusFilter == "CONFLICT") ? (
-                    <button onClick={() => toggleStudyStatusShowing("CONFLICT")}
-                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        CONFLICT ({studiesWithScreening.filter(study => !study.status || study.status === "Conflict").length})
-                    </button>
-                ) : (
-                    <button onClick={() => toggleStudyStatusShowing("CONFLICT")}>
-                        CONFLICT ({studiesWithScreening.filter(study => !study.status || study.status === "Conflict").length})
-                    </button>
-                )}
+                <button onClick={() => toggleStudyStatusShowing("ALREADY VOTED")}
+                style={ statusFilter === "ALREADY VOTED" ? { 
+                    fontWeight: "700", 
+                    backgroundColor: "#213547", 
+                    color: "white" 
+                    } : {}}
+                >
+                    ALREADY VOTED ({countByStatus("ALREADY VOTED")})
+                </button>
 
-                {(statusFilter == "REJECTED") ? (
-                    <button onClick={() => toggleStudyStatusShowing("REJECTED")}
-                    style={{ fontWeight: "700", backgroundColor: "#213547", color: "white" }}>
-                        REJECTED ({studiesWithScreening.filter(study => !study.status || study.status === "Rejected").length})
-                    </button>
-                ) : (
-                    <button onClick={() => toggleStudyStatusShowing("REJECTED")}>
-                        REJECTED ({studiesWithScreening.filter(study => !study.status || study.status === "Rejected").length})
-                    </button>
-                )}
+                <button onClick={() => toggleStudyStatusShowing("CONFLICT")}
+                style={ statusFilter === "CONFLICT" ? { 
+                    fontWeight: "700", 
+                    backgroundColor: "#213547", 
+                    color: "white" 
+                    } : {}}
+                >
+                    CONFLICT ({countByStatus("CONFLICT")})
+                </button>
+
+                <button onClick={() => toggleStudyStatusShowing("REJECTED")}
+                style={ statusFilter === "REJECTED" ? { 
+                    fontWeight: "700", 
+                    backgroundColor: "#213547", 
+                    color: "white" 
+                    } : {}}
+                >
+                    REJECTED ({countByStatus("REJECTED")})
+                </button>
             </div>
 
             {/* Second vote notice */}
-            {(statusFilter == "AWAITING SECOND VOTE") && (
-                <p className="filter-notice" style={{ color: "red" }}>Studies that you have voted on will not appear</p>
+            {(statusFilter == "PENDING") && (
+                <p className="filter-notice" /*{style={{ color: "red" }}}*/>Studies that you have voted on will not appear</p>
             )}
 
             {/* Filter notice */}
@@ -265,9 +280,6 @@ export default function TAScreening(props) {
                 setHideDetails={setHideDetails}
             />
 
-            <br />
-            <br />
-            <br />
             <br />
             <br />
 

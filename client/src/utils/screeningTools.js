@@ -49,29 +49,91 @@ export function handleSortByOrder(studies, sortBy) {
     });
 }
 
-/* SCREENING STATUS */
-export function getTAStatus(screening) {
-    if (!screening?.TA) return "PENDING";
-    
-    const a = screening.TA.ACCEPT.length;
-    const r = screening.TA.REJECT.length;
+/* CAN USERS VOTE */
+export function canUserVoteTA(screening, currentUserId) {
+    const ta = screening?.TA;
 
-    if (a >= 2) return "ACCEPTED";
-    if (r >= 2) return "REJECTED";
-    if (a > 0 && r > 0) return "CONFLICT";
-    return "PENDING";
+    if (!ta) return true
+    
+    const a = ta.ACCEPT.length;
+    const r = ta.REJECT.length;
+
+    if (a >= 2 || r >= 2) return false;
+    if (a > 0 && r > 0) return true;
+
+    const userAccepted = ta.ACCEPT.includes(currentUserId);
+    const userRejected = ta.REJECT.includes(currentUserId);
+    const userHasVoted = userAccepted || userRejected;
+
+    if (userHasVoted) return false;
+
+    return true;
 }
 
-export function getFullTextStatus(screening) {
-    if (!screening?.FULLTEXT) return "PENDING";
+export function canUserVoteFT(screening, currentUserId) {
+    const ft = screening?.FULLTEXT;
 
-    const a = screening.FULLTEXT.ACCEPT.length;
-    const r = screening.FULLTEXT.REJECT.length;
+    if (!ft) return true
+    
+    const a = ft.ACCEPT.length;
+    const r = ft.REJECT.length;
+
+    if (a >= 2 || r >= 2) return false;
+    if (a > 0 && r > 0) return true;
+
+    const userAccepted = ft.ACCEPT.includes(currentUserId);
+    const userRejected = ft.REJECT.includes(currentUserId);
+    const userHasVoted = userAccepted || userRejected;
+
+    if (userHasVoted) return false;
+
+    return true;
+}
+
+/* SCREENING STATUS */
+export function getTAStatus(screening, currentUserId) {
+    const ta = screening?.TA;
+
+    if (!ta || (ta.ACCEPT.length === 0 || ta.REJECT.length === 0)) {
+        return "UNSCREENED";
+    }
+    
+    const a = ta.ACCEPT.length;
+    const r = ta.REJECT.length;
 
     if (a >= 2) return "ACCEPTED";
     if (r >= 2) return "REJECTED";
     if (a > 0 && r > 0) return "CONFLICT";
-    return "PENDING";
+
+    const userAccepted = ta.ACCEPT.includes(currentUserId);
+    const userRejected = ta.REJECT.includes(currentUserId);
+    const userHasVoted = userAccepted || userRejected;
+
+    if (!userHasVoted) return "PENDING"
+
+    return "ALREADY VOTED";
+}
+export function getFullTextStatus(screening, currentUserId) {
+    const ft = screening?.FULLTEXT;
+
+    if (!ft || (ft.ACCEPT.length === 0 || ft.REJECT.length === 0)) {
+        return "UNSCREENED";
+    }
+    
+    const a = ft.ACCEPT.length;
+    const r = ft.REJECT.length;
+
+    if (a >= 2) return "ACCEPTED";
+    if (r >= 2) return "REJECTED";
+    if (a > 0 && r > 0) return "CONFLICT";
+
+    const userAccepted = ft.ACCEPT.includes(currentUserId);
+    const userRejected = ft.REJECT.includes(currentUserId);
+    const userHasVoted = userAccepted || userRejected;
+
+    if (!userHasVoted) return "PENDING"
+
+    return "ALREADY VOTED";
 }
 
 /* FORMATTING */
