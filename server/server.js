@@ -300,6 +300,11 @@ app.post("/authentication", (req, res) => {
     }
 });
 
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
+});
+  
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });

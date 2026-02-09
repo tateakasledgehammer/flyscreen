@@ -30,27 +30,31 @@ export default function StudyCard(props) {
     console.log("Inclusion: ", inclusionCriteria, "Exclusion: ", exclusionCriteria)
     console.log(studies)
 
-    async function submitVote(studyId, stage, vote) {
-        fetch("http://localhost:5005/api/screenings", {
-            method: "POST",
-            credentials: "include",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                study_id: studyId,
-                stage,
-                vote
-            })
-        });
+    async function submitVote(studyId, stage, vote) { 
+        try {
+            const res = await fetch("http://localhost:5005/api/screenings", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    study_id: studyId,
+                    stage,
+                    vote
+                })
+            });
 
-        if (!res.ok) {
-            const msg = await res.text();
-            console.error("Vote failed", msg);
-            return;
+            if (!res.ok) {
+                const msg = await res.text();
+                console.error("Vote failed", msg);
+                return;
+            }
+
+            refreshScreenings();
+        } catch (error) {
+            console.error("Error submitting vote:", error)
         }
-
-        refreshScreenings();
     }
 
     function handleToggleDetails(studyID) {
@@ -182,12 +186,12 @@ export default function StudyCard(props) {
                             </>
                         )}
 
-                        <span className={`vote-badge ${
+                        {/* <span className={`vote-badge ${
                             myTAVote === "ACCEPT" ? "accept" : "reject"
                         }`}
                         >
                             You: {myTAVote};
-                        </span>
+                        </span> */}
 
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
                         {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
@@ -201,12 +205,12 @@ export default function StudyCard(props) {
                             </select>
                         ))}
 
-                        <span className={`vote-badge ${
+                        {/* <span className={`vote-badge ${
                             myFTVote === "ACCEPT" ? "accept" : "reject"
                         }`}
                         >
                             You: {myFTVote};
-                        </span>
+                        </span> */}
                                               
                         {/* NOTE / TAG for all */}
                             <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>

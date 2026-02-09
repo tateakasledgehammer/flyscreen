@@ -1,50 +1,69 @@
 const express = require("express");
-const { upsertScreening } = require("../db.js");
-
 const router = express.Router();
 
-router.get("/api/screenings", (req, res) => {
-    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+const { db, upsertScreening, getScreeningsForStudies } = require("../db.js");
 
-    const rows = getScreeningsForStudies.all();
-    res.json(rows);
-});
-
-router.get("/api/screenings/summary", (req, res) => {
+/* middleware */
+function requireAuth(req, res, next) {
     if (!req.user) {
         return res.status(401).json({ error: "Not authenticated" });
     }
+    next();
+}
 
-    const rows = getScreeningsForStudies.all();
+/* get them all */
+router.get("/screenings/summary", requireAuth, (req, res) => {
+    try {
+        const rows = getScreeningsForStudies.all();
+        const summary = {};
 
-    const summary = {};
+        for (const { study_id, stage, vote, user_id } of rows) {
+            if (!summary[study_id]) {
+                summary[study_id] = {
+                    TA: { ACCEPT: [], REJECT: [], myVote: null },
+                    FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
+                };
+            }
+            if (
+                summary[study_id][stage] &&
+                summary[study_id][stage][vote] &&
+                Array.isArray(summary[study_id][stage][vote])
+            ) {
+                summary[study_id][stage][vote].push(user_id);
+            }
 
-    for (const row of rows) {
-        const { study_id, stage, vote, user_id } = row;
-
-        if (!summary[study_id]) {
-            summary[study_id] = {
-                TA: { ACCEPT: [], REJECT: [], myVote: null },
-                FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
-            };
+            if (user_id === req.user.userid) {
+                summary[study_id][stage].myVote = vote;
+            }
         }
-        summary[study_id][stage][vote].push(user_id);
-
-        if (row.user_id === req.user.userid) {
-            summary[study_id][stage].myVote = vote;
-        }
+        res.json(summary);
+    } catch (err) {
+        console.error("Error in /screenings/summary:", err);
+        res.status(500).json({ error: "Internal server error" });
     }
-
-    res.json(summary);
 });
 
-router.post("/screenings", (req, res) => {
-    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
-      
+/* voting */
+router.post("/screenings", (req, res) => {      
     const { study_id, stage, vote, reason } = req.body;
 
+    /* general checking */
+    if (!study_id || !stage) {
+        return res.status(400).json({ error: "Missing study_id or stage" });
+    }
+
+    if (!["TA", "FULLTEXT"].includes(stage)) {
+        return res.status(400).json({ error: "Invalid stage" });
+    }
+
+    if (!["ACCEPT", "REJECT"].includes(vote)) {
+        return res.status(400).json({ error: "Invalid vote" });
+    }
+    
+    /* checking votes */
     const existingVotes = db.prepare(`
-        SELECT vote FROM screenings
+        SELECT user_id, vote 
+        FROM screenings
         WHERE study_id = ? AND stage = ?
     `).all(study_id, stage);
 
@@ -54,23 +73,12 @@ router.post("/screenings", (req, res) => {
     
     const accepts = existingVotes.filter(v => v.vote === "ACCEPT").length;
     const rejects = existingVotes.filter(v => v.vote === "REJECT").length;
+    
     if (accepts >= 2 || rejects >= 2) {
         return res.status(409).json({ error: "Decision finalised" });
     }
     if (existingVotes.length >= 2 && !hasUserVoted) {
         return res.status(409).json({ error: "Voting closed" });
-    }
-
-    if (!study_id || !stage) {
-        return res.status(400).json({ error: "Missing study_id or stage" });
-    }
-
-    if (!["ACCEPT", "REJECT"].includes(vote)) {
-        return res.status(400).json({ error: "Invalid vote" });
-    }
-
-    if (!["TA", "FULLTEXT"].includes(stage)) {
-        return res.status(400).json({ error: "Invalid stage" });
     }
 
     upsertScreening.run({
@@ -81,7 +89,7 @@ router.post("/screenings", (req, res) => {
         reason: reason ?? null
     });
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Screening saved" });
 });
 
 module.exports = router;
