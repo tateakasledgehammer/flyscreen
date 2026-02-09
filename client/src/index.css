@@ -391,6 +391,25 @@ button:focus-visible {
   margin-bottom: 0.5rem;
 }
 
+/* VOTE BADGE */
+.vote-badge {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.vote-badge.accept {
+  background: #e6f6ec;
+  color: #1a7f37;
+}
+
+.vote-badge.reject {
+  background: #fdeaea;
+  color: #b42318;
+}
+
 /* MEDIA QUERIES */
 @media (max-width: 1024px) {
   .actions button,

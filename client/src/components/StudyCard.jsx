@@ -129,6 +129,8 @@ export default function StudyCard(props) {
                 const ftStatus = getFullTextStatus(study.screening, user?.userid);
                 const canVoteTA = canUserVoteTA(study.screening, user?.userid);
                 const canVoteFT = canUserVoteFT(study.screening, user?.userid);
+                const myTAVote = study.screening?.TA?.myVote;
+                const myFTVote = study.screening?.FULLTEXT?.myVote;
 
                 return (
                 <div key={study.id ?? study._clientId} study={study} className="study-card">
@@ -180,6 +182,13 @@ export default function StudyCard(props) {
                             </>
                         )}
 
+                        <span className={`vote-badge ${
+                            myTAVote === "ACCEPT" ? "accept" : "reject"
+                        }`}
+                        >
+                            You: {myTAVote};
+                        </span>
+
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
                         {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
                             <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
@@ -191,6 +200,13 @@ export default function StudyCard(props) {
                                 )))}
                             </select>
                         ))}
+
+                        <span className={`vote-badge ${
+                            myFTVote === "ACCEPT" ? "accept" : "reject"
+                        }`}
+                        >
+                            You: {myFTVote};
+                        </span>
                                               
                         {/* NOTE / TAG for all */}
                             <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>

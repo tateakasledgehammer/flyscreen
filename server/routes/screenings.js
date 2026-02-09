@@ -3,14 +3,48 @@ const { upsertScreening } = require("../db.js");
 
 const router = express.Router();
 
+router.get("/api/screenings", (req, res) => {
+    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
+
+    const rows = getScreeningsForStudies.all();
+    res.json(rows);
+});
+
+router.get("/api/screenings/summary", (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const rows = getScreeningsForStudies.all();
+
+    const summary = {};
+
+    for (const row of rows) {
+        const { study_id, stage, vote, user_id } = row;
+
+        if (!summary[study_id]) {
+            summary[study_id] = {
+                TA: { ACCEPT: [], REJECT: [], myVote: null },
+                FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
+            };
+        }
+        summary[study_id][stage][vote].push(user_id);
+
+        if (row.user_id === req.user.userid) {
+            summary[study_id][stage].myVote = vote;
+        }
+    }
+
+    res.json(summary);
+});
+
 router.post("/screenings", (req, res) => {
     if (!req.user) return res.status(401).json({ error: "Not authenticated" });
       
     const { study_id, stage, vote, reason } = req.body;
 
     const existingVotes = db.prepare(`
-        SELECT user_id, vote
-        FROM screenings
+        SELECT vote FROM screenings
         WHERE study_id = ? AND stage = ?
     `).all(study_id, stage);
 

@@ -128,8 +128,8 @@ export default function TAScreening(props) {
     const studiesWithScreening = studiesSafe.map(study => ({
         ...study,
         screening: screenings[study.id] ?? {
-            TA: { ACCEPT: [], REJECT: [] },
-            FULLTEXT: { ACCEPT: [], REJECT: [] }
+            TA: { ACCEPT: [], REJECT: [], myVote: null },
+            FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
         }
     }))
 
