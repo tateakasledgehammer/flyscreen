@@ -27,8 +27,8 @@ export default function StudyCard(props) {
         refreshScreenings
     } = props;
 
-    console.log("Inclusion: ", inclusionCriteria, "Exclusion: ", exclusionCriteria)
-    console.log(studies)
+    //console.log("Inclusion:", inclusionCriteria, "Exclusion: ", exclusionCriteria)
+    //console.log(studies)
 
     async function submitVote(studyId, stage, vote) { 
         try {
@@ -135,6 +135,8 @@ export default function StudyCard(props) {
                 const canVoteFT = canUserVoteFT(study.screening, user?.userid);
                 const myTAVote = study.screening?.TA?.myVote;
                 const myFTVote = study.screening?.FULLTEXT?.myVote;
+
+                //console.log("SCREENING STATE", study.id, study.screening);
 
                 return (
                 <div key={study.id ?? study._clientId} study={study} className="study-card">

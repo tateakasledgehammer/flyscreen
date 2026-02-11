@@ -39,14 +39,25 @@ export default function TAScreening(props) {
         })
             .then(res => res.json())
             .then(setScreenings)
+            .catch(err => console.error("Initial fetch failed", err));
     }, []);
 
-    function refreshScreenings() {
-        fetch("http://localhost:5005/api/screenings/summary", {
-            credentials: "include"
-        })
-            .then(res => res.json())
-            .then(setScreenings);
+    async function refreshScreenings() {
+        try 
+            {const res = await fetch("http://localhost:5005/api/screenings/summary", {
+                credentials: "include"
+            });
+
+            if (!res.ok) {
+                console.error("Failed to fetch screening summary");
+                return;
+            }
+
+            const summary = await res.json();
+            setScreenings(summary);
+        } catch (err) {
+            console.error("refreshScreenings error:", err)
+        }
     }
 
     function handleItemsPerPage(e) {

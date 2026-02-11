@@ -16,11 +16,13 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
         const rows = getScreeningsForStudies.all();
         const summary = {};
 
-        for (const { study_id, stage, vote, user_id } of rows) {
+        for (const row of rows) {
+            const { study_id, stage, vote, user_id } = row;
+
             if (!summary[study_id]) {
                 summary[study_id] = {
-                    TA: { ACCEPT: [], REJECT: [], myVote: null },
-                    FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
+                    TA: { votes: [], myVote: null, status: "UNSCREENED" },
+                    FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
                 };
             }
             if (
@@ -35,6 +37,24 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
                 summary[study_id][stage].myVote = vote;
             }
         }
+
+        for (const studyId of Object.keys(summary)) {
+            for (const stage of ["TA", "FULLTEXT"]) {
+                const votes = summary[studyId][stage].votes;
+
+                const accepts = votes.filter(v => v.vote === "ACCEPT").length;
+                const rejects = votes.filter(v => v.vote === "REJECT").length;
+                
+                let status = "UNSCREENED";
+                if (votes.length === 1) status = "PENDING";
+                if (accepts >= 2) status = "ACCEPTED";
+                if (rejects >= 2) status = "REJECTED";
+                if (accepts === 1 && rejects === 1) status = "CONFLICT";
+
+                summary[studyId][stage].status = status;
+            }
+        }
+
         res.json(summary);
     } catch (err) {
         console.error("Error in /screenings/summary:", err);
