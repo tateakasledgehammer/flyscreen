@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const { db, upsertScreening, getScreeningsForStudies } = require("../db.js");
 
 /* middleware */
@@ -45,51 +44,59 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
 
 /* voting */
 router.post("/screenings", (req, res) => {      
-    const { study_id, stage, vote, reason } = req.body;
+    try {
+        console.log("VOTE BODY:", req.body);
+        console.log("USER:", req.user);
 
-    /* general checking */
-    if (!study_id || !stage) {
-        return res.status(400).json({ error: "Missing study_id or stage" });
+        const { study_id, stage, vote, reason } = req.body;
+
+        /* general checking */
+        if (!study_id || !stage) {
+            return res.status(400).json({ error: "Missing study_id or stage" });
+        }
+
+        if (!["TA", "FULLTEXT"].includes(stage)) {
+            return res.status(400).json({ error: "Invalid stage" });
+        }
+
+        if (!["ACCEPT", "REJECT"].includes(vote)) {
+            return res.status(400).json({ error: "Invalid vote" });
+        }
+        
+        /* checking votes */
+        const existingVotes = db.prepare(`
+            SELECT user_id, vote 
+            FROM screenings
+            WHERE study_id = ? AND stage = ?
+        `).all(study_id, stage);
+
+        const hasUserVoted = existingVotes.some(
+            v => v.user_id === req.user.userid
+        );
+        
+        const accepts = existingVotes.filter(v => v.vote === "ACCEPT").length;
+        const rejects = existingVotes.filter(v => v.vote === "REJECT").length;
+        
+        if (accepts >= 2 || rejects >= 2) {
+            return res.status(409).json({ error: "Decision finalised" });
+        }
+        if (existingVotes.length >= 2 && !hasUserVoted) {
+            return res.status(409).json({ error: "Voting closed" });
+        }
+
+        upsertScreening.run({
+            user_id: req.user.userid,
+            study_id,
+            stage,
+            vote,
+            reason: reason ?? null
+        });
+
+        res.json({ success: true, message: "Screening saved" });
+    } catch (err) {
+        console.error("SCREENING POST ERROR:", err);
+        res.status(500).json({ error: err.message });
     }
-
-    if (!["TA", "FULLTEXT"].includes(stage)) {
-        return res.status(400).json({ error: "Invalid stage" });
-    }
-
-    if (!["ACCEPT", "REJECT"].includes(vote)) {
-        return res.status(400).json({ error: "Invalid vote" });
-    }
-    
-    /* checking votes */
-    const existingVotes = db.prepare(`
-        SELECT user_id, vote 
-        FROM screenings
-        WHERE study_id = ? AND stage = ?
-    `).all(study_id, stage);
-
-    const hasUserVoted = existingVotes.some(
-        v => v.user_id === req.user.userid
-    );
-    
-    const accepts = existingVotes.filter(v => v.vote === "ACCEPT").length;
-    const rejects = existingVotes.filter(v => v.vote === "REJECT").length;
-    
-    if (accepts >= 2 || rejects >= 2) {
-        return res.status(409).json({ error: "Decision finalised" });
-    }
-    if (existingVotes.length >= 2 && !hasUserVoted) {
-        return res.status(409).json({ error: "Voting closed" });
-    }
-
-    upsertScreening.run({
-        user_id: req.user.userid,
-        study_id,
-        stage,
-        vote,
-        reason: reason ?? null
-    });
-
-    res.json({ success: true, message: "Screening saved" });
 });
 
 module.exports = router;

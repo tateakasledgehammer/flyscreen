@@ -2,12 +2,11 @@ const path = require("path");
 const Database = require("better-sqlite3");
 
 const DB_PATH = path.resolve(__dirname, "flyscreen.db");
-
 console.log("SQLite DB path:", DB_PATH);
-
 const db = new Database(DB_PATH);
 
 db.pragma("journal_mode = WAL");
+db.pragma("busy_timeout = 5000");
 db.pragma("foreign_keys = ON");
 
 // db.pragma enables WAL mode - which makes SQL make 3 files
