@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import { handleSortByOrder, getTAStatus, canUserVoteTA } from "../utils/screeningTools";
@@ -128,21 +128,35 @@ export default function TAScreening(props) {
         setTagFilter("");
     }
 
-    function countByStatus(status) {
-        return studiesWithScreening.filter(
-            study => getTAStatus(study.screening, user?.userid) === status
-        ).length;
-    }
-
     const studiesSafe = Array.isArray(studies) ? studies : [];
     
-    const studiesWithScreening = studiesSafe.map(study => ({
-        ...study,
-        screening: screenings[study.id] ?? {
-            TA: { ACCEPT: [], REJECT: [], myVote: null },
-            FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
+    const studiesWithScreening = useMemo(() => {
+        return studiesSafe.map(study => ({
+            ...study,
+            screening: screenings[study.id] ?? {
+                TA: { ACCEPT: [], REJECT: [], myVote: null },
+                FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
+            }
+        }));
+    }, [studiesSafe, screenings]);
+
+    const countByStatus = useMemo(() => {
+        const counts = {
+            UNSCREENED: 0,
+            PENDING: 0,
+            CONFLICT: 0,
+            REJECTED: 0,
+            "ALREADY VOTED": 0,
+        };
+        for (const study of studiesWithScreening) {
+            const status = getTAStatus(study.screening, user?.userid);
+            if (counts[status] !== undefined) {
+                counts[status]++;
+            }
         }
-    }))
+
+        return counts;
+    }, [studiesWithScreening, user?.userid]);
 
     const filteredStudies = studiesWithScreening
         .filter(study => {
@@ -170,7 +184,7 @@ export default function TAScreening(props) {
         if(statusFilter === "REJECTED") return status === "REJECTED";
         if(statusFilter === "ALREADY VOTED") return status === "ALREADY VOTED";
         return true;
-    })
+    });
     
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -215,7 +229,7 @@ export default function TAScreening(props) {
                     color: "white" 
                     } : {}}
                 >
-                    UNSCREENED ({countByStatus("UNSCREENED")})
+                    UNSCREENED ({countByStatus.UNSCREENED})
                 </button>
 
                 <button onClick={() => toggleStudyStatusShowing("PENDING")}
@@ -225,7 +239,7 @@ export default function TAScreening(props) {
                     color: "white" 
                     } : {}}
                 >
-                    PENDING ({countByStatus("PENDING")})
+                    PENDING ({countByStatus.PENDING})
                 </button>
 
                 <button onClick={() => toggleStudyStatusShowing("ALREADY VOTED")}
@@ -235,7 +249,7 @@ export default function TAScreening(props) {
                     color: "white" 
                     } : {}}
                 >
-                    ALREADY VOTED ({countByStatus("ALREADY VOTED")})
+                    ALREADY VOTED ({countByStatus["ALREADY VOTED"]})
                 </button>
 
                 <button onClick={() => toggleStudyStatusShowing("CONFLICT")}
@@ -245,7 +259,7 @@ export default function TAScreening(props) {
                     color: "white" 
                     } : {}}
                 >
-                    CONFLICT ({countByStatus("CONFLICT")})
+                    CONFLICT ({countByStatus.CONFLICT})
                 </button>
 
                 <button onClick={() => toggleStudyStatusShowing("REJECTED")}
@@ -255,7 +269,7 @@ export default function TAScreening(props) {
                     color: "white" 
                     } : {}}
                 >
-                    REJECTED ({countByStatus("REJECTED")})
+                    REJECTED ({countByStatus.REJECTED})
                 </button>
             </div>
 
