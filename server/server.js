@@ -11,6 +11,7 @@ const screeningRoutes = require("./routes/screenings.js");
 const notesRoutes = require("./routes/notes.js");
 const tagRoutes = require("./routes/tags.js");
 const duplicateRoutes = require("./routes/duplicates.js")
+const studyDetailRoutes = require("./routes/studyDetails.js")
 
 console.log("server.js loaded successfully");
 
@@ -28,7 +29,7 @@ const {
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: false,
+    secure: false, // change later - process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
     maxAge: 1000 * 60 * 60 * 24
@@ -37,7 +38,9 @@ const COOKIE_OPTIONS = {
 // middleware
 
 app.use(cors({
-    origin: process.env.CLIENT_ORIGIN?.split(",") ?? "http://localhost:5173",
+    origin: process.env.CLIENT_ORIGIN
+        ? process.env.CLIENT_ORIGIN.split(",")
+        : "http://localhost:5173",
     credentials: true
 }));
 app.use(express.json({ limit: "50mb" }));
@@ -73,15 +76,12 @@ app.use("/api", screeningRoutes);
 app.use("/api", notesRoutes);
 app.use("/api", tagRoutes);
 app.use("/api", duplicateRoutes);
+app.use("/api", studyDetailRoutes);
 
 // ---- STUDIES ----
 
 // get all studies
-app.get("/api/studies", (req, res) => {
-    if (!req.user) {
-        return res.status(401).json({ error: "Not authenticated!" })
-    }
-
+app.get("/api/studies", requireAuth, (req, res) => {
     try {
         const studies = getAllStudies.all();
         res.json(studies);
@@ -212,10 +212,7 @@ app.get("/api/auth/whoami", requireAuth, (req, res) => {
 
 app.post("/api/auth/logout", (req, res) => {
     res.clearCookie("flyscreenCookie", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "strict",
-        path: "/"
+        ...COOKIE_OPTIONS,
     }),
     res.json({ success: true, message: "Logged out." })
 })
@@ -246,11 +243,11 @@ app.post("/api/auth/login", async (req, res) => {
 
     const token = jwt.sign(
         {
-            exp: jwt.sign(payload, scret, { expiresIn: "1d"}), 
             userid: user.id, 
             username: user.username
         }, 
-    process.env.JWTSECRET
+        process.env.JWTSECRET,
+        { expiresIn: "1d" }
     );
     
     res.cookie("flyscreenCookie", token, COOKIE_OPTIONS)
@@ -259,7 +256,7 @@ app.post("/api/auth/login", async (req, res) => {
     res.json({ success: true, message: "Logged in" })
 })
 
-app.post("/authentication", async (req, res) => {
+app.post("/api/auth/register", async (req, res) => {
     const { username, password } = req.body;
     let errors = [];
 
@@ -287,7 +284,7 @@ app.post("/authentication", async (req, res) => {
     }
 
     // saving new user
-    const salt = bcrypt.genSaltSync(10)
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(trimmedPassword, salt)
 
     const insertStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
@@ -300,11 +297,11 @@ app.post("/authentication", async (req, res) => {
         // sign cookie
         const tokenValue = jwt.sign(
             {
-                exp: jwt.sign(payload, scret, { expiresIn: "1d"}), 
                 userid: selectedUser.id, 
                 username: selectedUser.username
             },
-            process.env.JWTSECRET
+            process.env.JWTSECRET,
+            { expiresIn: "1d"}
         );
         
         res.cookie("flyscreenCookie", tokenValue, COOKIE_OPTIONS)

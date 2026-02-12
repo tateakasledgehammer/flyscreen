@@ -24,7 +24,7 @@ export default function Authentication(props) {
         setErrors([]);
         setMessage("")
 
-        const endpoint = loginNotSignUp ? "login" : "authentication";
+        const endpoint = loginNotSignUp ? "api/auth/login" : "api/auth/register";
 
         try {
             const res = await fetch(`http://localhost:5005/${endpoint}`, {
