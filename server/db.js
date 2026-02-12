@@ -46,7 +46,19 @@ const initSchema = db.transaction(() => {
             keywords TEXT,
             language TEXT,
 
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            is_duplicate INTEGER DEFAULT 0
+        )
+    `).run();
+
+    // Duplicates
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS duplicates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            original_study_id INTEGER NOT NULL,
+            duplicate_payload TEXT NOT NULL,
+            detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE
         )
     `).run();
 
@@ -60,6 +72,7 @@ const initSchema = db.transaction(() => {
             vote TEXT CHECK(vote IN ('ACCEPT','REJECT')) NOT NULL,
             reason TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
@@ -86,7 +99,7 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
-        );
+        )
     `).run();
     
     db.prepare(`
@@ -96,17 +109,33 @@ const initSchema = db.transaction(() => {
             PRIMARY KEY (study_id, tag_id),
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-        );    
-    `)
+        )  
+    `).run();
 
 });
 
 initSchema();
 
+// Existing index
 db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_studies_year ON studies(year)    
 `).run();
 
+// New recommended indexes
+db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_screenings_study_stage 
+    ON screenings(study_id, stage)    
+`).run();
+
+db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_study_tags_study 
+    ON study_tags(study_id)    
+`).run();
+
+db.prepare(`
+    CREATE INDEX IF NOT EXISTS idx_study_tags_tag 
+    ON study_tags(tag_id)    
+`).run();
 
 const insertManyStudies = db.transaction((studies) => {
     const insert = db.prepare(`
@@ -121,8 +150,28 @@ const insertManyStudies = db.transaction((studies) => {
         )
     `);
 
+    const findByDOI = db.prepare(`SELECT id FROM studies WHERE doi = ?`);
+    const logDuplicate = db.prepare(`
+        INSERT INTO duplicates (original_study_id, duplicate_payload)
+        VALUES (?, ?)
+    `);
+    const markDuplicate = db.prepare(`
+        UPDATE studies SET is_duplicate = 1 WHERE id = ?    
+    `);
+
     for (const study of studies) {
-        insert.run(study);
+        try {
+            insert.run(study);
+        } catch (err) {
+            if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
+                const existing = findByDOI.get(study.doi);
+                logDuplicate.run(existing.id, JSON.stringify(study));
+                markDuplicate.run(existing.id);
+                
+                continue; // skip duplicate
+            }
+            throw err;
+        }
     }
 });
  
