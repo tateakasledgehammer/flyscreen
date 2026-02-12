@@ -48,6 +48,8 @@ const initSchema = db.transaction(() => {
 
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             is_duplicate INTEGER DEFAULT 0
+
+            project_id INTEGER REFERENCES projects(id)
         )
     `).run();
 
@@ -58,7 +60,9 @@ const initSchema = db.transaction(() => {
             original_study_id INTEGER NOT NULL,
             duplicate_payload TEXT NOT NULL,
             detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE
+            FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE,
+
+            project_id INTEGER REFERENCES projects(id)
         )
     `).run();
 
@@ -77,7 +81,9 @@ const initSchema = db.transaction(() => {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             
-            UNIQUE(user_id, study_id, stage)
+            UNIQUE(user_id, study_id, stage),
+
+            project_id INTEGER REFERENCES projects(id)
         )
     `).run();
 
@@ -90,7 +96,9 @@ const initSchema = db.transaction(() => {
             content TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE
+            FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
+
+            project_id INTEGER REFERENCES projects(id)
         )
     `).run();
 
@@ -108,8 +116,32 @@ const initSchema = db.transaction(() => {
             tag_id INTEGER NOT NULL,
             PRIMARY KEY (study_id, tag_id),
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
-            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+
+            project_id INTEGER REFERENCES projects(id)
         )  
+    `).run();
+
+    // Projects
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT null,
+            description TEXT,
+            created_by INTEGER NOT null,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIN KEY (created_by) REFERENCES users(id)
+    )`).run();
+
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS project_users (
+            project_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            role TEXT CHECK(role IN ('OWNER', 'REVIEWER')) NOT NULL DEFAULT 'REVIEWER',
+            PRIMARY KEY (project_id, user_id),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
     `).run();
 
 });
@@ -167,7 +199,7 @@ const insertManyStudies = db.transaction((studies) => {
                 const existing = findByDOI.get(study.doi);
                 logDuplicate.run(existing.id, JSON.stringify(study));
                 markDuplicate.run(existing.id);
-                
+
                 continue; // skip duplicate
             }
             throw err;

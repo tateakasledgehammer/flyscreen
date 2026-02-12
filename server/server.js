@@ -115,7 +115,7 @@ app.post("/api/studies/bulk", requireAuth, (req, res) => {
 
     try {
         const cleanStudies = studies.map(dbSafeStudy);
-        insertManyStudies(cleanStudies);
+        insertManyStudies(cleanStudies, projectId);
         res.json({ success: true, message: `Inserted ${studies.length} studies.` });
     } catch (error) {
         console.error("Bulk insert error:", error);
