@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { db, upsertScreening, getScreeningsForStudies } = require("../db.js");
 
+const screeningRepo = require("../repos/screeningRepo");
+const auditRepo = require("../repos/auditRepo");
+
 /* middleware */
 function requireAuth(req, res, next) {
     if (!req.user) {
@@ -19,20 +22,18 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
         for (const row of rows) {
             const { study_id, stage, vote, user_id } = row;
 
+            // Study + Stage structure
             if (!summary[study_id]) {
                 summary[study_id] = {
                     TA: { votes: [], myVote: null, status: "UNSCREENED" },
                     FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
                 };
             }
-            if (
-                summary[study_id][stage] &&
-                summary[study_id][stage][vote] &&
-                Array.isArray(summary[study_id][stage][vote])
-            ) {
-                summary[study_id][stage][vote].push(user_id);
-            }
 
+            // Push vote at the stage
+            summary[study_id][stage].votes.push({ vote, user_id });
+
+            // Track vote
             if (user_id === req.user.userid) {
                 summary[study_id][stage].myVote = vote;
             }
@@ -40,7 +41,8 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
 
         for (const studyId of Object.keys(summary)) {
             for (const stage of ["TA", "FULLTEXT"]) {
-                const votes = summary[studyId][stage].votes;
+                const stageData = summary[studyId][stage];
+                const votes = stageData.votes;
 
                 const accepts = votes.filter(v => v.vote === "ACCEPT").length;
                 const rejects = votes.filter(v => v.vote === "REJECT").length;
@@ -51,11 +53,12 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
                 if (rejects >= 2) status = "REJECTED";
                 if (accepts === 1 && rejects === 1) status = "CONFLICT";
 
-                summary[studyId][stage].status = status;
+                stageData.status = status;
             }
         }
 
         res.json(summary);
+
     } catch (err) {
         console.error("Error in /screenings/summary:", err);
         res.status(500).json({ error: "Internal server error" });
@@ -63,56 +66,69 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
 });
 
 /* voting */
-router.post("/screenings", (req, res) => {      
+router.post("/screenings", requireAuth, (req, res) => {      
     try {
-        console.log("VOTE BODY:", req.body);
-        console.log("USER:", req.user);
-
         const { study_id, stage, vote, reason } = req.body;
+        const userId = req.user.userid;
 
-        /* general checking */
+        // general checks
         if (!study_id || !stage) {
             return res.status(400).json({ error: "Missing study_id or stage" });
         }
-
         if (!["TA", "FULLTEXT"].includes(stage)) {
             return res.status(400).json({ error: "Invalid stage" });
         }
-
         if (!["ACCEPT", "REJECT"].includes(vote)) {
             return res.status(400).json({ error: "Invalid vote" });
         }
-        
-        /* checking votes */
-        const existingVotes = db.prepare(`
-            SELECT user_id, vote 
-            FROM screenings
-            WHERE study_id = ? AND stage = ?
-        `).all(study_id, stage);
 
-        const hasUserVoted = existingVotes.some(
-            v => v.user_id === req.user.userid
-        );
-        
-        const accepts = existingVotes.filter(v => v.vote === "ACCEPT").length;
-        const rejects = existingVotes.filter(v => v.vote === "REJECT").length;
-        
-        if (accepts >= 2 || rejects >= 2) {
-            return res.status(409).json({ error: "Decision finalised" });
-        }
-        if (existingVotes.length >= 2 && !hasUserVoted) {
-            return res.status(409).json({ error: "Voting closed" });
-        }
+        // the vote
+        const processVote = db.transaction(() => {
+            // Checking existing votes
+            const existingVotes = screeningRepo.getVotesForStudyStage.all(study_id, stage);
+            const oldVote = existingVotes.find(v => v.user_id === userId)?.vote ?? null;
+            const hasUserVoted = oldVote !== null;
 
-        upsertScreening.run({
-            user_id: req.user.userid,
-            study_id,
-            stage,
-            vote,
-            reason: reason ?? null
+            const accepts = existingVotes.filter(v => v.vote === "ACCEPT").length;
+            const rejects = existingVotes.filter(v => v.vote === "REJECT").length;
+            
+            // Finalisation rules
+            if (accepts >= 2 || rejects >= 2) throw new Error("FINALISED");
+            if (existingVotes.length >= 2 && !hasUserVoted) throw new Error("CLOSED");
+
+            // The vote...
+            screeningRepo.saveVote({
+                user_id: userId,
+                study_id,
+                stage,
+                vote,
+                reason: reason ?? null
+            });
+
+            auditRepo.logVoteChange({
+                user_id: userId,
+                study_id,
+                stage,
+                old_vote: oldVote,
+                new_vote: vote,
+                reason: reason ?? null
+            })
         });
 
+        try {
+            processVote();
+        } catch (err) {
+            if (err.message === "FINALISED") {
+                return res.status(409).json({ error: "Decision finalised" });
+            }
+            if (err.message === "CLOSED") {
+                return res.status(409).json({ error: "Voting closed" });
+            }
+            throw err; // unexpected
+        }
+
         res.json({ success: true, message: "Screening saved" });
+
     } catch (err) {
         console.error("SCREENING POST ERROR:", err);
         res.status(500).json({ error: err.message });

@@ -40,7 +40,7 @@ const initSchema = db.transaction(() => {
             volume TEXT,
             issue TEXT,
             
-            doi TEXT,
+            doi TEXT UNIQUE,
             link TEXT,
 
             keywords TEXT,
@@ -60,7 +60,7 @@ const initSchema = db.transaction(() => {
             vote TEXT CHECK(vote IN ('ACCEPT','REJECT')) NOT NULL,
             reason TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            
+
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             

@@ -51,89 +51,47 @@ export function handleSortByOrder(studies, sortBy) {
 
 /* CAN USERS VOTE */
 export function canUserVoteTA(screening, currentUserId) {
-    const ta = screening?.TA;
+    if (!screening || !screening.TA || !currentUserId) return false;
 
-    if (!ta) return true
+    const { ACCEPT = [], REJECT = [] } = screening.TA;
     
-    const a = ta.ACCEPT.length;
-    const r = ta.REJECT.length;
+    const totalVotes = ACCEPT.length + REJECT.length;
 
-    if (a >= 2 || r >= 2) return false;
-    if (a > 0 && r > 0) return true;
+    if (ACCEPT.includes(currentUserId) || REJECT.includes(currentUserId)) return false;
 
-    const userAccepted = ta.ACCEPT.includes(currentUserId);
-    const userRejected = ta.REJECT.includes(currentUserId);
-    const userHasVoted = userAccepted || userRejected;
-
-    if (userHasVoted) return false;
-
-    return true;
+    return totalVotes < 2;
 }
 
 export function canUserVoteFT(screening, currentUserId) {
-    const ft = screening?.FULLTEXT;
-
-    if (!ft) return true
-    
-    const a = ft.ACCEPT.length;
-    const r = ft.REJECT.length;
-
-    if (a >= 2 || r >= 2) return false;
-    if (a > 0 && r > 0) return true;
-
-    const userAccepted = ft.ACCEPT.includes(currentUserId);
-    const userRejected = ft.REJECT.includes(currentUserId);
-    const userHasVoted = userAccepted || userRejected;
-
-    if (userHasVoted) return false;
-
-    return true;
+    return;
+    // need to update to match TA version once resolved
 }
 
 /* SCREENING STATUS */
 export function getTAStatus(screening, currentUserId) {
-    const ta = screening?.TA;
-
-    if (!ta || (ta.ACCEPT.length === 0 || ta.REJECT.length === 0)) {
-        return "UNSCREENED";
-    }
+    if (!screening || !screening.TA) return "UNSCREENED";
     
-    const a = ta.ACCEPT.length;
-    const r = ta.REJECT.length;
+    const { ACCEPT = [], REJECT = [], myVote = null } = screening.TA;
+    
+    const totalVotes = ACCEPT.length + REJECT.length;
 
-    if (a >= 2) return "ACCEPTED";
-    if (r >= 2) return "REJECTED";
-    if (a > 0 && r > 0) return "CONFLICT";
+    if (totalVotes === 0) return "UNSCREENED";
 
-    const userAccepted = ta.ACCEPT.includes(currentUserId);
-    const userRejected = ta.REJECT.includes(currentUserId);
+    if (ACCEPT.length === 2) return "ACCEPTED";
+    if (REJECT.length === 2) return "REJECTED";
+
+    if (ACCEPT.length === 1 && REJECT.length === 1) return "CONFLICT"
+
+    const userAccepted = ACCEPT.includes(currentUserId);
+    const userRejected = REJECT.includes(currentUserId);
     const userHasVoted = userAccepted || userRejected;
 
-    if (!userHasVoted) return "PENDING"
-
-    return "ALREADY VOTED";
+    if (!userHasVoted && totalVotes === 1) return "PENDING";
+    if (userHasVoted && totalVotes === 1) return "ALREADY VOTED";
 }
+
 export function getFullTextStatus(screening, currentUserId) {
-    const ft = screening?.FULLTEXT;
-
-    if (!ft || (ft.ACCEPT.length === 0 || ft.REJECT.length === 0)) {
-        return "UNSCREENED";
-    }
-    
-    const a = ft.ACCEPT.length;
-    const r = ft.REJECT.length;
-
-    if (a >= 2) return "ACCEPTED";
-    if (r >= 2) return "REJECTED";
-    if (a > 0 && r > 0) return "CONFLICT";
-
-    const userAccepted = ft.ACCEPT.includes(currentUserId);
-    const userRejected = ft.REJECT.includes(currentUserId);
-    const userHasVoted = userAccepted || userRejected;
-
-    if (!userHasVoted) return "PENDING"
-
-    return "ALREADY VOTED";
+    return;
 }
 
 /* FORMATTING */

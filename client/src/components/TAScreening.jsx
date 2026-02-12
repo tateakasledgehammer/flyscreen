@@ -32,6 +32,7 @@ export default function TAScreening(props) {
     const [highlighted, setHighlighted] = useState(false);
     const [hideDetails, setHideDetails] = useState(false);
 
+    /*
     const [screenings, setScreenings] = useState({});
     useEffect(() => {
         fetch("http://localhost:5005/api/screenings/summary", {
@@ -41,6 +42,7 @@ export default function TAScreening(props) {
             .then(setScreenings)
             .catch(err => console.error("Initial fetch failed", err));
     }, []);
+    */
 
     async function refreshScreenings() {
         try 
@@ -133,12 +135,22 @@ export default function TAScreening(props) {
     const studiesWithScreening = useMemo(() => {
         return studiesSafe.map(study => ({
             ...study,
-            screening: screenings[study.id] ?? {
+            screening: study.screening ?? {
                 TA: { ACCEPT: [], REJECT: [], myVote: null },
                 FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
             }
         }));
-    }, [studiesSafe, screenings]);
+    }, [studiesSafe]);
+
+    useEffect(() => {
+        console.log(
+            "STUDIES WITH SCREENING SNAPSHOT",
+            studiesWithScreening.map(s => ({
+                id: s.id,
+                TA: s.screening?.TA
+            }))
+        );
+    }, [studiesWithScreening]);    
 
     const countByStatus = useMemo(() => {
         const counts = {

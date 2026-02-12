@@ -50,7 +50,7 @@ export default function StudyCard(props) {
                 console.error("Vote failed", msg);
                 return;
             }
-
+              
             refreshScreenings();
         } catch (error) {
             console.error("Error submitting vote:", error)
@@ -128,7 +128,15 @@ export default function StudyCard(props) {
                     toggleDetails.hasOwnProperty(study.id)
                         ? toggleDetails[study.id] 
                         : hideDetails;
-
+   
+                console.log(
+                    "FINAL TA",
+                    study.id,
+                    study.screening?.TA,
+                    "canVote:",
+                    canUserVoteTA(study.screening, user?.userid)
+                );
+                      
                 const taStatus = getTAStatus(study.screening, user?.userid);
                 const ftStatus = getFullTextStatus(study.screening, user?.userid);
                 const canVoteTA = canUserVoteTA(study.screening, user?.userid);
