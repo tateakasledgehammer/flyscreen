@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { db, upsertScreening, getScreeningsForStudies } = require("../db.js");
+const { db, getScreeningsForStudies } = require("../db.js");
 
 const screeningRepo = require("../repos/screeningRepo");
 const auditRepo = require("../repos/auditRepo");

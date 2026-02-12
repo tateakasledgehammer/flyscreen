@@ -7,6 +7,8 @@ const cors = require("cors");
 // const bodyParser = require('body-parser');
 // const crypto = require("crypto");
 const screeningRoutes = require("./routes/screenings.js");
+const notesRoutes = require("./routes/notes.js");
+const tagRoutes = require("./routes/tags.js")
 
 console.log("server.js loaded successfully");
 
@@ -65,8 +67,9 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
-
-app.use("/api", screeningRoutes)
+app.use("/api", screeningRoutes);
+app.use("/api", notesRoutes);
+app.use("/api", tagRoutes);
 
 // ---- STUDIES ----
 

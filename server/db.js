@@ -80,6 +80,25 @@ const initSchema = db.transaction(() => {
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE
         )
     `).run();
+
+    // Tags
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        );
+    `).run();
+    
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS study_tags (
+            study_id INTEGER NOT NULL,
+            tag_id INTEGER NOT NULL,
+            PRIMARY KEY (study_id, tag_id),
+            FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
+            FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+        );    
+    `)
+
 });
 
 initSchema();
