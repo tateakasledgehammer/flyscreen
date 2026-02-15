@@ -161,6 +161,32 @@ const initSchema = db.transaction(() => {
         )
     `).run();
 
+    // Probability
+    db.prepare(`
+        CREATE TABLE project_criteria (
+            project_id INTEGER PRIMARY KEY,
+            population TEXT,
+            intervention TEXT,
+            comparator TEXT,
+            outcomes TEXT,
+            study_design TEXT,
+            exclusions TEXT,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+    `).run();
+
+    db.prepare(`
+        CREATE TABLE study_scores (
+            study_id INTEGER PRIMARY KEY,
+            project_id INTEGER NOT NULL,
+            score REAL NOT NULL,
+            explanation TEXT,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id)
+        )
+    `).run();
+
 });
 
 initSchema();
@@ -212,22 +238,30 @@ const insertManyStudies = db.transaction((studies, projectId) => {
         UPDATE studies SET is_duplicate = 1 WHERE id = ?    
     `);
 
+    const insertedIds = [];
+
     for (const study of studies) {
         study.project_id = projectId;
 
         try {
-            insert.run(study);
+            const result = insert.run(study);
+            insertedIds.push(result.lastInsertRowid);
+
         } catch (err) {
             if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
                 const existing = findByDOI.get(study.doi);
-                logDuplicate.run(existing.id, JSON.stringify(study));
-                markDuplicate.run(existing.id);
+                if (existing) {
+                    logDuplicate.run(existing.id, JSON.stringify(study), projectId);
+                    markDuplicate.run(existing.id);
+                }
 
                 continue; // skip duplicate
             }
             throw err;
         }
     }
+    
+    return insertedIds;
 });
 
 // SCREENING HELPERS

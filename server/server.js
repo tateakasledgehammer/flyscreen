@@ -8,6 +8,8 @@ const cors = require("cors");
 // const crypto = require("crypto");
 
 const requireProjectAccess = require("./middleware/projectAuth.js");
+const scoringEngine = require("./utils/scoringEngine.js");
+const criteriaRepo = require("./repos/projectCriteriaRepo.js");
 
 const screeningRoutes = require("./routes/screenings.js");
 const notesRoutes = require("./routes/notes.js");
@@ -29,6 +31,7 @@ const {
     deleteStudy,
     insertManyStudies,
 } = require("./db");
+const studyScoreRepo = require("./repos/studyScoreRepo.js");
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -128,8 +131,29 @@ app.post(
 
         try {
             const cleanStudies = studies.map(dbSafeStudy);
-            insertManyStudies(cleanStudies, projectId);
-            res.json({ success: true, message: `Inserted ${studies.length} studies.` });
+            
+            const insertedIds = insertManyStudies(cleanStudies, projectId);
+
+            const criteria = criteriaRepo.getCriteria.get(projectId);
+
+            const getStudyByIdStmt = db.prepare(`
+                SELECT * FROM studies WHERE id = ?    
+            `);
+            
+            for (const studyId of insertedIds) {
+                const study = getStudyByIdStmt.get(studyId);
+                if (!study) continue;
+
+                const { score, explanation } = scoringEngine.scoreStudy(study, criteria);
+                studyScoreRepo.upsertScore.run(studyId, projectId, score, explanation);
+            }
+
+            res.json({ 
+                success: true, 
+                message: `Inserted ${studies.length} studies.`,
+                insertedCount: insertedIds.length
+            });
+            
         } catch (error) {
             console.error("Bulk insert error:", error);
             res.status(500).json({ error: "Failed to insert studies" })
