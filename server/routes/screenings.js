@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { db, getScreeningsForStudies } = require("../db.js");
+const { db, getScreeningsForProject } = require("../db.js");
 
 const screeningRepo = require("../repos/screeningRepo");
 const auditRepo = require("../repos/auditRepo");
+const requireProjectAccess = require("../middleware/projectAuth.js");
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -13,10 +14,19 @@ function requireAuth(req, res, next) {
     next();
 }
 
+const studyProjectCheck = db.prepare(`
+    SELECT project_id FROM studies WHERE id = ?    
+`);
+
 /* get them all */
-router.get("/screenings/summary", requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/screenings/summary", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
-        const rows = getScreeningsForStudies.all();
+        const projectId = Number(req.params.projectId);
+        const rows = getScreeningsForProject.all(projectId);
         const summary = {};
 
         for (const row of rows) {
@@ -66,10 +76,21 @@ router.get("/screenings/summary", requireAuth, (req, res) => {
 });
 
 /* voting */
-router.post("/screenings", requireAuth, (req, res) => {      
+router.post(
+    "/projects/:projectId/screenings", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {      
     try {
         const { study_id, stage, vote, reason } = req.body;
         const userId = req.user.userid;
+        const projectId = Number(req.params.projectId);
+
+        // validate study belongs to project
+        const row = studyProjectCheck.get(study_id);
+        if (!row || row.project_id !== Number(req.params.projectId)) {
+            return res.status(403).json({ error: "Study does not belong to this project" });
+        }
 
         // general checks
         if (!study_id || !stage) {
@@ -85,7 +106,7 @@ router.post("/screenings", requireAuth, (req, res) => {
         // the vote
         const processVote = db.transaction(() => {
             // Checking existing votes
-            const existingVotes = screeningRepo.getVotesForStudyStage.all(study_id, stage);
+            const existingVotes = screeningRepo.getVotesForStudyStage.all(study_id, stage, projectId);
             const oldVote = existingVotes.find(v => v.user_id === userId)?.vote ?? null;
             const hasUserVoted = oldVote !== null;
 
@@ -108,6 +129,7 @@ router.post("/screenings", requireAuth, (req, res) => {
             auditRepo.logVoteChange({
                 user_id: userId,
                 study_id,
+                project_id: Number(req.params.projectId),
                 stage,
                 old_vote: oldVote,
                 new_vote: vote,

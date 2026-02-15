@@ -5,6 +5,7 @@ db.prepare(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         study_id INTEGER NOT NULL,
+        project_id INTEGER NOT NULL,
         stage TEXT NOT NULL,
         old_vote TEXT,
         new_vote TEXT,
@@ -14,12 +15,12 @@ db.prepare(`
 `).run();
 
 const insertAudit = db.prepare(`
-    INSERT INTO audit_log (user_id, study_id, stage, old_vote, new_vote, reason)
-    VALUES (@user_id, @study_id, @stage, @old_vote, @new_vote, @reason)
+    INSERT INTO audit_log (user_id, study_id, project_id, stage, old_vote, new_vote, reason)
+    VALUES (@user_id, @study_id, @project_id, @stage, @old_vote, @new_vote, @reason)
 `);
 
 module.exports = {
-    logVoteChange({ user_id, study_id, stage, old_vote, new_vote, reason }) {
-        insertAudit.run({ user_id, study_id, stage, old_vote, new_vote, reason });
+    logVoteChange({ user_id, study_id, project_id, stage, old_vote, new_vote, reason }) {
+        insertAudit.run({ user_id, study_id, project_id, stage, old_vote, new_vote, reason });
     }
 };

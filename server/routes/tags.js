@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const tagRepo = require("../repos/tagRepo");
+const requireProjectAccess = require("../middleware/projectAuth.js");
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -11,7 +12,11 @@ function requireAuth(req, res, next) {
     next();
 }
 
-router.post("/tags", requireAuth, (req, res) => {
+router.post(
+    "/projects/:projectId/tags", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     const { name } = req.body;
     if (!name.trim()) return res.status(400).json({ error: "Tag name required" });
 
@@ -19,7 +24,11 @@ router.post("/tags", requireAuth, (req, res) => {
     res.json({ success: true });
 });
 
-router.post("/tags/attach", requireAuth, (req, res) => {
+router.post(
+    "/projects/:projectId/tags/attach", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     const { study_id, tag } = req.body;
 
     if (!study_id || !tag?.trim()) {
@@ -34,12 +43,20 @@ router.post("/tags/attach", requireAuth, (req, res) => {
     res.json({ success: true });
 });
 
-router.get("/tags/:studyId", requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/tags/:studyId", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     const tags = tagRepo.getTagsForStudy.all(req.params.studyId);
     res.json(tags);
 });
 
-router.get("/tags", requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/tags", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     const tags = tagRepo.getAllTags.all();
     res.json(tags);
 });

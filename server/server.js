@@ -7,11 +7,14 @@ const cors = require("cors");
 // const bodyParser = require('body-parser');
 // const crypto = require("crypto");
 
+const requireProjectAccess = require("./middleware/projectAuth.js");
+
 const screeningRoutes = require("./routes/screenings.js");
 const notesRoutes = require("./routes/notes.js");
 const tagRoutes = require("./routes/tags.js");
-const duplicateRoutes = require("./routes/duplicates.js")
-const studyDetailRoutes = require("./routes/studyDetails.js")
+const duplicateRoutes = require("./routes/duplicates.js");
+const studyDetailRoutes = require("./routes/studyDetails.js");
+const projectRoutes = require("./routes/projects.js");
 
 console.log("server.js loaded successfully");
 
@@ -77,11 +80,16 @@ app.use("/api", notesRoutes);
 app.use("/api", tagRoutes);
 app.use("/api", duplicateRoutes);
 app.use("/api", studyDetailRoutes);
+app.use("/api", projectRoutes);
 
 // ---- STUDIES ----
 
 // get all studies
-app.get("/api/studies", requireAuth, (req, res) => {
+app.get(
+    "/api/projects/:projectId/studies", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
         const studies = getAllStudies.all();
         res.json(studies);
@@ -91,39 +99,48 @@ app.get("/api/studies", requireAuth, (req, res) => {
     }
 });
 
-app.post("/api/studies/bulk", requireAuth, (req, res) => {      
-    const studies = req.body.studies;
+app.post(
+    "/api/projects/:projectId/studies/bulk", 
+    requireAuth, 
+    requireProjectAccess, 
+    (req, res) => {      
+        const studies = req.body.studies;
+        const projectId = Number(req.params.projectId);
 
-    if (!Array.isArray(studies) || studies.length === 0) {
-        return res.status(400).json({ error: "Studies array required" });
-    }
+        if (!Array.isArray(studies) || studies.length === 0) {
+            return res.status(400).json({ error: "Studies array required" });
+        }
 
-    const dbSafeStudy = study => ({
-        title: study.title,
-        abstract: study.abstract,
-        authors: study.authors,
-        year: study.year,
-        type: study.type,
-        journal: study.journal,
-        volume: study.volume,
-        issue: study.issue,
-        doi: study.doi,
-        link: study.link,
-        keywords: study.keywords,
-        language: study.language
-      });
+        const dbSafeStudy = study => ({
+            title: study.title,
+            abstract: study.abstract,
+            authors: study.authors,
+            year: study.year,
+            type: study.type,
+            journal: study.journal,
+            volume: study.volume,
+            issue: study.issue,
+            doi: study.doi,
+            link: study.link,
+            keywords: study.keywords,
+            language: study.language
+        });
 
-    try {
-        const cleanStudies = studies.map(dbSafeStudy);
-        insertManyStudies(cleanStudies, projectId);
-        res.json({ success: true, message: `Inserted ${studies.length} studies.` });
-    } catch (error) {
-        console.error("Bulk insert error:", error);
-        res.status(500).json({ error: "Failed to insert studies" })
-    }
+        try {
+            const cleanStudies = studies.map(dbSafeStudy);
+            insertManyStudies(cleanStudies, projectId);
+            res.json({ success: true, message: `Inserted ${studies.length} studies.` });
+        } catch (error) {
+            console.error("Bulk insert error:", error);
+            res.status(500).json({ error: "Failed to insert studies" })
+        }
 })
 
-app.post("/api/studies", requireAuth, (req, res) => {
+app.post(
+    "/api/projects/:projectId/studies", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     const { 
         title, 
         abstract, 
@@ -170,7 +187,11 @@ app.post("/api/studies", requireAuth, (req, res) => {
     }
 })
 
-app.delete("/api/studies/:id", requireAuth, (req, res) => {
+app.delete(
+    "/api/projects/:projectId/studies/:id", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
         deleteStudy.run(req.params.id);
         res.json({ success: true });
@@ -181,7 +202,11 @@ app.delete("/api/studies/:id", requireAuth, (req, res) => {
 });
 
 // clear studies
-app.delete('/api/studies', requireAuth, async (req, res) => {
+app.delete(
+    '/api/projects/:projectId/studies', 
+    requireAuth, 
+    requireProjectAccess,
+    async (req, res) => {
     try {
         const stmt = db.prepare("DELETE FROM studies");
         stmt.run();

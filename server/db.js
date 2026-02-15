@@ -16,12 +16,38 @@ db.pragma("foreign_keys = ON");
 
 // Create tables
 const initSchema = db.transaction(() => {
+
     // Users
     db.prepare(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL
+        )
+    `).run();
+
+    // Projects
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT,
+            created_by INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            
+            FOREIGN KEY (created_by) REFERENCES users(id)
+        )
+    `).run();
+
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS project_users (
+            project_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            role TEXT CHECK(role IN ('OWNER', 'REVIEWER')) NOT NULL DEFAULT 'REVIEWER',
+            
+            PRIMARY KEY (project_id, user_id),
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `).run();
 
@@ -47,9 +73,11 @@ const initSchema = db.transaction(() => {
             language TEXT,
 
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            is_duplicate INTEGER DEFAULT 0
+            is_duplicate INTEGER DEFAULT 0,
 
-            project_id INTEGER REFERENCES projects(id)
+            project_id INTEGER NOT NULL,
+            
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
 
@@ -60,9 +88,11 @@ const initSchema = db.transaction(() => {
             original_study_id INTEGER NOT NULL,
             duplicate_payload TEXT NOT NULL,
             detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE,
 
-            project_id INTEGER REFERENCES projects(id)
+            project_id INTEGER NOT NULL,
+            
+            FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
 
@@ -72,18 +102,20 @@ const initSchema = db.transaction(() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             study_id INTEGER NOT NULL,
+            
             stage TEXT CHECK(stage IN ('TA','FULLTEXT')) NOT NULL,
             vote TEXT CHECK(vote IN ('ACCEPT','REJECT')) NOT NULL,
             reason TEXT,
+
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
+            project_id INTEGER NOT NULL,
+
+            UNIQUE(user_id, study_id, stage),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
-            
-            UNIQUE(user_id, study_id, stage),
-
-            project_id INTEGER REFERENCES projects(id)
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
 
@@ -93,12 +125,14 @@ const initSchema = db.transaction(() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
             study_id INTEGER NOT NULL,
+
             content TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            project_id INTEGER NOT NULL,
+
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
-
-            project_id INTEGER REFERENCES projects(id)
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
 
@@ -106,7 +140,11 @@ const initSchema = db.transaction(() => {
     db.prepare(`
         CREATE TABLE IF NOT EXISTS tags (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
+            name TEXT NOT NULL,
+            project_id INTEGER NOT NULL,
+
+            UNIQUE(name, project_id),
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
     
@@ -114,33 +152,12 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS study_tags (
             study_id INTEGER NOT NULL,
             tag_id INTEGER NOT NULL,
+            project_id INTEGER NOT NULL,
+
             PRIMARY KEY (study_id, tag_id),
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
-
-            project_id INTEGER REFERENCES projects(id)
-        )  
-    `).run();
-
-    // Projects
-    db.prepare(`
-        CREATE TABLE IF NOT EXISTS projects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT null,
-            description TEXT,
-            created_by INTEGER NOT null,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIN KEY (created_by) REFERENCES users(id)
-    )`).run();
-
-    db.prepare(`
-        CREATE TABLE IF NOT EXISTS project_users (
-            project_id INTEGER NOT NULL,
-            user_id INTEGER NOT NULL,
-            role TEXT CHECK(role IN ('OWNER', 'REVIEWER')) NOT NULL DEFAULT 'REVIEWER',
-            PRIMARY KEY (project_id, user_id),
-            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
 
@@ -148,6 +165,7 @@ const initSchema = db.transaction(() => {
 
 initSchema();
 
+// INDEXES
 // Existing index
 db.prepare(`
     CREATE INDEX IF NOT EXISTS idx_studies_year ON studies(year)    
@@ -169,29 +187,34 @@ db.prepare(`
     ON study_tags(tag_id)    
 `).run();
 
-const insertManyStudies = db.transaction((studies) => {
+// BULK INSERT
+const insertManyStudies = db.transaction((studies, projectId) => {
     const insert = db.prepare(`
         INSERT INTO studies (
             title, abstract, authors, year, type,
             journal, volume, issue, doi, link,
-            keywords, language
+            keywords, language, project_id
         ) VALUES (
             @title, @abstract, @authors, @year, @type,
             @journal, @volume, @issue, @doi, @link,
-            @keywords, @language
+            @keywords, @language, @project_id
         )
     `);
 
     const findByDOI = db.prepare(`SELECT id FROM studies WHERE doi = ?`);
+
     const logDuplicate = db.prepare(`
         INSERT INTO duplicates (original_study_id, duplicate_payload)
         VALUES (?, ?)
     `);
+
     const markDuplicate = db.prepare(`
         UPDATE studies SET is_duplicate = 1 WHERE id = ?    
     `);
 
     for (const study of studies) {
+        study.project_id = projectId;
+
         try {
             insert.run(study);
         } catch (err) {
@@ -206,15 +229,19 @@ const insertManyStudies = db.transaction((studies) => {
         }
     }
 });
- 
- const getScreeningsForStudies = db.prepare(`
-     SELECT study_id, stage, vote, user_id
-     FROM screenings
- `);
+
+// SCREENING HELPERS
+
+ const getScreeningsForProject = db.prepare(`
+    SELECT s.study_id, s.stage, s.vote, s.user_id
+    FROM screenings s
+    JOIN studies st ON st.id = s.study_id
+    WHERE st.project_id = ?    
+`)
 
  const upsertScreening = db.prepare(`
-    INSERT INTO screenings (user_id, study_id, stage, vote, reason, updated_at)
-    VALUES (@user_id, @study_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
+    INSERT INTO screenings (user_id, study_id, project_id, stage, vote, reason, updated_at)
+    VALUES (@user_id, @study_id, @project_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
     
     ON CONFLICT(user_id, study_id, stage)
     DO UPDATE SET
@@ -223,10 +250,12 @@ const insertManyStudies = db.transaction((studies) => {
      updated_at = CURRENT_TIMESTAMP
  `);
 
+// EXPORTING
+
 module.exports = {
     db,
     upsertScreening,
-    getScreeningsForStudies,
+    getScreeningsForProject,
 
     // studies
     createStudy: db.prepare(`
@@ -242,7 +271,8 @@ module.exports = {
             doi,
             link,
             keywords,
-            language
+            language,
+            project_id
         )
         VALUES (
             @title, 
@@ -256,7 +286,8 @@ module.exports = {
             @doi,
             @link,
             @keywords,
-            @language
+            @language,
+            @project_id
         )    
     `),
 

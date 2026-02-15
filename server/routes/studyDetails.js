@@ -5,6 +5,7 @@ const { db, getStudyById } = require("../db")
 const tagRepo = require("../repos/tagRepo");
 const noteRepo = require("../repos/noteRepo");
 const screeningRepo = require("../repos/tagRepo");
+const requireProjectAccess = require("../middleware/projectAuth.js");
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -21,7 +22,11 @@ const getDuplicatesForStudy = db.prepare(`
     ORDER BY detected_at DESC
 `);
 
-router.get("/studies/:id/detail"), requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/studies/:id/detail", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
         const studyId = Number(req.params.id);
 
@@ -36,7 +41,7 @@ router.get("/studies/:id/detail"), requireAuth, (req, res) => {
         const tags = tagRepo.getTagsForStudy.all(studyId);
 
         // Screening Info
-        const allScreenings = screeningRepo.getAllScreenings.all();
+        const allScreenings = screeningRepo.getAllScreeningsForProject.all();
         const summary = {
             TA: { votes: [], myVote: null, status: "UNSCREENED" },
             FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
@@ -87,6 +92,6 @@ router.get("/studies/:id/detail"), requireAuth, (req, res) => {
         console.error("Error in study detail endpoint", err);
         res.status(500).json({ error: "Internal server error" });
     }
-}
+});
 
 module.exports = router;

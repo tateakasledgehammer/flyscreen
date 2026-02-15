@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db");
+const requireProjectAccess = require("../middleware/projectAuth.js");
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -31,7 +32,11 @@ const getDuplicateSummary = db.prepare(`
     ORDER BY duplicate_count DESC
 `);
 
-router.get("/duplicates", requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/duplicates", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
         const rows = getDuplicates.all();
         res.json(rows);
@@ -41,7 +46,11 @@ router.get("/duplicates", requireAuth, (req, res) => {
     }
 });
 
-router.get("/duplicates/summary", requireAuth, (req, res) => {
+router.get(
+    "/projects/:projectId/duplicates/summary", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
     try {
         const rows = getDuplicateSummary.all();
         res.json(rows);

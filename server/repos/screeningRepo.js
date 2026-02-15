@@ -2,14 +2,18 @@ const { db, upsertScreening } = require("../db");
 
 module.exports = {
     getVotesForStudyStage: db.prepare(`
-        SELECT user_id, vote
-        FROM screenings
-        WHERE study_id = ? AND stage = ?    
+        SELECT s.user_id, s.vote
+        FROM screenings s
+        JOIN studies st ON st.id = s.study_id
+        WHERE study_id = ? AND stage = ? AND st.project_id = ?   
     `),
 
-    getAllScreenings: db.prepare(`
-        SELECT study_id, stage, vote, user_id
-        FROM screenings
+    getAllScreeningsForProject: db.prepare(`
+        SELECT s.study_id, s.stage, s.vote, s.user_id
+        FROM screenings s
+        JOIN studies st ON st.id = s.study_id
+        WHERE st.project_id = ?
+
     `),
 
     saveVote: (voteData) => {
