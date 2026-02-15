@@ -4,6 +4,9 @@ const { db, getScreeningsForProject } = require("../db.js");
 
 const screeningRepo = require("../repos/screeningRepo");
 const auditRepo = require("../repos/auditRepo");
+const screeningStatsRepo = require("../repos/screeningStatsRepo.js");
+const projectProgressRepo = require("../repos/projectProgressRepo.js");
+
 const requireProjectAccess = require("../middleware/projectAuth.js");
 
 /* middleware */
@@ -156,5 +159,89 @@ router.post(
         res.status(500).json({ error: err.message });
     }
 });
+
+// screening stats
+router.get(
+    "/projects/:projectId/my-stats", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+        const userId = req.user.userid;
+
+        const breakdown = screeningStatsRepo.getMyStats.all(projectId, userId);
+        const totalStudies = screeningStatsRepo.getTotalStudies.all(projectId).total;
+        const screened = screeningStatsRepo.getMyScreenedStudies.all(projectId, userId).screened;
+
+        const stats = {
+            totalStudies,
+            screened,
+            remaining: totalStudies - screened,
+            TA: { ACCEPT: 0, REJECT: 0 },
+            FULLTEXT: { ACCEPT: 0, REJECT: 0 },
+        };
+
+        for (const row of breakdown) {
+            stats[row.stage][row.vote] = row.count
+        }
+
+        res.json(stats);
+    }
+);
+
+router.get(
+    "/projects/:projectId/progress", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+        
+        const total = projectProgressRepo.getTotalStudies.get(projectId).total;
+        const votes = projectProgressRepo.getVotes.get(projectId);
+
+        // Structure
+        const perStudy = {};
+        for (const v of votes) {
+            if (!perStudy[v.study_id]) {
+                perStudy(v.study_id) = { TA: [], FULLTEXT: [] };
+            }
+            perStudy[v.study_id][v.stage].push(v.vote);
+        }
+
+        let taDone = 0, taConflict = 0, taPending = 0;
+        let ftDone = 0, ftConflict = 0, ftPending = 0;
+        
+        for (const studyId in perStudy) {
+            const taVotes = perStudy[studyId].TA;
+            const ftVotes = perStudy[studyId].FULLTEXT;
+
+            // TA
+            if (taVotes.length === 0) taPending++;
+            else if (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) taConflict++;
+            else if (taVotes.length >= 2) taDone++;
+            else taPending++;
+
+            // TA
+            if (ftVotes.length === 0) ftPending++;
+            else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) ftConflict++;
+            else if (ftVotes.length >= 2) ftDone++;
+            else ftPending++;
+        }
+
+        res.json({
+            totalStudies: total,
+            TA: {
+                done: taDone,
+                conflict: taConflict,
+                pending: taPending
+            },
+            FULLTEXT: {
+                done: ftDone,
+                conflict: ftConflict,
+                pending: ftPending
+            }
+        });
+    }
+);
 
 module.exports = router;
