@@ -66,3 +66,98 @@ EP  - 110
 DP  - Informit
 ER  - 
 `;
+
+// // PROJECT TITLE
+  // const [projectTitle, setProjectTitle] = useState(() => {
+  //   const savedProject = localStorage.getItem('projectTitle');
+  //   if (!savedProject || savedProject === "undefined") return "";
+  //   return savedProject;
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem("projectTitle", projectTitle)
+  // }, [projectTitle]);
+
+  // // STUDY TAGS
+  // const [studyTags, setStudyTags] = useState(() => {
+  //   const savedStudyTags = localStorage.getItem('studyTags');
+  //   return savedStudyTags ? JSON.parse(savedStudyTags) : [];
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //       "studyTags",
+  //       JSON.stringify(studyTags)
+  //   );
+  // }, [studyTags]);
+
+  // // INCLUSION CRITERIA
+  // const [inclusionCriteria, setInclusionCriteria] = useState(() => {
+  //   const savedInclusionCriteria = localStorage.getItem('inclusionCriteria');
+  //   if (!savedInclusionCriteria || savedInclusionCriteria === "undefined") return [];
+  //   return savedInclusionCriteria ? JSON.parse(savedInclusionCriteria) : [];
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     "inclusionCriteria",
+  //     JSON.stringify(inclusionCriteria)
+  //   )
+  // }, [inclusionCriteria]);
+
+  // // EXCLUSION CRITERIA
+  // const [exclusionCriteria, setExclusionCriteria] = useState(() => {
+  //   const savedExclusionCriteria = localStorage.getItem('exclusionCriteria');
+  //   if (!savedExclusionCriteria || savedExclusionCriteria === "undefined") return [];
+  //   return savedExclusionCriteria ? JSON.parse(savedExclusionCriteria) : [];
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //       "exclusionCriteria",
+  //       JSON.stringify(exclusionCriteria)
+  //   )
+  // }, [exclusionCriteria]);
+
+  // // FULL TEXT EXCLUSION
+  // const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState(() => {
+  //   const savedFullTextExclusion = localStorage.getItem("fullTextExclusionReasons");
+  //   if (!savedFullTextExclusion || savedFullTextExclusion === "undefined") return [];
+  //   return savedFullTextExclusion ? JSON.parse(savedFullTextExclusion) : [];
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     "fullTextExclusionReasons",
+  //     JSON.stringify(fullTextExclusionReasons)
+  //   )
+  // }, [fullTextExclusionReasons])
+
+  // // BACKGROUND INFO
+  // const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
+  //   const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
+  //   return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
+  //     title: "",
+  //     studyType: "",
+  //     questionType: "",
+  //     researchArea: "",
+  //     numberOfReviewersForScreening: 1,
+  //     numberOfReviewersForFullText: 1,
+  //     numberOfReviewersForExtraction: 1,
+  //   };
+  // });
+  // useEffect(() => {
+  //   // Save information when it changes
+  //   localStorage.setItem(
+  //     "backgroundInformationForReview",
+  //     JSON.stringify(backgroundInformationForReview)
+  //   );
+  // }, [backgroundInformationForReview]);
+
+  // // SEARCH FILTER
+  // const [searchFilter, setSearchFilter] = useState(() => {
+  //   const savedFilter = localStorage.getItem('searchFilter');
+  //   if (!savedFilter || savedFilter === "undefined") return "";
+  //   return savedFilter;
+  // });
+  // useEffect(() => {
+  //   localStorage.setItem("searchFilter", searchFilter)
+  // }, [searchFilter]);
+  
+  // TOGGLE DETAILS
+  // const [toggleDetails, setToggleDetails] = useState({});

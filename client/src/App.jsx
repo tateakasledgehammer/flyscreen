@@ -21,14 +21,25 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // STUDIES
-  const [studies, setStudies] = useState()
+  // PROJECT ID
+  const [projectId, setProjectId] = useState(() => {
+    const saved = localStorage.getItem("projectId");
+    return saved ? Number(saved) : null;
+  });
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (projectId !== null) {
+      localStorage.setItem("projectId", projectId);
+    }
+  }, [projectId]);
+
+  // STUDIES
+  const [studies, setStudies] = useState([])
+  useEffect(() => {
+    if (!isAuthenticated || !projectId) return;
 
     const fetchStudies = async () => {
       try {
-        const res = await fetch("http://localhost:5005/api/studies", {
+        const res = await fetch(`http://localhost:5005/api/projects/${projectId}/studies-with-scores`, {
           credentials: "include"
         });
         const data = await res.json();
@@ -39,12 +50,13 @@ function App() {
     };
 
     fetchStudies();
-  }, [isAuthenticated])
+  }, [isAuthenticated, projectId])
 
+  // AUTH CHECK
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5005/api/whoami", {
+        const res = await fetch("http://localhost:5005/api/auth/whoami", {
           method: "GET",
           credentials: "include",
         })
@@ -65,101 +77,6 @@ function App() {
     };
     checkAuth();
   }, []);
-
-  // PROJECT TITLE
-  const [projectTitle, setProjectTitle] = useState(() => {
-    const savedProject = localStorage.getItem('projectTitle');
-    if (!savedProject || savedProject === "undefined") return "";
-    return savedProject;
-  });
-  useEffect(() => {
-    localStorage.setItem("projectTitle", projectTitle)
-  }, [projectTitle]);
-
-  // STUDY TAGS
-  const [studyTags, setStudyTags] = useState(() => {
-    const savedStudyTags = localStorage.getItem('studyTags');
-    return savedStudyTags ? JSON.parse(savedStudyTags) : [];
-  });
-  useEffect(() => {
-    localStorage.setItem(
-        "studyTags",
-        JSON.stringify(studyTags)
-    );
-  }, [studyTags]);
-
-  // INCLUSION CRITERIA
-  const [inclusionCriteria, setInclusionCriteria] = useState(() => {
-    const savedInclusionCriteria = localStorage.getItem('inclusionCriteria');
-    if (!savedInclusionCriteria || savedInclusionCriteria === "undefined") return [];
-    return savedInclusionCriteria ? JSON.parse(savedInclusionCriteria) : [];
-  });
-  useEffect(() => {
-    localStorage.setItem(
-      "inclusionCriteria",
-      JSON.stringify(inclusionCriteria)
-    )
-  }, [inclusionCriteria]);
-
-  // EXCLUSION CRITERIA
-  const [exclusionCriteria, setExclusionCriteria] = useState(() => {
-    const savedExclusionCriteria = localStorage.getItem('exclusionCriteria');
-    if (!savedExclusionCriteria || savedExclusionCriteria === "undefined") return [];
-    return savedExclusionCriteria ? JSON.parse(savedExclusionCriteria) : [];
-  });
-  useEffect(() => {
-    localStorage.setItem(
-        "exclusionCriteria",
-        JSON.stringify(exclusionCriteria)
-    )
-  }, [exclusionCriteria]);
-  
-  // SEARCH FILTER
-  const [searchFilter, setSearchFilter] = useState(() => {
-    const savedFilter = localStorage.getItem('searchFilter');
-    if (!savedFilter || savedFilter === "undefined") return "";
-    return savedFilter;
-  });
-  useEffect(() => {
-    localStorage.setItem("searchFilter", searchFilter)
-  }, [searchFilter]);
-
-  // FULL TEXT EXCLUSION
-  const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState(() => {
-    const savedFullTextExclusion = localStorage.getItem("fullTextExclusionReasons");
-    if (!savedFullTextExclusion || savedFullTextExclusion === "undefined") return [];
-    return savedFullTextExclusion ? JSON.parse(savedFullTextExclusion) : [];
-  });
-  useEffect(() => {
-    localStorage.setItem(
-      "fullTextExclusionReasons",
-      JSON.stringify(fullTextExclusionReasons)
-    )
-  }, [fullTextExclusionReasons])
-
-  // BACKGROUND INFO
-  const [backgroundInformationForReview, setBackgroundInformationForReview] = useState(() => {
-    const savedBackgroundInfo = localStorage.getItem("backgroundInformationForReview");
-    return savedBackgroundInfo ? JSON.parse(savedBackgroundInfo) : {
-      title: "",
-      studyType: "",
-      questionType: "",
-      researchArea: "",
-      numberOfReviewersForScreening: 1,
-      numberOfReviewersForFullText: 1,
-      numberOfReviewersForExtraction: 1,
-    };
-  });
-  useEffect(() => {
-    // Save information when it changes
-    localStorage.setItem(
-      "backgroundInformationForReview",
-      JSON.stringify(backgroundInformationForReview)
-    );
-  }, [backgroundInformationForReview]);
-  
-  // TOGGLE DETAILS
-  const [toggleDetails, setToggleDetails] = useState({});
 
   const PrivateRoute = ({ children, isAuthenticated }) => {
     return isAuthenticated ? children : <Navigate to="/" replace />;
@@ -197,8 +114,8 @@ function App() {
             element={
               <PrivateRoute isAuthenticated={isAuthenticated}>
                 <Dashboard 
-                  projectTitle={projectTitle}
-                  setProjectTitle={setProjectTitle}
+                  projectId={projectId}
+                  setProjectId={setProjectId}
                 />
               </PrivateRoute>
             } />
@@ -208,12 +125,8 @@ function App() {
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <Overview 
                 studies={studies} 
-                backgroundInformationForReview={backgroundInformationForReview} 
-                studyTags={studyTags}
-                inclusionCriteria={inclusionCriteria}
-                exclusionCriteria={exclusionCriteria}
-                fullTextExclusionReasons={fullTextExclusionReasons}
                 user={user}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />        
@@ -221,20 +134,9 @@ function App() {
             element={
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <Setup 
-                backgroundInformationForReview={backgroundInformationForReview} 
-                setBackgroundInformationForReview={setBackgroundInformationForReview} 
-                studyTags={studyTags} 
-                setStudyTags={setStudyTags} 
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria} 
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
-                setSearchFilter={setSearchFilter}
-                setProjectTitle={setProjectTitle}
                 setUser={setUser}
                 setStudies={setStudies}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />        
@@ -244,8 +146,7 @@ function App() {
               <Import 
                 studies={studies} 
                 setStudies={setStudies}
-                inclusionCriteria={inclusionCriteria}
-                exclusionCriteria={exclusionCriteria}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />
@@ -254,21 +155,10 @@ function App() {
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <TAScreening 
                 studies={studies} 
-                setStudies={setStudies} 
-                studyTags={studyTags} 
-                setStudyTags={setStudyTags}
-                toggleDetails={toggleDetails} 
-                setToggleDetails={setToggleDetails}
+                setStudies={setStudies}
                 user={user}
                 setUser={setUser}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />
@@ -277,21 +167,10 @@ function App() {
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <FullTextScreening
                 studies={studies} 
-                setStudies={setStudies} 
-                studyTags={studyTags} 
-                setStudyTags={setStudyTags}
-                toggleDetails={toggleDetails} 
-                setToggleDetails={setToggleDetails}
+                setStudies={setStudies}
                 user={user}
                 setUser={setUser}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />
@@ -300,21 +179,10 @@ function App() {
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <IncludedStudies
                 studies={studies} 
-                setStudies={setStudies} 
-                studyTags={studyTags} 
-                setStudyTags={setStudyTags}
-                toggleDetails={toggleDetails} 
-                setToggleDetails={setToggleDetails}
+                setStudies={setStudies}
                 user={user}
                 setUser={setUser}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />
@@ -323,21 +191,10 @@ function App() {
               <PrivateRoute isAuthenticated={isAuthenticated}>
               <ExcludedStudies
                 studies={studies} 
-                setStudies={setStudies} 
-                studyTags={studyTags} 
-                setStudyTags={setStudyTags}
-                toggleDetails={toggleDetails} 
-                setToggleDetails={setToggleDetails}
+                setStudies={setStudies}
                 user={user}
                 setUser={setUser}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
+                projectId={projectId}
               />
               </PrivateRoute>
             } />
