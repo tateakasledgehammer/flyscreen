@@ -1,89 +1,178 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
+import ReviewTitleSection from "./setup/ReviewTitleSection";
+import StudyTypeSection from "./setup/StudyTypeSection";
+import TagSetupSection from "./setup/TagSetupSection";
+import CriteriaSetupSection from "./setup/CriteriaSetupSection";
 
 export default function Setup(props) {
     const { 
-        isAuthenticated, 
-        backgroundInformationForReview, 
-        setBackgroundInformationForReview,
-        studyTags,
-        setStudyTags,
-        inclusionCriteria,
-        setInclusionCriteria,
-        exclusionCriteria,
-        setExclusionCriteria,
-        fullTextExclusionReasons,
-        setFullTextExclusionReasons,
-        setSearchFilter,
-        setProjectTitle,
+        projectId,
         setUser,
         setStudies
     } = props;
 
-    // tags
+    // UI STATES
+    const [studyTags, setStudyTags] = useState([])
     const [newTagInput, setNewTagInput] = useState('');
 
-    async function handleNewTag(e) {        
-        const enteredTag = newTagInput.trim();
-        if (enteredTag === '') return;
-        if (studyTags.includes(enteredTag)) {
-            alert("Tag already exists");
-            return;
+    const [inclusionSection, setInclusionSection] = useState([]);
+    const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
+    const [criteriaInputs, setCriteriaInputs] = useState({});
+
+    const [exclusionSection, setExclusionSection] = useState([]);
+    const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
+    const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
+
+    const [fullTextSub, setFullTextSub] = useState([]);
+    const [fullTextInput, setFullTextInput] = useState('');
+
+    // Background info
+    const [backgroundInformationForReview, setBackgroundInformationForReview] = useState({
+      title: "",
+      studyType: "",
+      questionType: "",
+      researchArea: "",
+      numberOfReviewersForScreening: 2,
+      numberOfReviewersForFullText: 2,
+      numberOfReviewersForExtraction: 2,
+  });
+
+    // LOAD CRITERIA FROM BACKEND
+  useEffect(() => {
+    if (!projectId) return;
+
+    async function loadCriteria() {
+        try {
+            const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
+                credentials: "include"
+            });
+            const data = await res.json();
+
+            if (!data) return;
+
+            // map backend > UI
+            if (data.inclusionCriteria) {
+                setInclusionSection(
+                    data.inclusionCriteria.map(sec => ({
+                        name: sec.category,
+                        criteria: sec.criteria
+                    }))
+                );
+            }
+            if (data.exclusionCriteria) {
+                setExclusionSection(
+                    data.exclusionCriteria.map(sec => ({
+                        name: sec.category,
+                        criteria: sec.criteria
+                    }))
+                );
+            }
+
+            if (data.fullTextExclusionReasons) {
+                setFullTextSub(data.fullTextExclusionReasons);
+            }
+        } catch (err) {
+            console.error("Failed to load criteria", err)
+        }
+    }
+    
+    loadCriteria();
+  }, [projectId]);
+
+
+    // Save criteria to backend when they change
+
+    async function saveCriteriaToBackend() {
+        if (!projectId) return;
+
+        const payload = {
+            inclusionCriteria: inclusionSection.map(sec => ({
+                category: sec.name,
+                criteria: sec.criteria
+            })),
+            exclusionCriteria: exclusionSection.map(sec => ({
+                category: sec.name,
+                criteria: sec.criteria
+            })),
+            fullTextExclusionReasons: fullTextSub
+        };
+
+        try {
+            await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+        });
+
+        } catch (err) {
+            console.error("Failed to save criteria", err);
+        }
+    }
+    // save when criteria changes
+    useEffect(() => {
+        saveCriteriaToBackend();
+    }, [inclusionSection, exclusionSection, fullTextSub]);
+
+    // TAGS
+    function handleNewTag() {        
+        const tag = newTagInput.trim();
+        if (!tag) return;
+        if (studyTags.includes(tag)) {
+            return alert("Tag already exists");
         }
 
-        setStudyTags([...studyTags, enteredTag]);
+        setStudyTags([...studyTags, tag]);
         setNewTagInput('');
     }
 
-    async function handleClearTags() {
+    function handleClearTags() {
         setStudyTags([]);
     }
 
-    async function handleDeleteTag(index) {
+    function handleDeleteTag(index) {
         const amendedStudyTags = studyTags.filter((_, i) => i !== index);
         setStudyTags(amendedStudyTags);
-        console.log('removed the tag')
     }
 
     //
     // Inclusion
     //
 
-    // Inclusion sections
-    const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
-    const [criteriaInputs, setCriteriaInputs] = useState({});
+    function handleNewInclusionCriteriaSection() {
+        const name = newIncludedSectionInput.trim();
+        if (!name) return;
+        if (inclusionSection.some(sec => sec.name === name)) return alert("Section exists");
 
-    function handleCriteriaInputChange(index, value) {
-        setCriteriaInputs(prev => ({
-            ...prev,
-            [index]: value
-        }));
-    }
-
-    const [inclusionSection, setInclusionSection] = useState(() => {
-        const saved = localStorage.getItem('inclusionSection');
-        return saved ? JSON.parse(saved) : [];
-    });
-    
-    useEffect(() => {
-        localStorage.setItem("inclusionSection", JSON.stringify(inclusionSection));
-      }, [inclusionSection]);
-
-    function handleNewInclusionCriteriaSection(e) {
-        const enteredIncludedSection = newIncludedSectionInput.trim();
-        if (enteredIncludedSection === '') return;
-        if (inclusionSection.includes(enteredIncludedSection)) {
-            alert("Inclusion criteria already exists");
-            return;
-        }
-        setInclusionSection([...inclusionSection, { name: enteredIncludedSection, criteria: [] }])
+        setInclusionSection([...inclusionSection, { name, criteria: [] }])
         setNewIncludedSectionInput('');
     }
 
-    async function handleClearInclusionSection() {
-        setInclusionSection([]);
-        setInclusionCriteria([]);
-        setCriteriaInputs({});
+    // has an error idk
+    // const handleCriteriaInputChange(index, value) {
+    //     setCriteriaInputs(prev => ({ ...prev, [index]: value }));
+    // }
+
+    function handleNewInclusionCriteria(index) {
+        const term = (criteriaInputs[index] || "").trim();
+        if (!term) return;
+
+        const updated = [...inclusionSection];
+        if (updated[index].criteria.includes(term)) {
+            return alert("Inclusion criteria already exists");
+        }
+
+        updated[index].criteria.push(term);
+        setInclusionSection(updated);
+
+        setCriteriaInputs(prev => ({ ...prev, [index]: "" }));
+    }
+
+    async function handleDeleteInclusionCriteria(index, termIndex) {
+        const updated = [...inclusionSection];
+        updated[index].criteria.splice(termIndex, 1);
+        setInclusionSection(updated);
     }
 
     async function handleDeleteInclusionSection(index) {
@@ -91,70 +180,42 @@ export default function Setup(props) {
         setInclusionSection(amendedInclusionSections);
     }
 
-    // Inclusion criteria
-    async function handleNewInclusionCriteria(index) {
-        const enteredInclusion = (criteriaInputs[index] || "").trim();
-        if (!enteredInclusion) return;
-
-        const updated = [...inclusionSection];
-        if (updated[index].criteria.includes(enteredInclusion)) {
-            alert("Inclusion criteria already exists");
-            return;
-        }
-
-        updated[index].criteria.push(enteredInclusion);
-        setInclusionSection(updated);
-        setCriteriaInputs(prev => ({
-            ...prev,
-            [index]: ""
-        }));
-    }
-
-    async function handleDeleteInclusionCriteria(index, termIndex) {
-        const amendedInclusionCriteria = [...inclusionSection];
-        amendedInclusionCriteria[index].criteria.splice(termIndex, 1);
-        setInclusionSection(amendedInclusionCriteria)
+    async function handleClearInclusionSection() {
+        setInclusionSection([]);
     }
 
     //
     // Exclusion
     //
 
-    // Exclusion sections
-    const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
-    const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
+    function handleNewExclusionCriteriaSection() {
+        const name = newExcludedSectionInput.trim();
+        if (!name) return;
+        if (exclusionSection.some(sec => sec.name === name)) return alert("Section exists");
 
-    function handleExclusionCriteriaInputChange(index, value) {
-        setExclusionCriteriaInputs(prev => ({
-            ...prev,
-            [index]: value
-        }));
-    }
-
-    const [exclusionSection, setExclusionSection] = useState(() => {
-        const saved = localStorage.getItem('exclusionSection');
-        return saved ? JSON.parse(saved) : [];
-    });
-    
-    useEffect(() => {
-        localStorage.setItem("exclusionSection", JSON.stringify(exclusionSection));
-      }, [exclusionSection]);
-
-    function handleNewExclusionCriteriaSection(e) {
-        const enteredExcludedSection = newExcludedSectionInput.trim();
-        if (enteredExcludedSection === '') return;
-        if (exclusionSection.includes(enteredExcludedSection)) {
-            alert("Exclusion criteria already exists");
-            return;
-        }
-        setExclusionSection([...exclusionSection, { name: enteredExcludedSection, criteria: [] }])
+        setExclusionSection([...exclusionSection, { name, criteria: [] }])
         setNewExcludedSectionInput('');
     }
 
-    async function handleClearExclusionSection() {
-        setExclusionSection([]);
-        setExclusionCriteria([]);
-        setExclusionCriteriaInputs({});
+    function handleNewExclusionCriteria(index) {
+        const term = (exclusionCriteriaInputs[index] || "").trim();
+        if (!term) return;
+
+        const updated = [...exclusionSection];
+        if (updated[index].criteria.includes(term)) {
+            return alert("Exclusion criteria already exists");
+        }
+
+        updated[index].criteria.push(term);
+        setExclusionSection(updated);
+
+        setExclusionCriteriaInputs(prev => ({ ...prev, [index]: "" }));
+    }
+
+    async function handleDeleteExclusionCriteria(index, termIndex) {
+        const updated = [...exclusionSection];
+        updated[index].criteria.splice(termIndex, 1);
+        setExclusionSection(updated);
     }
 
     async function handleDeleteExclusionSection(index) {
@@ -162,126 +223,43 @@ export default function Setup(props) {
         setExclusionSection(amendedExclusionSections);
     }
 
-    // Exclusion criteria
-    async function handleNewExclusionCriteria(index) {
-        const enteredExclusion = (exclusionCriteriaInputs[index] || "").trim();
-        if (!enteredExclusion) return;
-
-        const updated = [...exclusionSection];
-        if (updated[index].criteria.includes(enteredExclusion)) {
-            alert("Exclusion criteria already exists");
-            return;
-        }
-
-        updated[index].criteria.push(enteredExclusion);
-        setExclusionSection(updated);
-        setExclusionCriteriaInputs(prev => ({
-            ...prev,
-            [index]: ""
-        }));
-    }
-
-    async function handleDeleteExclusionCriteria(index, termIndex) {
-        const amendedExclusionCriteria = [...exclusionSection];
-        amendedExclusionCriteria[index].criteria.splice(termIndex, 1);
-        setExclusionSection(amendedExclusionCriteria)
+    async function handleClearExclusionSection() {
+        setExclusionSection([]);
     }
 
     // 
     // Full Text Criteria
     // 
-    const [fullTextInput, setFullTextInput] = useState('')
 
-    function handleFullTextCriteriaInputChange(value) {
-        setFullTextInput(value);
-    }
-
-    const [fullTextSub, setFullTextSub] = useState(() => {
-        const saved = localStorage.getItem('fullTextExclusionReasons');
-        return saved ? JSON.parse(saved) : [];
-    });
-    
-    useEffect(() => {
-        localStorage.setItem("fullTextExclusionReasons", JSON.stringify(fullTextSub));
-      }, [fullTextSub]);
-
-    async function handleNewFullTextExclusion() {
-        const enteredFullText = fullTextInput.trim();
-        if (enteredFullText === '') return;
-        if (fullTextSub.includes(enteredFullText)) {
-            alert("Criteria already exists");
-            return;
+    function handleNewFullTextExclusion() {
+        const term = fullTextInput.trim();
+        if (!term) return;
+        if (fullTextSub.includes(term)) {
+            return alert("Criteria already exists");
         }
-        setFullTextSub([...fullTextSub, enteredFullText])
+        setFullTextSub([...fullTextSub, term]);
         setFullTextInput('');
     }
 
-    async function handleDeleteFullTextExclusion(index) {
+    function handleDeleteFullTextExclusion(index) {
         const amendedFullText = fullTextSub.filter((_, i) => i !== index);
         setFullTextSub(amendedFullText);
     }
 
-    async function handleClearFullTextReasons() {
+    function handleClearFullTextReasons() {
         setFullTextSub([])
         setFullTextInput('')
     }
 
     //
-    // Global Inclusion + Exclusion
+    // Reset
     //
-
-    useEffect(() => {
-        const criteriaObject = inclusionSection.map(section => ({
-            category: section.name,
-            criteria: section.criteria
-        }));
-
-        setInclusionCriteria(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(criteriaObject);
-            return prevStr === newStr ? prev : criteriaObject;
-        });
-    }, [inclusionSection]);
-      
-    useEffect(() => {
-        const criteriaObject = exclusionSection.map(section => ({
-            category: section.name,
-            criteria: section.criteria
-        }));
-        
-        setExclusionCriteria(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(criteriaObject);
-            return prevStr === newStr ? prev : criteriaObject;
-        });
-    }, [exclusionSection]);
-
-    useEffect(() => {
-        const criteria = fullTextSub.flatMap(term => term);
-        setFullTextExclusionReasons(prev => {
-            const prevStr = JSON.stringify(prev);
-            const newStr = JSON.stringify(criteria);
-            return prevStr === newStr ? prev : criteria;
-        });
-    }, [fullTextSub]);
 
     function resetApp() {
         setStudies([]);
-        setSearchFilter("")
-        setInclusionCriteria([]);
-        setExclusionCriteria([]);
-        setFullTextExclusionReasons([])
-        setBackgroundInformationForReview({})
-        setProject(null);
         setUser(null);
-        setStudyTags([]);
         localStorage.clear();
-        console.log("All data cleared")
-    }
-
-    function resetCriteria() {
-        setInclusionCriteria([]);
-        setExclusionCriteria([]);
+        window.location.href = "/";
     }
 
     return (
@@ -297,361 +275,80 @@ export default function Setup(props) {
                 <br />
         </div>
 
-        {/* Review Title */}
-        <div>
-            <h3>Review Name</h3>
-            <input 
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        title: e.target.value
-                    })
-                }
-                type="text" 
-                value={backgroundInformationForReview.title} 
-                placeholder="Provide the title of your review..." 
-                id="review-title"></input>
-        </div>
+        <ReviewTitleSection
+            backgroundInformationForReview={backgroundInformationForReview}
+            setBackgroundInformationForReview={setBackgroundInformationForReview}
+        />
+        <StudyTypeSection
+            backgroundInformationForReview={backgroundInformationForReview}
+            setBackgroundInformationForReview={setBackgroundInformationForReview}
+        />
+        <QuestionTypeSection
+            backgroundInformationForReview={backgroundInformationForReview}
+            setBackgroundInformationForReview={setBackgroundInformationForReview}
+        />
+        <ResearchAreaSection
+            backgroundInformationForReview={backgroundInformationForReview}
+            setBackgroundInformationForReview={setBackgroundInformationForReview}
+        />
+        
+        <br />
+        <hr />
 
-        {/* Study Type */}
-        <div>
-            <h3>Study Type</h3>
-            <select 
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        studyType: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.studyType}
-                id="study-type"
-                >
-                    <option value="">Set study type</option>
-                    <option value="Systematic Review">Systematic Review</option>
-                    <option value="Scoping Review">Scoping Review</option>
-                    <option value="Literature Review">Literature Review</option>
-                    <option value="Rapid Review">Rapid Review</option>
-                    <option value="Umbrella Review">Umbrella Review</option>
-                    <option value="Other">Other</option>
-            </select>
-        </div>
-
-        {/* Question Type */}
-        <div>
-            <h3>Question Type</h3>
-            <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        questionType: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.questionType} 
-                id="question-type"
-                >
-                    <option value={null}>Set question type</option>
-                    <option value="intervention">Intervention / Treatment</option>
-                    <option value="prevention">Prevention</option>
-                    <option value="etiology">Etiology</option>
-                    <option value="diagnosis">Diagnosis</option>
-                    <option value="prognosis">Prognosis</option>
-                    <option value="qualitative">Qualitative</option>
-            </select>
-        </div>
-
-        {/* Research Area */}
-        <div>
-            <h3>Area of Research</h3>
-            <select 
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        researchArea: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.researchArea} 
-                id="research-area"
-                    >
-                    <option value={null}>Set research area</option>
-                    <option value="arts">Arts & Humanities</option>
-                    <option value="food-and-animals">Agriculture, Veterinary & Food sciences</option>
-                    <option value="bio-and-chem">Biological & Chemical Sciences</option>
-                    <option value="environmental">Environmental Sciences</option>
-                    <option value="business-and-economic">Economic, Business & Social Sciences</option>
-                    <option value="education">Education</option>
-                    <option value="stem">Engineering, Maths, Physics & Technology</option>
-                    <option value="medical-and-health">Medical & Health Science</option>
-                    <option value="psychology">Psychology</option>
-                    <option value="other">Other</option>
-            </select>
-        </div>
+        <ReviewerSettingsSection
+            backgroundInformationForReview={backgroundInformationForReview}
+            setBackgroundInformationForReview={setBackgroundInformationForReview}
+        />
 
         <br />
         <hr />
 
-        {/* Reviewer Settings */}
-        <div>
-            <h3>Reviewer Settings</h3>
-            <p>Reviewers required for title & abstract screening</p>
-            <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForScreening: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForScreening} 
-                id="screener-no"
-                >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-            </select>
-
-            <p>Reviewers required for full text screening</p>
-            <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForFullText: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForFullText}
-                id="full-text-screener-no"
-                data-storage-key="fullTextScreenerNo"
-                >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-            </select>
-
-            <p>Reviewers required for data extraction</p>
-            <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForExtraction: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForExtraction}
-                id="data-extraction-screener-no"
-                data-storage-key="dataExtractionNo"
-                >
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-            </select>
-
-            <button id="invite-reviewer">Invite Reviewer</button>
-            {/* Open modal to input email, name, send link to access, backend to update their authentication */}
-            
-            <div id="reviewerList"></div>
-            {/* List of reviewers + their status */}
-        </div>
+        <TagSetupSection
+            studyTags={studyTags}
+            setStudyTags={setStudyTags}
+            newTagInput={newTagInput}
+            setNewTagInput={setNewTagInput}
+            handleNewTag={handleNewTag}
+            handleDeleteTag={handleDeleteTag}
+            handleClearTags={handleClearTags}
+        />
 
         <br />
         <hr />
 
-        {/* Tag Setup */}
-        <div>
-            <h3>Define Tags</h3>
-            <p>Tags will appear while you are screening and are helpful for you to place into groups to check later - whether it be to look into more, to inform another piece of research, or provide valuable background information.</p>
-            <div>
-                <input 
-                    onChange={(e) => setNewTagInput(e.target.value)}
-                    value={newTagInput}
-                    placeholder="Enter your tag..." 
-                    type="text" 
-                >
-                </input>
-                {/* input gets added to tag list which gets added to list below */}
-                <button onClick={handleNewTag}>Add Tag</button>
+        <CriteriaSetupSection
+            // Inclusion
+            inclusionSection={inclusionSection}
+            newIncludedSectionInput={newIncludedSectionInput}
+            setNewIncludedSectionInput={setNewIncludedSectionInput}
+            criteriaInputs={criteriaInputs}
+            handleCriteriaInputChange={handleCriteriaInputChange}
+            handleNewInclusionCriteriaSection={handleNewInclusionCriteriaSection}
+            handleNewInclusionCriteria={handleNewInclusionCriteria}
+            handleDeleteInclusionCriteria={handleDeleteInclusionCriteria}
+            handleDeleteInclusionSection={handleDeleteInclusionSection}
+            handleClearInclusionSection={handleClearInclusionSection}
 
-                <div className="criteria-section">
-                    {(!studyTags || studyTags.length === 0) && <p>No tags provided.</p>}
+            // Exclusion
+            exclusionSection={exclusionSection}
+            newExcludedSectionInput={newExcludedSectionInput}
+            setNewExcludedSectionInput={setNewExcludedSectionInput}
+            exclusionCriteriaInputs={exclusionCriteriaInputs}
+            handleExclusionCriteriaInputChange={handleExclusionCriteriaInputChange}
+            handleNewExclusionCriteria={handleNewExclusionCriteria}
+            handleDeleteExclusionCriteria={handleDeleteExclusionCriteria}
+            handleDeleteExclusionSection={handleDeleteExclusionSection}
+            handleClearExclusionSection={handleClearExclusionSection}
 
-                    {studyTags && studyTags.length > 0 && (
-                        <div className="inclusion-exclusion-criteria">
-                            {(studyTags.map((tag, index) => (
-                                <h4 key={index}>
-                                    {tag}
-                                    <button onClick={() => handleDeleteTag(index)}>X</button>
-                                </h4>
-                            )))}
-                        </div>
-                    )}
-                </div>
+            // Full text
+            fullTextSub={fullTextSub}
+            fullTextInput={fullTextInput}
+            setFullTextInput={setFullTextInput}
+            handleNewFullTextExclusion={handleNewFullTextExclusion}
+            handleDeleteFullTextExclusion={handleDeleteFullTextExclusion}
+            handleClearFullTextReasons={handleClearFullTextReasons}
+        />
 
-                <button onClick={handleClearTags}>Clear Tags</button>
-            </div>
-        </div>
-
-        <br />
-        <hr />
-
-        {/* Inclusion / Exclusion Set Up */}
-        <div>
-            <h3>Set Inclusion & Exclusion Criteria</h3>
-            {/* Needs a modal to open to confirm okay to delete - only for primary author */}
-            <p>The terms that you input below will show up highlighted in green (inclusion) or red (exclusion) to help guide your screening process (this can also be toggled off). You are able to add your own subheadings for maximum customisability.</p>
-
-            <div>
-                <div>
-                    {/* Set up inclusion categories */}
-                    <h3>Inclusion Criteria</h3>
-                    <input 
-                        onChange={(e) => setNewIncludedSectionInput(e.target.value)}
-                        value={newIncludedSectionInput}
-                        type="text" 
-                        id="newInclusionSection" 
-                        placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onClick={() => handleNewInclusionCriteriaSection()}>Add Section</button>
-                    {/* Inclusion cards to go in as divs below */}
-
-                    {!inclusionSection || inclusionSection.length === 0 && (
-                        <p>No criteria categories set.</p>
-                    )}
-
-                    {inclusionSection && inclusionSection.length > 0 && (
-                        <div className="criteria-section">
-                            {(inclusionSection.map((section, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {section.name}
-                                        <button onClick={() => handleDeleteInclusionSection(index)}
-                                        >X</button>
-                                    </h3>
-                                    <input
-                                        onChange={(e) => handleCriteriaInputChange(index, e.target.value)}
-                                        value={criteriaInputs[index] || ""}
-                                        id="newInclusionCriteria"
-                                        placeholder="Provide your term for inclusion..."
-                                    >
-                                    </input>
-                                    <button onClick={() => handleNewInclusionCriteria(index)}>Add</button>
-
-                                    {(!section.criteria || section.criteria.length === 0) && (
-                                        <p>No terms for inclusion added.</p>
-                                    )}
-
-                                    {(section.criteria && section.criteria.length > 0) && (
-                                        <div className="inclusion-exclusion-criteria">
-                                            {(section.criteria.map((term, termIndex) => (
-                                                <div key={termIndex}>
-                                                    <h4>
-                                                        {term}
-                                                        <button onClick={() => handleDeleteInclusionCriteria(index, termIndex)}
-                                                        >X</button>
-                                                    </h4>
-                                                </div>
-                                            )))}
-                                        </div>
-                                    )}
-
-
-                                </div>
-                            )))}
-                        </div>
-                    )}
-                    
-                    <button onClick={() => handleClearInclusionSection()}>Clear Inclusion Criteria</button>
-                </div>
-
-
-                <div>
-                    {/* Set up exclusion categories */}
-                    <h3>Exclusion Criteria</h3>
-                    <input 
-                        onChange={(e) => setNewExcludedSectionInput(e.target.value)}
-                        value={newExcludedSectionInput}
-                        type="text" 
-                        id="newExclusionSection" 
-                        placeholder="New Section (i.e. Population, Intervention...)"></input>
-                    <button onClick={() => handleNewExclusionCriteriaSection()}>Add Section</button>
-
-                    {!exclusionSection || exclusionSection.length === 0 && (
-                        <p>No criteria categories set.</p>
-                    )}
-
-                    {exclusionSection && exclusionSection.length > 0 && (
-                        <div className="criteria-section">
-                            {(exclusionSection.map((section, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {section.name}
-                                        <button onClick={() => handleDeleteExclusionSection(index)}
-                                        >X</button>
-                                    </h3>
-                                    <input
-                                        onChange={(e) => handleExclusionCriteriaInputChange(index, e.target.value)}
-                                        value={exclusionCriteriaInputs[index] || ""}
-                                        id="newExclusionCriteria"
-                                        placeholder="Provide your term for exclusion..."
-                                    >
-                                    </input>
-                                    <button onClick={() => handleNewExclusionCriteria(index)}>Add</button>
-
-                                    {(!section.criteria || section.criteria.length === 0) && (
-                                        <p>No terms for exclusion added.</p>
-                                    )}
-
-                                    {(section.criteria && section.criteria.length > 0) && (
-                                        <div className="inclusion-exclusion-criteria">
-                                            {(section.criteria.map((term, termIndex) => (
-                                                <div key={termIndex}>
-                                                    <h4>
-                                                        {term}
-                                                        <button onClick={() => handleDeleteExclusionCriteria(index, termIndex)}
-                                                        >X</button>
-                                                    </h4>
-                                                </div>
-                                            )))}
-                                        </div>
-                                    )}
-
-
-                                </div>
-                            )))}
-                        </div>
-                    )}
-                    
-                    <button onClick={() => handleClearExclusionSection()}>Clear Exclusion Criteria</button>
-                </div>
-
-            </div>
-        </div>    
-
-        <br />
-        <hr />
-
-        {/* Set up Full Text exclusion reasons */}
-        <div>
-            {/* Set up exclusion categories */}
-            <h3>Full Text Exclusion Criteria</h3>
-            <input 
-                onChange={(e) => setFullTextInput(e.target.value)}
-                value={fullTextInput}
-                type="text" 
-                placeholder="New full text exclusion reasons (i.e. not a study, unavailable in English..."></input>
-            <button onClick={() => handleNewFullTextExclusion()}>Add Reason</button>
-
-            {!fullTextSub || fullTextSub.length === 0 && (
-                <p>No criteria set.</p>
-            )}
-
-            {fullTextSub && fullTextSub.length > 0 && (
-                <div className="criteria-section">
-                    <div className="inclusion-exclusion-criteria">
-                        {fullTextSub.map((term, index) => (
-                            <h4 key={index}>
-                                {term}
-                                <button onClick={() => handleDeleteFullTextExclusion(index)}
-                                >X</button>
-                            </h4>
-                        ))}
-                    </div>
-                </div>
-            )}
-                    
-            <button onClick={() => handleClearFullTextReasons()}>Clear Criteria</button>
-        </div>
         </div>
         </>
     )
