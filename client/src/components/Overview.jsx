@@ -104,9 +104,6 @@ export default function Overview(props) {
                         </ul>
                     </>
                     )}
-
-
-
                 </ul>
             </div>
             <div className="homepage-section">

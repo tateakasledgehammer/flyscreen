@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Navbar from "./Navbar";
 
 export default function Import(props) {
@@ -27,6 +27,8 @@ export default function Import(props) {
     }
 
     async function handleFileUpload(e) {
+        if (!projectId) return setError("No project selected");
+
         const file = e.target.files[0];
         if (!file) return setError("No files uploaded");
         if (!file.name.toLowerCase().endsWith('.ris')) return setError("Please upload a .ris file");
@@ -70,7 +72,8 @@ export default function Import(props) {
             await fetchStudiesFromServer();
         } catch (err) {
             console.error(err);
-            setError("Failed to upload file");
+            const errData = await res.json();
+            setError(errData.error || "Failed to upload file");
         } finally {
             setIsLoading(false);
         }
@@ -83,7 +86,7 @@ export default function Import(props) {
 
         try {
             const res = await fetch(
-                `http://localhost:5005/api/project/${projectId}/studies`, 
+                `http://localhost:5005/api/projects/${projectId}/studies`, 
                 {
                     method: "DELETE",
                     credentials: "include",
@@ -133,8 +136,6 @@ export default function Import(props) {
                     ))}
                 </ul>
             )}
-
-            {uploadProgress && <p>{uploadProgress}</p>}                
 
             <button onClick={handleClear}>Clear studies</button>
         </div>
