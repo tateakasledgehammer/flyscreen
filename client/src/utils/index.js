@@ -161,3 +161,96 @@ ER  -
   
   // TOGGLE DETAILS
   // const [toggleDetails, setToggleDetails] = useState({});
+
+
+
+
+  ///// FROM IMPORT RIP
+//  function parseRIS(content) {
+    //     const lines = content.split(/\r?\n/);
+    //     const records = []; 
+    //     let currentStudy = {};
+
+    //     // skip empty lines
+    //     lines.forEach(line => {
+    //         if (!line.trim()) return;
+    //         const tag = line.slice(0, 2); 
+    //         const value = line.slice(6).trim(); 
+    
+    //     // TY is the start of a new, so checks to push the value to records then resets
+        
+    //         if (tag === 'TY') {
+    //             currentStudy = { TY: value };
+    //         } else if (tag === 'ER') {
+    //             records.push(currentStudy);
+    //             currentStudy = {};
+    //         } else {
+    //             if (!currentStudy[tag]) {
+    //                 currentStudy[tag] = [];
+    //             }
+    //             currentStudy[tag].push(value);
+    //         }
+    //     });
+
+    //     return records;
+    // };
+
+    // function normaliseStudy(entry) {
+    //     return {
+    //         _clientId: crypto.randomUUID(),
+    //         id: null, // backend assigns - clever,
+    //         title: entry.TI?.[0] ?? entry.T1?.[0] ?? "",
+    //         abstract: entry.AB?.[0] ?? "",
+    //         authors: entry.AU ? entry.AU.join(", ") : entry.A1 ? entry.A1.join(",") : "",
+    //         year: entry.PY ? parseInt(entry.PY[0], 10) || null : null,
+    //         type: entry.TY?.[0] ?? null,
+    //         journal: entry.T2?.[0] ?? "",
+    //         volume: entry.VL?.[0] ?? "",
+    //         issue: entry.IS?.[0] ?? "",
+    //         doi: entry.DO?.[0] ?? "",
+    //         link: entry.UR?.[0] ?? "",
+    //         keywords: entry.KW ? entry.KW.join(", ") : "",
+    //         language: entry.LA?.[0] ?? "",
+
+    //         notes: [],
+    //         tagStatus: "",
+    //     };
+    // }
+
+    // function handleStudyDetails(records) {
+    //     return records.map(entry => {
+    //         return normaliseStudy(entry);
+    //     });
+    // }
+
+    // async function uploadStudiesInBatches(studies, batchSize = 100) {
+    //     for (let i = 0; i < studies.length; i+= batchSize) {
+    //         const batch = studies.slice(i, i + batchSize);
+
+    //         const response = await fetch("http://localhost:5005/api/studies/bulk", {
+    //             method: "POST",
+    //             credentials: "include",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ studies: batch }),
+    //         });
+
+    //         if (!response.ok) {
+    //             const err = await response.json();
+    //             throw new Error(err.error || "Batch upload failed");
+    //         }
+
+    //         console.log(
+    //             `Uploaded batch ${i / batchSize + 1} / ${Math.ceil(studies.length / batchSize)}`
+    //         );
+
+    //         setUploadProgress(`Uploading ${i + batch.length} / ${studies.length}`);
+    //     }
+    // }
+
+    // async function fetchStudiesFromServer() {
+    //     const res = await fetch("http://localhost:5005/api/studies", {
+    //         credentials: "include"
+    //     });
+    //     const data = await res.json();
+    //     setStudies(data)
+    // }
