@@ -254,3 +254,19 @@ ER  -
     //     const data = await res.json();
     //     setStudies(data)
     // }
+
+
+
+
+
+
+
+
+
+
+    // const searchWords = searchFilter
+    //     ? searchFilter
+    //         .split(" ")       // split by spaces
+    //         .map(w => w.trim())
+    //         .filter(Boolean)  // remove empty strings
+    //     : [];

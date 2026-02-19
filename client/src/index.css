@@ -453,3 +453,69 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* ============================
+   SCORE BADGE + TOOLTIP
+   ============================ */
+
+   .score-badge {
+    position: relative;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: white;
+    cursor: help;
+    margin-bottom: 8px;
+  }
+  
+  /* Tooltip */
+  .score-badge .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    position: absolute;
+    top: 120%;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 6px;
+    width: 260px;
+    z-index: 20;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  
+  .score-badge:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  /* ============================
+     SCORE COLOUR THRESHOLDS
+     ============================ */
+  
+  .score-green {
+    background-color: #2e7d32; /* deep green */
+  }
+  
+  .score-yellow {
+    background-color: #f9a825; /* warm yellow */
+    color: black;
+  }
+  
+  .score-orange {
+    background-color: #ef6c00; /* strong orange */
+  }
+  
+  .score-red {
+    background-color: #c62828; /* deep red */
+  }
+  
+  .score-grey {
+    background-color: #757575; /* neutral grey */
+  }
+  

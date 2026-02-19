@@ -1,61 +1,45 @@
-import { useEffect, useState } from "react";
-import { getTAStatus, getFullTextStatus, canUserVoteTA, canUserVoteFT, formatAuthors } from "../utils/screeningTools";
+import { 
+    getTAStatus, 
+    getFullTextStatus, 
+    canUserVoteTA, 
+    canUserVoteFT, 
+    formatAuthors  
+} from "../utils/screeningTools";
+
 import StudyInfo from "./StudyInfo";
 
 export default function StudyCard(props) {
     const { 
         studies,
-        savedStudies, 
         toggleDetails, 
         setToggleDetails, 
         studyTags, 
-        setStudyTags, 
         user, 
-        setUser,
-        inclusionCriteria = [],
-        setInclusionCriteria, 
-        exclusionCriteria = [],
         fullTextExclusionReasons,
-        setFullTextExclusionReasons,
-        setExclusionCriteria,
         searchFilter,
-        setSearchFilter,
-        highlighted,
-        setHighlighted,
-        hideDetails,
-        setHideDetails,
-        refreshScreenings
+        refreshScreenings,
+        handleAssignTag,
+        handleAddNote,
+        handleFullTextExclusion
     } = props;
 
-    //console.log("Inclusion:", inclusionCriteria, "Exclusion: ", exclusionCriteria)
-    //console.log(studies)
-
-    async function submitVote(studyId, stage, vote) { 
-        try {
-            const res = await fetch("http://localhost:5005/api/screenings", {
+    function submitVote(studyId, stage, vote) { 
+        fetch("http://localhost:5005/api/screenings", {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     study_id: studyId,
                     stage,
                     vote
                 })
-            });
-
-            if (!res.ok) {
-                const msg = await res.text();
-                console.error("Vote failed", msg);
-                return;
-            }
-              
-            refreshScreenings();
-        } catch (error) {
-            console.error("Error submitting vote:", error)
+            })
+            .then(res => {
+                if (!res.ok) return console.error("Vote failed");
+                refreshScreenings();
+            })
+            .catch(err => console.error("Error submitting vote", err));
         }
-    }
 
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
@@ -64,7 +48,12 @@ export default function StudyCard(props) {
         }));
     }
 
-    function highlightContent(text, includedWords = [], excludedWords = [], filteredWords = []) {
+    function highlightContent(
+        text, 
+        includedWords = [], 
+        excludedWords = [], 
+        filteredWords = []
+    ) {
         if (!text) return ""
 
         const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -110,12 +99,13 @@ export default function StudyCard(props) {
         return parts;          
     }
 
-    const searchWords = searchFilter
-        ? searchFilter
-            .split(" ")       // split by spaces
-            .map(w => w.trim())
-            .filter(Boolean)  // remove empty strings
-        : [];
+    function getScoreColour(score) {
+        if (score >= 0.80) return "score-green";
+        if (score >= 0.60) return "score-yellow";
+        if (score >= 0.40) return "score-orange";
+        if (score >= 0.10) return "score-red";
+        return "score-grey"
+    }
 
     if (!studies || studies.length === 0) {
         return <p>No studies visible. None uploaded or studies per page not set.</p>;
@@ -123,41 +113,33 @@ export default function StudyCard(props) {
 
     return (
         <div>
-            {studies.map((study, index) => {
+            {studies.map((study) => {
                 const isExpanded = 
                     toggleDetails.hasOwnProperty(study.id)
                         ? toggleDetails[study.id] 
-                        : hideDetails;
-   
-                console.log(
-                    "FINAL TA",
-                    study.id,
-                    study.screening?.TA,
-                    "canVote:",
-                    canUserVoteTA(study.screening, user?.userid)
-                );
-                      
+                        : false;
+
                 const taStatus = getTAStatus(study.screening, user?.userid);
                 const ftStatus = getFullTextStatus(study.screening, user?.userid);
                 const canVoteTA = canUserVoteTA(study.screening, user?.userid);
                 const canVoteFT = canUserVoteFT(study.screening, user?.userid);
-                const myTAVote = study.screening?.TA?.myVote;
-                const myFTVote = study.screening?.FULLTEXT?.myVote;
-
-                //console.log("SCREENING STATE", study.id, study.screening);
+                
+                const scoreColour = getScoreColour(study.score ?? 0)
 
                 return (
-                <div key={study.id ?? study._clientId} study={study} className="study-card">
-                    {/* Study information */}
+                <div key={study.id} className="study-card">
+                    {/* Score Badge */}
+                    <div className={`score-badge ${scoreColour}`}>
+                        {study.score?.toFixed(2) ?? "N/A"}
+                        <span className="tooltip">{study.explanation}</span>
+                    </div>
 
+                    {/* Study information */}
                     <StudyInfo
                         study={study}
-                        studies={studies}
-                        highlighted={highlighted}
                         highlightContent={highlightContent}
-                        inclusionCriteria={inclusionCriteria}
-                        exclusionCriteria={exclusionCriteria}
-                        searchWords={searchWords}
+                        inclusionCriteria={inclusionCriteria || []}
+                        exclusionCriteria={exclusionCriteria || []}
                         isExpanded={isExpanded}
                         handleToggleDetails={handleToggleDetails}
                     />
@@ -169,14 +151,6 @@ export default function StudyCard(props) {
                             <>
                                 <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
                                 <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
-                                {!canVoteTA && (
-                                    <p>
-                                        {taStatus === "ACCEPTED" || taStatus === "REJECTED"
-                                            ? "Decision finalised"
-                                            : "Waiting for another reviewer"
-                                        }
-                                    </p>
-                                )}
                             </>
                         )}
 
@@ -185,27 +159,15 @@ export default function StudyCard(props) {
                             <>
                                 <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
                                 <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
-                                {!canVoteFT && (
-                                    <p>
-                                        {ftStatus === "ACCEPTED" || ftStatus === "REJECTED"
-                                            ? "Decision finalised"
-                                            : "Waiting for another reviewer"
-                                        }
-                                    </p>
-                                )}
                             </>
                         )}
 
-                        {/* <span className={`vote-badge ${
-                            myTAVote === "ACCEPT" ? "accept" : "reject"
-                        }`}
-                        >
-                            You: {myTAVote};
-                        </span> */}
-
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
-                        {((study.fullTextStatus !== "Full Text Accepted" && study.status === "Accepted") && (
-                            <select value={study.fullTextExclusionStatus || ""} onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}>
+                        {taStatus === "Accepted" && (
+                            <select 
+                                value={study.fullTextExclusionStatus || ""} 
+                                onChange={(e) => (handleFullTextExclusion(study.id, e.target.value))}
+                            >
                                 <option value="">Reason to exclude</option>
                                 {Array.isArray(fullTextExclusionReasons) && (fullTextExclusionReasons.map((reason, reasonIndex) => (
                                     <option key={reasonIndex} value={reason}>
@@ -213,24 +175,18 @@ export default function StudyCard(props) {
                                     </option>
                                 )))}
                             </select>
-                        ))}
+                        )}
+        
+                        {/* NOTE */}
+                        <button onClick={(e) => (handleAddNote(study.id))}>ADD NOTE</button>
 
-                        {/* <span className={`vote-badge ${
-                            myFTVote === "ACCEPT" ? "accept" : "reject"
-                        }`}
-                        >
-                            You: {myFTVote};
-                        </span> */}
-                                              
-                        {/* NOTE / TAG for all */}
-                            <button onClick={(e) => (handleAddNote(study.id, e.target.value))}>ADD NOTE</button>
-
+                        {/* TAG */}
                         <select
                             value={study.tagStatus || ""}
                             onChange={(e) => (handleAssignTag(study.id, e.target.value))}
                         >
                             <option value="">Select tag</option>
-                            {Array.isArray(studyTags) && (studyTags.map((tag, tagIndex) => (
+                            {Array.isArray(studyTags) && (studyTags?.map((tag, tagIndex) => (
                                 <option key={tagIndex} value={tag}>
                                     {tag}
                                 </option>
@@ -240,10 +196,12 @@ export default function StudyCard(props) {
 
                     {study.fullTextExclusionStatus && (
                         <>
-                            <p><strong>Full Text Exclusion Reason: </strong>{study.fullTextExclusionStatus}</p>
+                            <p>
+                                <strong>Full Text Exclusion Reason: </strong>
+                                {study.fullTextExclusionStatus}
+                            </p>
                         </>
                     )}
-
                 </div>
             )})}
         </div>
