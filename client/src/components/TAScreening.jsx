@@ -6,161 +6,59 @@ import ScreeningFilters from "./ScreeningFilters";
 
 export default function TAScreening(props) {
     const { 
-        studies, 
-        setStudies, 
-        toggleDetails, 
-        setToggleDetails, 
-        studyTags, 
-        setStudyTags, 
-        user, 
-        setUser, 
-        searchFilter, 
-        setSearchFilter, 
-        inclusionCriteria, 
-        setInclusionCriteria, 
-        exclusionCriteria, 
-        setExclusionCriteria,
-        fullTextExclusionReasons,
-        setFullTextExclusionReasons
+        user,
+        studyTags,
+        projectId,
+        handleAssignTag,
+        handleAddNote,
+        handleFullTextExclusion,
+        fullTextExclusionReasons
     } = props;
 
+    // general useState for screening
+    const [studies, setStudies] = useState([]);
+    const [toggleDetails, setToggleDetails] = useState([]);
+    const [searchFilter, setSearchFilter] = useState("");
+    const [sortOption, setSortOption] = useState("score-desc")
+
+    // pagination
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
-    const [sortBy, setSortBy] = useState('index_asc');
-    const [searchFilterInput, setSearchFilterInput] = useState("");
-    const [statusFilter, setStatusFilter] = useState("UNSCREENED");
-    const [highlighted, setHighlighted] = useState(false);
-    const [hideDetails, setHideDetails] = useState(false);
 
-    /*
-    const [screenings, setScreenings] = useState({});
-    useEffect(() => {
-        fetch("http://localhost:5005/api/screenings/summary", {
-            credentials: "include"
-        })
-            .then(res => res.json())
-            .then(setScreenings)
-            .catch(err => console.error("Initial fetch failed", err));
-    }, []);
-    */
+    // other filters
+    const [highlighted, setHighlighted] = useState(true);
+    const [tagFilter, setTagFilter] = useState("");
+    const [languageFilter, setLanguageFilter] = useState("");
+    const [typeFilter, setTypeFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
-    async function refreshScreenings() {
-        try 
-            {const res = await fetch("http://localhost:5005/api/screenings/summary", {
-                credentials: "include"
-            });
-
-            if (!res.ok) {
-                console.error("Failed to fetch screening summary");
-                return;
-            }
-
-            const summary = await res.json();
-            setScreenings(summary);
+    async function fetchStudies() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setStudies(data);
         } catch (err) {
-            console.error("refreshScreenings error:", err)
+            console.error("Failed to fetch studies:", err);
         }
     }
 
-    function handleItemsPerPage(e) {
-        setItemsPerPage(e.target.value);
-        setCurrentPage(1);
-    }
-    
-    const [tagFilter, setTagFilter] = useState("")
-    function handleSortByTag(value) {
-        setTagFilter(value)
-    }
-
-    function handleSetSearchFilter(e) {
-        setSearchFilter(searchFilterInput);
-        setCurrentPage(1);
-        setSearchFilterInput("");
-    }
-
-    function handleRemoveSearchFilter() {
-        setSearchFilter("");
-        setCurrentPage(1);
-        setSearchFilterInput("")
-
-        if (searchFilter === "") alert("No filter to clear")
-    }
-
-    function handleToggleDetailsGlobal() {
-        setHideDetails(prev => !prev);
-    }
-
-    function handleToggleHighlightsGlobal() {
-        setHighlighted(prev => !prev);
-    }
-
-    function handleLoadMoreStudies() {
-        setItemsPerPage(itemsPerPage * 2)
-    }
-
-    function toggleStudyStatusShowing(filter) {
-        setStatusFilter(filter)
-    }
-
-    const [selectedYear, setSelectedYear] = useState(null);
-    function handleSortByPublicationDate(value) {
-        setSelectedYear(value);
-    }
-
-    const [selectedLanguage, setSelectedLanguage] = useState("");
-    function handleSortByLanguage(value) {
-        setSelectedLanguage(value);
-    }
-
-    const [selectedType, setSelectedType] = useState("");
-    function handleSortByType(value) {
-        setSelectedType(value)
-    }
-
-    function clearFilters() {
-        setSelectedType("");
-        setSelectedLanguage("");
-        setSelectedYear(null);
-        setSearchFilter("");
-        setSearchFilterInput("");
-        setStatusFilter("UNSCREENED")
-        setSortBy('index_asc');
-        setHighlighted(false);
-        setItemsPerPage(25);
-        setTagFilter("");
-    }
-
-    const studiesSafe = Array.isArray(studies) ? studies : [];
-    
-    const studiesWithScreening = useMemo(() => {
-        return studiesSafe.map(study => ({
-            ...study,
-            screening: study.screening ?? {
-                TA: { ACCEPT: [], REJECT: [], myVote: null },
-                FULLTEXT: { ACCEPT: [], REJECT: [], myVote: null }
-            }
-        }));
-    }, [studiesSafe]);
-
     useEffect(() => {
-        console.log(
-            "STUDIES WITH SCREENING SNAPSHOT",
-            studiesWithScreening.map(s => ({
-                id: s.id,
-                TA: s.screening?.TA
-            }))
-        );
-    }, [studiesWithScreening]);    
+        if (projectId) fetchStudies();
+    }, [projectId]);
 
     const countByStatus = useMemo(() => {
         const counts = {
             UNSCREENED: 0,
             PENDING: 0,
             CONFLICT: 0,
-            REJECTED: 0,
-            "ALREADY VOTED": 0,
+            ACCEPTED: 0,
+            REJECTED: 0
         };
-        for (const study of studiesWithScreening) {
+
+        for (const study of studies) {
             const status = getTAStatus(study.screening, user?.userid);
             if (counts[status] !== undefined) {
                 counts[status]++;
@@ -168,127 +66,175 @@ export default function TAScreening(props) {
         }
 
         return counts;
-    }, [studiesWithScreening, user?.userid]);
+    }, [studies, user])
 
-    const filteredStudies = studiesWithScreening
-        .filter(study => {
-            if (!searchFilter) return true;
-            return (
-                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
-            )
-        })
-        .filter(study => {
-            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
-            if (selectedLanguage && study.language !== selectedLanguage) return false;
-            if (selectedType && study.type !== selectedType) return false;
-            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
-            return true;
-        });
-    
-    const filteredStudiesByStatus = filteredStudies.filter(study => {
+    const searchWords = searchFilter
+        .split(" ")
+        .map(w => w.trim().toLowerCase())
+        .filter(Boolean);
+
+    function matchesSearch(study) {
+        if (searchWords.length === 0) return true;
+        const text = `${study.title} ${study.abstract} ${study.keywords}`.toLowerCase();
+        return searchWords.every(w => text.includes(w));
+    }
+
+    //
+    // filters
+    //
+    function matchesLanguage(study) {
+        return languageFilter === "" || study.language === languageFilter;
+    }
+    function matchesType(study) {
+        return typeFilter === "" || study.type === typeFilter;
+    }
+    function matchesTag(study) {
+        return tagFilter === "" || study.tagStatus === tagFilter;
+    }
+    function matchesStatus(study) {
+        if (!statusFilter) return true;
         const status = getTAStatus(study.screening, user?.userid);
+        return status === statusFilter;
+    }
 
-        if(statusFilter === "UNSCREENED") return status === "UNSCREENED";
-        if(statusFilter === "PENDING") return status === "PENDING";
-        if(statusFilter === "CONFLICT") return status === "CONFLICT";
-        if(statusFilter === "REJECTED") return status === "REJECTED";
-        if(statusFilter === "ALREADY VOTED") return status === "ALREADY VOTED";
-        return true;
-    });
-    
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(filteredStudiesByStatus, sortBy);
-    const visibleStudies = sortedStudies.slice(startIndex, endIndex);
+    // sort
+    function sortStudies(list) {
+        const sorted = [...list];
+
+        if (sortOption === "score-desc") {
+            sorted.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+        } else if (sortOption === "score-asc") {
+            sorted.sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
+        } else if (sortOption === "year-desc") {
+            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+        } else if (sortOption === "year-asc") {
+            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+        } else if (sortOption === "title-asc") {
+            sorted.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortOption === "title-desc") {
+            sorted.sort((a, b) => b.title.localeCompare(a.title));
+        }
+
+        return sorted;
+    }
+
+    const filteredStudies = sortStudies(
+        studies.filter(study => 
+            matchesSearch(study) &&
+            matchesLanguage(study) &&
+            matchesTag(study) &&
+            matchesType(study) &&
+            matchesStatus(study)
+        )
+    );
+
+    // Pagination
+    const totalPages = Math.ceil(filteredStudies.length / itemsPerPage);
+    const paginatedStudies = filteredStudies.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Clear function
+    function clearFilters() {
+        setSearchFilter("");
+        setSortOption("score-desc");
+        setLanguageFilter("");
+        setTypeFilter("");
+        setTagFilter("");
+        setHighlighted(true);
+        setCurrentPage(1);
+        setItemsPerPage(25);
+        setStatusFilter("");
+    }
 
     return (
         <>
         <Navbar />
+        
         <div className="page-container">
             <h2>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
             </h2>
 
-            {/* Navigation bar for the screening */}
-            <ScreeningFilters
-                studies={studiesWithScreening}
-                setSortBy={setSortBy}
-                handleItemsPerPage={handleItemsPerPage}
-                itemsPerPage={itemsPerPage}
-                searchFilterInput={searchFilterInput}
-                setSearchFilterInput={setSearchFilterInput}
-                handleSetSearchFilter={handleSetSearchFilter}
-                handleRemoveSearchFilter={handleRemoveSearchFilter}
-                handleToggleDetailsGlobal={handleToggleDetailsGlobal}
-                handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
-                highlighted={highlighted}
-                hideDetails={hideDetails}
-                studyTags={studyTags}
-                handleSortByTag={handleSortByTag}
-                handleSortByPublicationDate={handleSortByPublicationDate}
-                handleSortByLanguage={handleSortByLanguage}
-                handleSortByType={handleSortByType}
-                clearFilters={clearFilters}
+            {/* Search */}
+            <input
+                type="text"
+                placeholder="Search studies..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
             />
 
+            {/* Sorting */}
+            <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+            >
+                <option value="year-asc">Year (Old → New)</option>
+                <option value="year-des">Year (New → Old)</option>
+                <option value="title-asc">Title (A → Z)</option>
+                <option value="title-des">Title (Z → A)</option>
+                <option value="score-asc">Score (Low → High)</option>
+                <option value="score-desc">Score (High → Low)</option>
+            </select>
+
+            {/* Filters */}
+            <select value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
+                <option value="">All languages</option>
+                {[...new Set(studies.map(s => s.language))].map((lang, i) => (
+                    <option key={i} value={lang}>{lang}</option>
+                ))}
+            </select>
+
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                <option value="">All types</option>
+                {[...new Set(studies.map(s => s.type))].map((type, i) => (
+                    <option key={i} value={type}>{type}</option>
+                ))}
+            </select>
+
+            <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)}>
+                <option value="">All tags</option>
+                {[...new Set(studies.map(s => s.tag))].map((tag, i) => (
+                    <option key={i} value={tag}>{tag}</option>
+                ))}
+            </select>
+
+            <select value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)}>
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+            </select>
+
+            {/* highlights */}
+            <button onClick={() => setHighlighted(prev => !prev)}>
+                {highlighted ? "Highlights Off" : "Highlights On"}
+            </button>
+
+            {/* clear */}
+            <button onClick={clearFilters}>Clear Filters</button>
+
+            {/* status filters */}
             <div className="toggle-status">
-                <button onClick={() => toggleStudyStatusShowing("UNSCREENED")}
-                style={ statusFilter === "UNSCREENED" ? { 
-                    fontWeight: "700", 
-                    backgroundColor: "#213547", 
-                    color: "white" 
-                    } : {}}
-                >
-                    UNSCREENED ({countByStatus.UNSCREENED})
-                </button>
-
-                <button onClick={() => toggleStudyStatusShowing("PENDING")}
-                style={ statusFilter === "PENDING" ? { 
-                    fontWeight: "700", 
-                    backgroundColor: "#213547", 
-                    color: "white" 
-                    } : {}}
-                >
-                    PENDING ({countByStatus.PENDING})
-                </button>
-
-                <button onClick={() => toggleStudyStatusShowing("ALREADY VOTED")}
-                style={ statusFilter === "ALREADY VOTED" ? { 
-                    fontWeight: "700", 
-                    backgroundColor: "#213547", 
-                    color: "white" 
-                    } : {}}
-                >
-                    ALREADY VOTED ({countByStatus["ALREADY VOTED"]})
-                </button>
-
-                <button onClick={() => toggleStudyStatusShowing("CONFLICT")}
-                style={ statusFilter === "CONFLICT" ? { 
-                    fontWeight: "700", 
-                    backgroundColor: "#213547", 
-                    color: "white" 
-                    } : {}}
-                >
-                    CONFLICT ({countByStatus.CONFLICT})
-                </button>
-
-                <button onClick={() => toggleStudyStatusShowing("REJECTED")}
-                style={ statusFilter === "REJECTED" ? { 
-                    fontWeight: "700", 
-                    backgroundColor: "#213547", 
-                    color: "white" 
-                    } : {}}
-                >
-                    REJECTED ({countByStatus.REJECTED})
-                </button>
+                {["UNSCREENED", "PENDING", "CONFLICT", "ACCEPTED", "REJECTED"].map(status => (
+                    <button 
+                        key={status}
+                        onClick={() => setStatusFilter(status)}
+                        style={ statusFilter === status ? { 
+                            fontWeight: "700", 
+                            backgroundColor: "#213547", 
+                            color: "white" 
+                            } : {}
+                        }
+                    >
+                        {status} ({countByStatus[status]})
+                    </button>
+                ))}
+                
+                <button onClick={() => setStatusFilter("")}>All ({studies.length})</button>
             </div>
-
-            {/* Second vote notice */}
-            {(statusFilter == "PENDING") && (
-                <p className="filter-notice" /*{style={{ color: "red" }}}*/>Studies that you have voted on will not appear</p>
-            )}
 
             {/* Filter notice */}
             <div>
@@ -299,32 +245,30 @@ export default function TAScreening(props) {
 
             {/* Output section */}
             <StudyCard 
-                studies={visibleStudies} 
-                refreshScreenings={refreshScreenings}
+                studies={filteredStudies} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
+                user={user}
+                projectId={projectId}
+                refreshScreenings={fetchStudies}
                 studyTags={studyTags}
-                setStudyTags={setStudyTags}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
-                highlighted={highlighted}
-                setHighlighted={setHighlighted}
-                hideDetails={hideDetails}
-                setHideDetails={setHideDetails}
+                handleAssignTag={handleAssignTag}
+                handleAddNote={handleAddNote}
+                fullTextExclusionReasons={fullTextExclusionReasons}
+                handleFullTextExclusion={handleFullTextExclusion}
             />
 
-            <br />
-            <br />
-
-            {studiesWithScreening.length > 0 && (
-                <button onClick={handleLoadMoreStudies}>
-                    Load more...
-                </button>
-            )}
+            <div className="pagination">
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button 
+                        key={i}
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={currentPage === i + 1 ? "active" : ""}
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+            </div>
         </div>
     </>
     )

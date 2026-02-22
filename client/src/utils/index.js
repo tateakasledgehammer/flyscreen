@@ -270,3 +270,84 @@ ER  -
     //         .map(w => w.trim())
     //         .filter(Boolean)  // remove empty strings
     //     : [];
+
+
+
+                {/* <div className={`percentile-card ${probabilityClass}`}>
+                    {totalCriteria === 0 ? "N/A" : `${score}/${totalCriteria}`}
+    
+                    <div className="percentile-contents">
+                        <h4>Inclusion Matches:</h4>
+                        {Object.keys(inclusionMatches).length === 0 && <p>None</p>}
+    
+                        {Object.entries(inclusionMatches).map(([category, terms]) => (
+                            <p key={capitaliseFirstLetter(category)}>
+                                {capitaliseFirstLetter(category)}: {terms.length > 0 ? terms.join(", "): "None"}
+                            </p>
+                        ))}
+                        <h4>Exclusion Matches:</h4>
+                        {Object.keys(exclusionMatches).length === 0 && <p>None</p>}
+                        {Object.entries(exclusionMatches).map(([category, terms]) => (
+                            <p key={capitaliseFirstLetter(category)}>
+                                {capitaliseFirstLetter(category)}: {terms.length > 0 ? terms.join(", "): "None"}
+                            </p>
+                        ))}
+                    </div>
+                </div> */}
+
+
+
+    // function handleItemsPerPage(e) {
+    //     setItemsPerPage(e.target.value);
+    //     setCurrentPage(1);
+    // }
+    
+    // const [tagFilter, setTagFilter] = useState("")
+    // function handleSortByTag(value) {
+    //     setTagFilter(value)
+    // }
+
+    // function handleSetSearchFilter(e) {
+    //     setSearchFilter(searchFilterInput);
+    //     setCurrentPage(1);
+    //     setSearchFilterInput("");
+    // }
+
+    // function handleRemoveSearchFilter() {
+    //     setSearchFilter("");
+    //     setCurrentPage(1);
+    //     setSearchFilterInput("")
+
+    //     if (searchFilter === "") alert("No filter to clear")
+    // }
+
+    // function handleToggleDetailsGlobal() {
+    //     setHideDetails(prev => !prev);
+    // }
+
+    // function handleToggleHighlightsGlobal() {
+    //     setHighlighted(prev => !prev);
+    // }
+
+    // function handleLoadMoreStudies() {
+    //     setItemsPerPage(itemsPerPage * 2)
+    // }
+
+    // function toggleStudyStatusShowing(filter) {
+    //     setStatusFilter(filter)
+    // }
+
+    // const [selectedYear, setSelectedYear] = useState(null);
+    // function handleSortByPublicationDate(value) {
+    //     setSelectedYear(value);
+    // }
+
+    // const [selectedLanguage, setSelectedLanguage] = useState("");
+    // function handleSortByLanguage(value) {
+    //     setSelectedLanguage(value);
+    // }
+
+    // const [selectedType, setSelectedType] = useState("");
+    // function handleSortByType(value) {
+    //     setSelectedType(value)
+    // }
