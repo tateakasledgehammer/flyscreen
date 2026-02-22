@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo } from "react"
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import { handleSortByOrder, getTAStatus, canUserVoteTA } from "../utils/screeningTools";
-import ScreeningFilters from "./ScreeningFilters";
+import { ScreeningFiltersBar } from "./ScreeningFiltersBar";
+import { StatusToggleBar } from "./StatusToggleBar";
+import { PaginationBar } from "./PaginationBar";
 
 export default function TAScreening(props) {
     const { 
@@ -157,92 +159,40 @@ export default function TAScreening(props) {
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
             </h2>
 
-            {/* Search */}
-            <input
-                type="text"
-                placeholder="Search studies..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
+            <ScreeningFiltersBar 
+                searchFilter={searchFilter}
+                setSearchFilter={setSearchFilter}
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+                languageFilter={languageFilter}
+                setLanguageFilter={setLanguageFilter}
+                typeFilter={typeFilter}
+                setTypeFilter={setTypeFilter}
+                tagFilter={tagFilter}
+                setTagFilter={setTagFilter}
+                itemsPerPage={itemsPerPage}
+                setItemsPerPage={setItemsPerPage}
+                highlighted={highlighted}
+                setHighlighted={setHighlighted}
+                clearFilters={clearFilters}
+                studies={studies}
+                studyTags={studyTags}
             />
 
-            {/* Sorting */}
-            <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value)}
-            >
-                <option value="year-asc">Year (Old → New)</option>
-                <option value="year-des">Year (New → Old)</option>
-                <option value="title-asc">Title (A → Z)</option>
-                <option value="title-des">Title (Z → A)</option>
-                <option value="score-asc">Score (Low → High)</option>
-                <option value="score-desc">Score (High → Low)</option>
-            </select>
-
-            {/* Filters */}
-            <select value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
-                <option value="">All languages</option>
-                {[...new Set(studies.map(s => s.language))].map((lang, i) => (
-                    <option key={i} value={lang}>{lang}</option>
-                ))}
-            </select>
-
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-                <option value="">All types</option>
-                {[...new Set(studies.map(s => s.type))].map((type, i) => (
-                    <option key={i} value={type}>{type}</option>
-                ))}
-            </select>
-
-            <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)}>
-                <option value="">All tags</option>
-                {[...new Set(studies.map(s => s.tag))].map((tag, i) => (
-                    <option key={i} value={tag}>{tag}</option>
-                ))}
-            </select>
-
-            <select value={itemsPerPage} onChange={(e) => setItemsPerPage(e.target.value)}>
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-            </select>
-
-            {/* highlights */}
-            <button onClick={() => setHighlighted(prev => !prev)}>
-                {highlighted ? "Highlights Off" : "Highlights On"}
-            </button>
-
-            {/* clear */}
-            <button onClick={clearFilters}>Clear Filters</button>
-
-            {/* status filters */}
-            <div className="toggle-status">
-                {["UNSCREENED", "PENDING", "CONFLICT", "ACCEPTED", "REJECTED"].map(status => (
-                    <button 
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        style={ statusFilter === status ? { 
-                            fontWeight: "700", 
-                            backgroundColor: "#213547", 
-                            color: "white" 
-                            } : {}
-                        }
-                    >
-                        {status} ({countByStatus[status]})
-                    </button>
-                ))}
-                
-                <button onClick={() => setStatusFilter("")}>All ({studies.length})</button>
-            </div>
-
+            <StatusToggleBar
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                countByStatus={countByStatus}
+                totalCount={totalCount}
+            />
+            
             {/* Filter notice */}
             <div>
                 {searchFilter && (
                     <h3 className="filter-notice">Filter: {searchFilter}</h3>
                 )}
             </div>
-
+            
             {/* Output section */}
             <StudyCard 
                 studies={filteredStudies} 
@@ -258,17 +208,11 @@ export default function TAScreening(props) {
                 handleFullTextExclusion={handleFullTextExclusion}
             />
 
-            <div className="pagination">
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button 
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={currentPage === i + 1 ? "active" : ""}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-            </div>
+            <PaginationBar 
+                totalPages={totalPages}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+            />
         </div>
     </>
     )
