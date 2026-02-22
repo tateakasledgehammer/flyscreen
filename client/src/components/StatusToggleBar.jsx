@@ -1,4 +1,4 @@
-export function StatusToggleBar({
+export default function StatusToggleBar({
     statusFilter,
     setStatusFilter,
     countByStatus,

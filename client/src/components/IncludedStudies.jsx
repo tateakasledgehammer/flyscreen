@@ -1,196 +1,181 @@
-import { formatAuthors, handleSortByOrder, ensureStudyShape } from "../utils/screeningTools";
-import StudyCard from "./StudyCard";
+import { useState, useEffect, useMemo } from "react";
 import Navbar from "./Navbar";
-import ScreeningFilters from "./ScreeningFilters";
-import { useState, useEffect } from "react";
+import StudyCard from "./StudyCard";
 
-export default function IncludedStudies(props) {
-    const {
-        studies,
-        setStudies,
-        toggleDetails,
-        setToggleDetails,
-        studyTags,
-        setStudyTags,
-        user,
-        setUser,
-        inclusionCriteria,
-        setInclusionCriteria,
-        exclusionCriteria,
-        setExclusionCriteria,
-        fullTextExclusionReasons,
-        setFullTextExclusionReasons,
-        searchFilter,
-        setSearchFilter,
-    } = props;
+import ScreeningFiltersBar from "./ScreeningFiltersBar";
+import PaginationBar from "./PaginationBar";
 
-    const [sortBy, setSortBy] = useState('index_asc');
-    const [searchFilterInput, setSearchFilterInput] = useState("");
-    const [highlighted, setHighlighted] = useState(false)
+import { getFullTextStatus } from "../utils/screeningTools";
+
+export default function IncludedScreening({
+    user,
+    studyTags,
+    projectId,
+    handleAssignTag,
+    handleAddNote
+}) {
+    const [studies, setStudies] = useState([]);
+    const [toggleDetails, setToggleDetails] = useState({});
+
+    // Filters
+    const [searchFilter, setSearchFilter] = useState("");
+    const [sortOption, setSortOption] = useState("score-desc");
+    const [languageFilter, setLanguageFilter] = useState("");
+    const [typeFilter, setTypeFilter] = useState("");
+    const [tagFilter, setTagFilter] = useState("");
+    const [highlighted, setHighlighted] = useState(true);
+
+    // Pagination
     const [itemsPerPage, setItemsPerPage] = useState(25);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const [screenings, setScreenings] = useState([]);
+    async function fetchStudies() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setStudies(data);
+        } catch (err) {
+            console.error("Failed to fetch studies:", err);
+        }
+    }
+
     useEffect(() => {
-        fetch("http://localhost:5005/api/screenings", {
-            credentials: "include"
-        })
-            .then(res => res.json())
-            .then(setScreenings)
-    }, []);
+        if (projectId) fetchStudies();
+    }, [projectId]);
 
-    const [tagFilter, setTagFilter] = useState("")
-    function handleSortByTag(value) {
-        setTagFilter(value)
+    // Only FT-accepted studies
+    const includedStudies = useMemo(() => {
+        return studies.filter(
+            study => getFullTextStatus(study.screening, user?.userid) === "ACCEPTED"
+        );
+    }, [studies, user]);
+
+    // Search
+    const searchWords = searchFilter
+        .split(" ")
+        .map(w => w.trim().toLowerCase())
+        .filter(Boolean);
+
+    function matchesSearch(study) {
+        if (searchWords.length === 0) return true;
+        const text = `${study.title} ${study.abstract} ${study.keywords}`.toLowerCase();
+        return searchWords.every(w => text.includes(w));
     }
 
-    function handleItemsPerPage(e) {
-        setItemsPerPage(e.target.value);
-        setCurrentPage(1);
-    }
-    
-    function handleSetSearchFilter(e) {
-        setSearchFilter(searchFilterInput);
-        setCurrentPage(1);
-        setSearchFilterInput("");
+    // Filters
+    function matchesLanguage(study) {
+        return languageFilter === "" || study.language === languageFilter;
     }
 
-    function handleRemoveSearchFilter() {
-        setSearchFilter("");
-        setCurrentPage(1);
-        setSearchFilterInput("")
-
-        if (searchFilter === "") alert("No filter to clear")
+    function matchesType(study) {
+        return typeFilter === "" || study.type === typeFilter;
     }
 
-    function handleToggleDetailsGlobal() {
-        alert("This function has not been set up")
+    function matchesTag(study) {
+        return tagFilter === "" || study.tagStatus === tagFilter;
     }
 
-    function handleToggleHighlightsGlobal() {
-        setHighlighted(prev => !prev);
+    // Sorting
+    function sortStudies(list) {
+        const sorted = [...list];
+
+        if (sortOption === "score-desc") {
+            sorted.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+        } else if (sortOption === "score-asc") {
+            sorted.sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
+        } else if (sortOption === "year-desc") {
+            sorted.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+        } else if (sortOption === "year-asc") {
+            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+        } else if (sortOption === "title-asc") {
+            sorted.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortOption === "title-desc") {
+            sorted.sort((a, b) => b.title.localeCompare(a.title));
+        }
+
+        return sorted;
     }
 
-    function handleLoadMoreStudies() {
-        setItemsPerPage(itemsPerPage * 2)
-    }
+    // Apply filters
+    const filteredStudies = sortStudies(
+        includedStudies.filter(study =>
+            matchesSearch(study) &&
+            matchesLanguage(study) &&
+            matchesType(study) &&
+            matchesTag(study)
+        )
+    );
 
-    function handleExportStudies() {
-        alert("This function has not been set up")
-    }
+    // Pagination
+    const totalPages = Math.ceil(filteredStudies.length / itemsPerPage);
+    const paginatedStudies = filteredStudies.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
+    // Clear filters
     function clearFilters() {
-        setSelectedType("");
-        setSelectedLanguage("");
-        setSelectedYear(null);
         setSearchFilter("");
-        setSearchFilterInput("");
-        setSortBy('index_asc');
-        setHighlighted(false);
-        setItemsPerPage(25);
+        setSortOption("score-desc");
+        setLanguageFilter("");
+        setTypeFilter("");
         setTagFilter("");
+        setHighlighted(true);
+        setItemsPerPage(25);
+        setCurrentPage(1);
     }
-
-    const [selectedYear, setSelectedYear] = useState(null);
-    function handleSortByPublicationDate(value) {
-        setSelectedYear(value);
-    }
-
-    const [selectedLanguage, setSelectedLanguage] = useState("");
-    function handleSortByLanguage(value) {
-        setSelectedLanguage(value);
-    }
-
-    const [selectedType, setSelectedType] = useState("");
-    function handleSortByType(value) {
-        setSelectedType(value)
-    }
-
-    const acceptedStudies = studies
-        .filter(study => study.fullTextStatus === "Full Text Accepted")
-        .filter(study => {
-            if (!searchFilter) return true;
-            return (
-                study.title.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-                study.abstract.toLowerCase().includes(searchFilter.toLocaleLowerCase()) ||
-                study.keywords.toLowerCase().includes(searchFilter.toLocaleLowerCase())
-            )
-        })
-        .filter(study => {
-            if (selectedYear && String(study.year) !== String(selectedYear)) return false;
-            if (selectedLanguage && study.language !== selectedLanguage) return false;
-            if (selectedType && study.type !== selectedType) return false;
-            if (tagFilter && !(study.tagStatus === tagFilter || study.fullTextExclusionStatus === tagFilter)) return false;
-            return true;
-        });
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const sortedStudies = handleSortByOrder(acceptedStudies, sortBy);
-    const filteredAcceptedStudies = sortedStudies.slice(startIndex, endIndex);
-    
 
     return (
         <>
-        <Navbar />
-        <div className="page-container">
-            <h2><i className="fa-solid fa-list-check"></i> Manage Included Studies</h2>
-            <div className="filter-notice">
-                <h3>Your Included Studies ({acceptedStudies.length})</h3>
-                <button onClick={handleExportStudies}>Export studies</button>
+            <Navbar />
+
+            <div className="page-container">
+                <h2>
+                    <i className="fa-solid fa-circle-check"></i> Final Included Studies
+                </h2>
+
+                <ScreeningFiltersBar
+                    searchFilter={searchFilter}
+                    setSearchFilter={setSearchFilter}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
+                    languageFilter={languageFilter}
+                    setLanguageFilter={setLanguageFilter}
+                    typeFilter={typeFilter}
+                    setTypeFilter={setTypeFilter}
+                    tagFilter={tagFilter}
+                    setTagFilter={setTagFilter}
+                    itemsPerPage={itemsPerPage}
+                    setItemsPerPage={setItemsPerPage}
+                    highlighted={highlighted}
+                    setHighlighted={setHighlighted}
+                    clearFilters={clearFilters}
+                    studies={includedStudies}
+                    studyTags={studyTags}
+                />
+
+                <StudyCard
+                    studies={paginatedStudies}
+                    toggleDetails={toggleDetails}
+                    setToggleDetails={setToggleDetails}
+                    user={user}
+                    projectId={projectId}
+                    refreshScreenings={fetchStudies}
+                    studyTags={studyTags}
+                    handleAssignTag={handleAssignTag}
+                    handleAddNote={handleAddNote}
+                    highlighted={highlighted}
+                />
+
+                <PaginationBar
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                />
             </div>
-
-            <ScreeningFilters
-                studies={studies}
-                setSortBy={setSortBy}
-                handleItemsPerPage={handleItemsPerPage}
-                itemsPerPage={itemsPerPage}
-                searchFilterInput={searchFilterInput}
-                setSearchFilterInput={setSearchFilterInput}
-                handleSetSearchFilter={handleSetSearchFilter}
-                handleRemoveSearchFilter={handleRemoveSearchFilter}
-                handleToggleDetailsGlobal={handleToggleDetailsGlobal}
-                handleToggleHighlightsGlobal={handleToggleHighlightsGlobal}
-                highlighted={highlighted}
-                setHighlighted={setHighlighted}
-                studyTags={studyTags}
-                handleSortByTag={handleSortByTag}
-                handleSortByPublicationDate={handleSortByPublicationDate}
-                handleSortByLanguage={handleSortByLanguage}
-                handleSortByType={handleSortByType}
-                clearFilters={clearFilters}
-
-            />
-
-            {/* Filter notice */}
-            <div>
-                {searchFilter && (
-                    <h3 className="filter-notice">Filter: {searchFilter}</h3>
-                )}
-            </div>
-
-            <StudyCard 
-                studies={filteredAcceptedStudies}
-                setStudies={setStudies}
-                toggleDetails={toggleDetails}
-                setToggleDetails={setToggleDetails}
-                studyTags={studyTags}
-                setStudyTags={setStudyTags}
-                user={user}
-                setUser={setUser}
-                inclusionCriteria={inclusionCriteria} 
-                setInclusionCriteria={setInclusionCriteria} 
-                exclusionCriteria={exclusionCriteria} 
-                setExclusionCriteria={setExclusionCriteria}
-                fullTextExclusionReasons={fullTextExclusionReasons}
-                setFullTextExclusionReasons={setFullTextExclusionReasons}
-                searchFilter={searchFilter}
-                setSearchFilter={setSearchFilter}
-                highlighted={highlighted}
-                setHighlighted={setHighlighted}
-            />
-
-        </div>
         </>
-    )
+    );
 }
