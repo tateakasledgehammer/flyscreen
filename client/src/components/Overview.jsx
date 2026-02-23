@@ -1,58 +1,132 @@
 import { capitaliseFirstLetter } from "../utils/screeningTools"
 import Navbar from "./Navbar"
+import { useState, useEffect } from "react"
 
 export default function Overview(props) {
     const { 
-        studies, 
-        setStudies, 
-        savedStudies, 
-        backgroundInformationForReview, 
-        studyTags,
-        inclusionCriteria,
-        exclusionCriteria,
-        fullTextExclusionReasons,
-        user
+        user,
+        projectId,
+        studies
     } = props
+
+    const [project, setProject] = useState(null);
+    const [studiesCount, setStudiesCount] = useState(0);
+    const [progress, setProgress] = useState(null);
+    const [myStats, setMyStats] = useState(null);
+
+    async function fetchProject() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setProject(data);
+        } catch (err) {
+            console.error("Failed to fetch project:", err);
+        }
+    }
+
+    async function fetchStudiesCount() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setStudiesCount(data.length);
+        } catch (err) {
+            console.error("Failed to fetch studies:", err);
+        }
+    }
+
+    async function fetchProgress() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}/progress`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setProgress(data);
+        } catch (err) {
+            console.error("Failed to fetch progress:", err);
+        }
+    }
+
+    async function fetchMyStats() {
+        try {
+            const res = await fetch(
+                `http://localhost:5005/api/projects/${projectId}/my-stats`,
+                { credentials: "include" }
+            );
+            const data = await res.json();
+            setMyStats(data);
+        } catch (err) {
+            console.error("Failed to fetch stats:", err);
+        }
+    }
+
+    useEffect(() => {
+        if (!projectId) return;
+        fetchProgress();
+        fetchStudiesCount();
+        fetchProgress();
+        fetchMyStats();
+    }, [projectId]);
+
+    if (!project || !progress) {
+        return (
+            <>
+            <Navbar />
+            <div className="page-container">
+                <h2>Loading overview...</h2>
+            </div>
+            </>
+        )
+    }
 
     function handlePrismaDiagram() {
         alert("This function has not been set up")
     }
+
     return (
         <>
         <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
+            
             {/* Add class and styling for the homepage cards + progress bar */}
             <div className="homepage-section">
                 <h3>Overview</h3>
                 <ul>
-                    <li>Study Title: {backgroundInformationForReview.title || "No title set"}</li>
-                    <li>Study Type: {backgroundInformationForReview.studyType || "No study type set"}</li>
-                    <li>Reviewers needed for screening: {backgroundInformationForReview.numberOfReviewersForScreening || "Screener number not set"}</li>
-                    <li>Reviewers needed for full text view: {backgroundInformationForReview.numberOfReviewersForFullText || "Reviewer number not set"}</li>
-                    <li>Reviewers needed for extraction: {backgroundInformationForReview.numberOfReviewersForExtraction || "Extraction number not set"}</li>
+                    <li>Study Title: {project.title || "No title set"}</li>
+                    <li>Study Type: {project.studyType || "No study type set"}</li>
+                    <li>Reviewers needed for screening: {project.numberOfReviewersForScreening || "Screener number not set"}</li>
+                    <li>Reviewers needed for full text view: {project.numberOfReviewersForFullText || "Reviewer number not set"}</li>
+                    <li>Reviewers needed for extraction: {project.numberOfReviewersForExtraction || "Extraction number not set"}</li>
                     <li>Primary reviewer: {user.username}</li>
+                    {/*  OTHER REVIEWERS !! */}
                     <li>Other reviewers: {user.username}</li>
                 </ul>
             </div>
             <div className="homepage-section">
                 <h3>Import Your Studies</h3>
                 <ul>
-                    <li>Number of imported studies: </li>
+                    <li>Number of imported studies: {studies.count}</li>
                 </ul>
             </div>
             <div className="homepage-section">   
                 <h3>Set Up Your Review</h3>
                 <ul>
                     {/* Study Tags */}
-                    {(!studyTags || studyTags.length === 0) && <li>Tags: No tags provided.</li>}
+                    {(!project.tags || project.tags.length === 0) && <li>Tags: No tags provided.</li>}
 
-                    {studyTags && studyTags.length > 0 && (
+                    {project.tags && project.tags.length > 0 && (
                     <>
                         <li>Tags: </li>
                         <ul>
-                            {(studyTags.map((tag, index) => (
-                                <li key={index}>{tag}</li>
+                            {(project.tags?.map((tag, i) => (
+                                <li key={i}>{tag}</li>
                             )))}
                         </ul>
                     </>
@@ -61,13 +135,13 @@ export default function Overview(props) {
                     {/* Inclusion Criteria */}
                     <li>Inclusion Criteria:</li>
 
-                    {inclusionCriteria && inclusionCriteria.length > 0 && (
+                    {project.inclusionCriteria && project.inclusionCriteria.length > 0 && (
                     <>
                         <ul>
-                            {(!inclusionCriteria || inclusionCriteria.length === 0) && <li>No inclusion criteria set provided.</li>}
+                            {(!project.inclusionCriteria || project.inclusionCriteria.length === 0) && <li>No inclusion criteria set provided.</li>}
 
-                            {(inclusionCriteria.map((section, index) => (
-                                <li key={index}>
+                            {(project.inclusionCriteria?.map((section, i) => (
+                                <li key={i}>
                                     {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
                                 </li>
                             )))}
@@ -77,13 +151,13 @@ export default function Overview(props) {
                     {/* Exclusion Criteria */}
                     <li>Exclusion Criteria:</li>
 
-                    {exclusionCriteria && exclusionCriteria.length > 0 && (
+                    {project.exclusionCriteria && project.exclusionCriteria.length > 0 && (
                     <>
                         <ul>
-                            {(!exclusionCriteria || exclusionCriteria.length === 0) && <li>No exclusion criteria set provided.</li>}
+                            {(!project.exclusionCriteria || project.exclusionCriteria.length === 0) && <li>No exclusion criteria set provided.</li>}
 
-                            {(exclusionCriteria.map((section, index) => (
-                                <li key={index}>
+                            {(project.exclusionCriteria?.map((section, i) => (
+                                <li key={i}>
                                     {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
                                 </li>
                             )))}
@@ -93,13 +167,13 @@ export default function Overview(props) {
                     {/* Full Text Exclusion Criteria */}
                     <li>Full Text Exclusion Criteria:</li>
 
-                    {fullTextExclusionReasons && fullTextExclusionReasons.length > 0 && (
+                    {project.fullTextExclusionReasons && project.fullTextExclusionReasons.length > 0 && (
                     <>
                         <ul>
-                            {(!fullTextExclusionReasons || fullTextExclusionReasons.length === 0) && <li>No exclusion criteria set provided.</li>}
+                            {(!project.fullTextExclusionReasons || project.fullTextExclusionReasons.length === 0) && <li>No exclusion criteria set provided.</li>}
 
-                            {(fullTextExclusionReasons.map((criteria, index) => (
-                                <li key={index}>{criteria}</li>
+                            {(project.fullTextExclusionReasons?.map((reason, i) => (
+                                <li key={i}>{reason}</li>
                             )))}
                         </ul>
                     </>
@@ -108,32 +182,31 @@ export default function Overview(props) {
             </div>
             <div className="homepage-section">
                 <h3>Title & Abstract Screening</h3>
-                <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
+                <button onClick={handlePrismaDiagram()}>See PRISMA Flow Diagram</button>
                 <ul>
-                    <li>Unscreened: </li>
-                    <li>One Vote: </li>
-                    <li>Approved: </li>
-                    <li>Conflicts: </li>
-                    <li>Rejected: </li>
+                    <li>Unscreened: {progress.ta.unscreened}</li>
+                    <li>One Vote: {progress.ta.pending}</li>
+                    <li>Approved: {progress.ta.approved}</li>
+                    <li>Conflicts: {progress.ta.conflict}</li>
+                    <li>Rejected: {progress.ta.rejected}</li>
                 </ul>
             </div>
             <div className="homepage-section">    
                 <h3>Full Text Screening</h3>
                 {/* ? copy above rather than double up */}
                 <ul>
-                    <li>
-                        Unscreened: 
-                    </li>
-                    <li>One Vote: </li>
-                    <li>Approved: </li>
-                    <li>Conflicts: </li>
-                    <li>Rejected: </li>
+                    <li>Unscreened: {progress.ft.unscreened}</li>
+                    <li>One Vote: {progress.ft.pending}</li>
+                    <li>Approved: {progress.ft.approved}</li>
+                    <li>Conflicts: {progress.ft.conflict}</li>
+                    <li>Rejected: {progress.ft.rejected}</li>
                 </ul>
             </div>
             <div className="homepage-section">
-                <h3>Manage Your Included Studies</h3>
+                <h3>Your Screening Stats</h3>
                 <ul>
-                    <li>Approved: </li>
+                    <li>TA Screened: {myStats?.taScreened}</li>
+                    <li>TA Screened: {myStats?.ftScreened}</li>
                 </ul>
             </div>
         </div>

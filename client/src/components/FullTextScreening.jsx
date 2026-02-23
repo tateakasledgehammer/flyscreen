@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
-import { handleSortByOrder, ensureStudyShape, getFullTextStatus, getTAStatus } from "../utils/screeningTools";
+import { useState, useEffect, useMemo } from "react";
+import { getFullTextStatus, getTAStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
-import { StatusToggleBar } from "./StatusToggleBar";
-import { ScreeningFiltersBar } from "./ScreeningFiltersBar";
-import { PaginationBar } from "./PaginationBar";
+import StatusToggleBar from "./StatusToggleBar";
+import ScreeningFiltersBar from "./ScreeningFiltersBar";
+import PaginationBar from "./PaginationBar";
+import useScreeningFilters from "../hooks/useScreeningFilters";
+import useStatusCounts from "../hooks/useStatusCounts";
 
 export default function FullTextScreening(props) {
     const { 
@@ -19,22 +21,8 @@ export default function FullTextScreening(props) {
 
     // general useState for screening
     const [studies, setStudies] = useState([]);
-    const [toggleDetails, setToggleDetails] = useState([]);
-    const [searchFilter, setSearchFilter] = useState("");
-    const [sortOption, setSortOption] = useState("score-desc")
-
-    // pagination
-    const [itemsPerPage, setItemsPerPage] = useState(25);
-    const [currentPage, setCurrentPage] = useState(1);
-
-    // other filters
-    const [highlighted, setHighlighted] = useState(true);
-    const [tagFilter, setTagFilter] = useState("");
-    const [languageFilter, setLanguageFilter] = useState("");
-    const [typeFilter, setTypeFilter] = useState("");
+    const [toggleDetails, setToggleDetails] = useState({});
     const [statusFilter, setStatusFilter] = useState("");
-
-    // HIDE DETAILS FILTER - ** ADD **
 
     async function fetchStudies() {
         try {
@@ -53,111 +41,54 @@ export default function FullTextScreening(props) {
         if (projectId) fetchStudies();
     }, [projectId]);
 
+    // HIDE DETAILS FILTER - ** ADD **
+
     const taAcceptedStudies = useMemo(() => {
         return studies.filter(
             study => getTAStatus(study.screening, user?.userid) === "ACCEPTED"
         )
     }, [studies, user]);
-
-    const countByStatus = useMemo(() => {
-        const counts = {
-            UNSCREENED: 0,
-            PENDING: 0,
-            CONFLICT: 0,
-            ACCEPTED: 0,
-            REJECTED: 0
-        };
-
-        for (const study of taAcceptedStudies) {
-            const status = getTAStatus(study.screening, user?.userid);
-            if (counts[status] !== undefined) {
-                counts[status]++;
-            }
-        }
-
-        return counts;
-    }, [taAcceptedStudies, user])
-
-    const searchWords = searchFilter
-        .split(" ")
-        .map(w => w.trim().toLowerCase())
-        .filter(Boolean);
-
-    function matchesSearch(study) {
-        if (searchWords.length === 0) return true;
-        const text = `${study.title} ${study.abstract} ${study.keywords}`.toLowerCase();
-        return searchWords.every(w => text.includes(w));
-    }
-
-    //
-    // filters
-    //
-    function matchesLanguage(study) {
-        return languageFilter === "" || study.language === languageFilter;
-    }
-    function matchesType(study) {
-        return typeFilter === "" || study.type === typeFilter;
-    }
-    function matchesTag(study) {
-        return tagFilter === "" || study.tagStatus === tagFilter;
-    }
-    function matchesStatus(study) {
-        if (!statusFilter) return true;
-        const status = getTAStatus(study.screening, user?.userid);
-        return status === statusFilter;
-    }
-
-    // sort
-    function sortStudies(list) {
-        const sorted = [...list];
-
-        if (sortOption === "score-desc") {
-            sorted.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-        } else if (sortOption === "score-asc") {
-            sorted.sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
-        } else if (sortOption === "year-desc") {
-            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
-        } else if (sortOption === "year-asc") {
-            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
-        } else if (sortOption === "title-asc") {
-            sorted.sort((a, b) => a.title.localeCompare(b.title));
-        } else if (sortOption === "title-desc") {
-            sorted.sort((a, b) => b.title.localeCompare(a.title));
-        }
-
-        return sorted;
-    }
-
-    const filteredStudies = sortStudies(
-        taAcceptedStudies.filter(study => 
-            matchesSearch(study) &&
-            matchesLanguage(study) &&
-            matchesTag(study) &&
-            matchesType(study) &&
-            matchesStatus(study)
-        )
-    );
-
-    // Pagination
-    const totalPages = Math.ceil(filteredStudies.length / itemsPerPage);
-    const paginatedStudies = filteredStudies.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    // Clear function
-    function clearFilters() {
-        setSearchFilter("");
-        setSortOption("score-desc");
-        setLanguageFilter("");
-        setTypeFilter("");
-        setTagFilter("");
-        setHighlighted(true);
-        setCurrentPage(1);
-        setItemsPerPage(25);
-        setStatusFilter("");
-    }
     
+    const {
+        filteredStudies,
+        paginatedStudies,
+        totalPages,
+        searchFilter,
+        setSearchFilter,
+        sortOption,
+        setSortOption,
+        languageFilter,
+        setLanguageFilter,
+        typeFilter,
+        setTypeFilter,
+        tagFilter,
+        setTagFilter,
+        highlighted,
+        setHighlighted,
+        itemsPerPage,
+        setItemsPerPage,
+        currentPage,
+        setCurrentPage,
+        clearFilters
+    } = useScreeningFilters(taAcceptedStudies)
+
+    const { countByStatus, matchesStatus } = useStatusCounts(taAcceptedStudies, user, getFullTextStatus);
+
+    const finalFiltered = useMemo(() => {
+        return filteredStudies.filter(study => 
+            matchesStatus(study, statusFilter)
+        );
+    }, [filteredStudies, statusFilter, matchesStatus])
+
+    const paginatedFinal = useMemo(() => {
+        return finalFiltered.slice(
+            (currentPage - 1) * itemsPerPage,
+            currentPage * itemsPerPage
+        );
+    }, [finalFiltered, currentPage, itemsPerPage]);
+
+    const finalTotalPages = Math.ceil(finalFiltered.length / itemsPerPage);
+
     return (
         <>
         <Navbar />
@@ -180,7 +111,7 @@ export default function FullTextScreening(props) {
                 highlighted={highlighted}
                 setHighlighted={setHighlighted}
                 clearFilters={clearFilters}
-                studies={studies}
+                studies={taAcceptedStudies}
                 studyTags={studyTags}
             />
 
@@ -188,7 +119,7 @@ export default function FullTextScreening(props) {
                 statusFilter={statusFilter}
                 setStatusFilter={setStatusFilter}
                 countByStatus={countByStatus}
-                totalCount={totalCount}
+                totalCount={taAcceptedStudies.length}
             />
             
             {/* Filter notice */}
@@ -200,7 +131,7 @@ export default function FullTextScreening(props) {
             
             {/* Output section */}
             <StudyCard 
-                studies={filteredStudies} 
+                studies={paginatedFinal} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}
                 user={user}
@@ -214,7 +145,7 @@ export default function FullTextScreening(props) {
             />
 
             <PaginationBar 
-                totalPages={totalPages}
+                totalPages={finalTotalPages}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
             />

@@ -23,6 +23,6 @@ export default function StatusToggleBar({
             </button>
         ))}
         
-        <button onClick={() => setStatusFilter("")}>All ({studies.length})</button>
+        <button onClick={() => setStatusFilter("")}>All</button>
     </div>
 }
