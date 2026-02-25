@@ -70,8 +70,8 @@ export default function Overview(props) {
         if (!projectId) return;
         fetchProgress();
         fetchStudiesCount();
-        fetchProgress();
         fetchMyStats();
+        fetchProject();
     }, [projectId]);
 
     if (!project || !progress) {
@@ -104,15 +104,16 @@ export default function Overview(props) {
                     <li>Reviewers needed for screening: {project.numberOfReviewersForScreening || "Screener number not set"}</li>
                     <li>Reviewers needed for full text view: {project.numberOfReviewersForFullText || "Reviewer number not set"}</li>
                     <li>Reviewers needed for extraction: {project.numberOfReviewersForExtraction || "Extraction number not set"}</li>
-                    <li>Primary reviewer: {user.username}</li>
+                    
                     {/*  OTHER REVIEWERS !! */}
+                    <li>Primary reviewer: {user.username}</li>
                     <li>Other reviewers: {user.username}</li>
                 </ul>
             </div>
             <div className="homepage-section">
                 <h3>Import Your Studies</h3>
                 <ul>
-                    <li>Number of imported studies: {studies.count}</li>
+                    <li>Number of imported studies: {studiesCount}</li>
                 </ul>
             </div>
             <div className="homepage-section">   
@@ -182,11 +183,11 @@ export default function Overview(props) {
             </div>
             <div className="homepage-section">
                 <h3>Title & Abstract Screening</h3>
-                <button onClick={handlePrismaDiagram()}>See PRISMA Flow Diagram</button>
+                <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
                 <ul>
                     <li>Unscreened: {progress.ta.unscreened}</li>
                     <li>One Vote: {progress.ta.pending}</li>
-                    <li>Approved: {progress.ta.approved}</li>
+                    <li>Approved: {progress.ta.accepted}</li>
                     <li>Conflicts: {progress.ta.conflict}</li>
                     <li>Rejected: {progress.ta.rejected}</li>
                 </ul>
@@ -197,7 +198,7 @@ export default function Overview(props) {
                 <ul>
                     <li>Unscreened: {progress.ft.unscreened}</li>
                     <li>One Vote: {progress.ft.pending}</li>
-                    <li>Approved: {progress.ft.approved}</li>
+                    <li>Approved: {progress.ft.accepted}</li>
                     <li>Conflicts: {progress.ft.conflict}</li>
                     <li>Rejected: {progress.ft.rejected}</li>
                 </ul>

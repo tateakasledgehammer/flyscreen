@@ -163,7 +163,7 @@ const initSchema = db.transaction(() => {
 
     // Probability
     db.prepare(`
-        CREATE TABLE project_criteria (
+        CREATE TABLE IF NOT EXISTS project_criteria (
             project_id INTEGER PRIMARY KEY,
             population TEXT,
             intervention TEXT,
@@ -176,7 +176,7 @@ const initSchema = db.transaction(() => {
     `).run();
 
     db.prepare(`
-        CREATE TABLE study_scores (
+        CREATE TABLE IF NOT EXISTS study_scores (
             study_id INTEGER PRIMARY KEY,
             project_id INTEGER NOT NULL,
             score REAL NOT NULL,

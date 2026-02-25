@@ -35,7 +35,6 @@ const getProjectsForUser = db.prepare(`
 router.post(
     "/projects", 
     requireAuth, 
-    requireProjectAccess,
     (req, res) => {
         const { name, description } = req.body;
 
@@ -48,11 +47,33 @@ router.post(
 router.get(
     "/projects", 
     requireAuth, 
+    (req, res) => {
+        try {
+            const projects = getProjectsForUser.all(req.user.userid);
+            res.json(projects);
+        } catch (err) {
+            console.error("Error loading projects for user", req.user, err);
+            res.status(500).json({ error: "Failed to load projects" })
+        }
+});
+
+const getProjectById = db.prepare(`
+   SELECT * FROM projects WHERE id = ? 
+`);
+
+router.get(
+    "/projects/:projectId",
+    requireAuth,
     requireProjectAccess,
     (req, res) => {
-        const projects = getProjectsForUser.all(req.user.userid);
-        res.json(projects);
-});
+        const projectId = Number(req.params.projectId);
+        const project = getProjectById.get(projectId);
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+        res.json(project);
+    }
+)
 
 router.post(
     "/projects/:projectId/criteria", 

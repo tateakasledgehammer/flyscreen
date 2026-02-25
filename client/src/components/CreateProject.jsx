@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 
 export default function CreateProject(props) {
-    const { projectTitle, setProjectTitle } = props;
+    const { projectTitle, setProjectTitle, setProjectId } = props;
 
     const [errors, setErrors] = useState([])
     const [message, setMessage] = useState("")
@@ -11,24 +11,27 @@ export default function CreateProject(props) {
         setErrors([])
         setMessage("")
 
-        if (!project.trim()) {
+        if (!projectTitle.trim()) {
             setErrors(["No title input"])
             return
         }
 
         try {
-            const res = await fetch("/create-project", {
+            const res = await fetch("http://localhost:5005/api/projects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
                 body: JSON.stringify({ 
-                    project
+                    name: projectTitle,
+                    description: ""
                 })
             });
+            
             const data = await res.json()
 
-            if (res.ok) {
-                setProjectTitle({ projectTitle })
+            if (res.ok && data.success) {
+                setProjectTitle({ projectTitle });
+                setProjectId(data.projectId);
                 setMessage("Project created!")
             } else {
                 setErrors([data.error || "Something went wrong :("])
