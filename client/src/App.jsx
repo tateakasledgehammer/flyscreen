@@ -42,6 +42,19 @@ function App() {
         const res = await fetch(`http://localhost:5005/api/projects/${projectId}/studies-with-scores`, {
           credentials: "include"
         });
+
+        if (res.status === 403) { 
+          console.warn("No access to project - clearing projectId");
+          setProjectId(null);
+          localStorage.removeItem("projectId");
+          return;
+        }
+
+        if (!res.ok) {
+          console.warn("Failed to fetch studies:", res.status);
+          return;
+        }
+
         const data = await res.json();
         setStudies(data);
       } catch (err) {
@@ -61,16 +74,23 @@ function App() {
           credentials: "include",
         })
 
+        if (res.status === 401) { 
+          setIsAuthenticated(false);
+          setUser(null);
+          return;
+        }
+        
         if (!res.ok) throw new Error("Network response was not okay");
 
         const data = await res.json();
-
         setIsAuthenticated(data.isAuthenticated);
         setUser(data.user || null);
+
       } catch (error) {
         console.error("Error checking authentication", error);
         setIsAuthenticated(false);
         setUser(null);
+
       } finally {
         setLoading(false);
       }
@@ -201,7 +221,7 @@ function App() {
           </Route>             
 
           {/* Redirect */}
-          <Route path="*" element={<Navigate to={isAuthenticated ? "/overview" : "/"} />} />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/overview" : "/dashboard"} />} />
       </Routes>
     </Router>
   );

@@ -41,7 +41,7 @@ export default function Authentication(props) {
                 return;
             } 
             
-            const whoamiRes = await fetch("http://localhost:5005/api/whoami", {
+            const whoamiRes = await fetch("http://localhost:5005/api/auth/whoami", {
                 credentials: "include"
             });
             if (whoamiRes.ok) {
