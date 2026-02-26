@@ -142,4 +142,79 @@ router.get(
     }
 )
 
+// edits to the project details
+router.patch(
+    "/projects/:projectId",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const { projectId } = req.params;
+        const { name } = req.body;
+
+        try {
+            db.prepare("UPDATE projects SET name = ? WHERE id = ?")
+                .run(name, projectId);
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Rename failed:", err);
+            res.status(500).json({ error: "Failed to rename project" });
+        }
+    });
+
+router.patch(
+    "/projects/:projectId/archive",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const { projectId } = req.params;
+
+        try {
+            db.prepare("UPDATE projects SET status = 'archived' WHERE id = ?")
+                .run(projectId);
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Archive failed:", err);
+            res.status(500).json({ error: "Failed to archive project" });
+        }
+    });
+
+router.post(
+    "/projects/:projectId/collaborators",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const { projectId } = req.params;
+        const { userId, role } = req.body;
+
+        try {
+            db.prepare(`
+                INSERT OR IGNORE INTO project_users (project_id, user_id, role)
+                VALUES (?, ?, ?)
+            `).run(projectId, userId, role || "REVIEWER");
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Add reviewer failed:", err);
+            res.status(500).json({ error: "Failed to archive project" });
+        }
+    });
+
+router.delete(
+    "/projects/:projectId",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const { projectId } = req.params;
+
+        try {
+            db.prepare("DELETE FROM projects WHERE id = ?").run(projectId);
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Delete failed:", err);
+            res.status(500).json({ error: "Failed to delete project" });
+        }
+    });
+
 module.exports = router;

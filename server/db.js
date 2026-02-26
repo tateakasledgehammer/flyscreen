@@ -34,6 +34,7 @@ const initSchema = db.transaction(() => {
             description TEXT,
             created_by INTEGER NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'active',
             
             FOREIGN KEY (created_by) REFERENCES users(id)
         )

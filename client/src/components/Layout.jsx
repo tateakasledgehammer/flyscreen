@@ -10,7 +10,7 @@ export default function Layout(props) {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("http://localhost:5005/api/logout", {
+            const res = await fetch("http://localhost:5005/api/auth/logout", {
                 method: "POST",
                 credentials: "include",
             });
@@ -19,8 +19,8 @@ export default function Layout(props) {
             console.error("Logout failed: ", err)
         } finally {
             setIsAuthenticated(false);
-            setUser(null)
-            navigate("/")
+            setUser(null);
+            navigate("/");
         }
     }
 

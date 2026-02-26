@@ -17,6 +17,7 @@ const tagRoutes = require("./routes/tags.js");
 const duplicateRoutes = require("./routes/duplicates.js");
 const studyDetailRoutes = require("./routes/studyDetails.js");
 const projectRoutes = require("./routes/projects.js");
+const userRoutes = require("./routes/users.js");
 
 console.log("server.js loaded successfully");
 
@@ -84,6 +85,7 @@ app.use("/api", tagRoutes);
 app.use("/api", duplicateRoutes);
 app.use("/api", studyDetailRoutes);
 app.use("/api", projectRoutes);
+app.use("/api", userRoutes);
 
 // ---- STUDIES ----
 
@@ -211,6 +213,7 @@ app.post(
     }
 })
 
+// delete study
 app.delete(
     "/api/projects/:projectId/studies/:id", 
     requireAuth, 
@@ -240,6 +243,29 @@ app.delete(
         res.status(500).json({ error: error.message || "Failed to delete studies" })
     }
 });
+
+// clear projects
+app.delete(
+    '/api/projects/:id', (req, res) => {
+        const projectId = Number(req.params.id);
+
+        try {
+            const deleteProjectTx = db.transaction(() => {
+                db.prepare("DELETE FROM screening_votes WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM studies WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM project_criteria WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM projects WHERE id = ?").run(projectId);
+            });
+
+            deleteProjectTx();
+
+            res.json({ success: true, message: "Project deleted" });
+
+        } catch (err) {
+            console.error("Delete project failed:", err);
+            res.status(500).json({ error: "Failed to delete project" });
+        }
+    });
 
 ///////////////////////
 
@@ -363,6 +389,7 @@ app.post("/api/auth/register", async (req, res) => {
     }
 });
 
+// ERROR 
 app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error" });

@@ -26,11 +26,11 @@ export default function CreateProject(props) {
                     description: ""
                 })
             });
-            
+
             const data = await res.json()
 
             if (res.ok && data.success) {
-                setProjectTitle({ projectTitle });
+                setProjectTitle("");
                 setProjectId(data.projectId);
                 setMessage("Project created!")
             } else {

@@ -4,6 +4,9 @@ import ReviewTitleSection from "./setup/ReviewTitleSection";
 import StudyTypeSection from "./setup/StudyTypeSection";
 import TagSetupSection from "./setup/TagSetupSection";
 import CriteriaSetupSection from "./setup/CriteriaSetupSection";
+import QuestionTypeSection from "./setup/QuestionTypeSection";
+import ResearchAreaSection from "./setup/ResearchAreaSection";
+import ReviewerSettingsSection from "./setup/ReviewerSettingsSection";
 
 export default function Setup(props) {
     const { 
@@ -322,7 +325,7 @@ export default function Setup(props) {
             newIncludedSectionInput={newIncludedSectionInput}
             setNewIncludedSectionInput={setNewIncludedSectionInput}
             criteriaInputs={criteriaInputs}
-            handleCriteriaInputChange={handleCriteriaInputChange}
+            // handleCriteriaInputChange={handleCriteriaInputChange}
             handleNewInclusionCriteriaSection={handleNewInclusionCriteriaSection}
             handleNewInclusionCriteria={handleNewInclusionCriteria}
             handleDeleteInclusionCriteria={handleDeleteInclusionCriteria}
@@ -334,7 +337,7 @@ export default function Setup(props) {
             newExcludedSectionInput={newExcludedSectionInput}
             setNewExcludedSectionInput={setNewExcludedSectionInput}
             exclusionCriteriaInputs={exclusionCriteriaInputs}
-            handleExclusionCriteriaInputChange={handleExclusionCriteriaInputChange}
+            // handleExclusionCriteriaInputChange={handleExclusionCriteriaInputChange}
             handleNewExclusionCriteria={handleNewExclusionCriteria}
             handleDeleteExclusionCriteria={handleDeleteExclusionCriteria}
             handleDeleteExclusionSection={handleDeleteExclusionSection}
