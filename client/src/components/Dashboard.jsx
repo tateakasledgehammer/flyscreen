@@ -64,7 +64,9 @@ export default function Dashboard(props) {
         const username = prompt("Enter collaborator username:");
         if (!username || !username.trim()) return;
 
-        const resUser = await fetch(`http://localhost:5005/api/users/by-username/${username}`);
+        const resUser = await fetch(`http://localhost:5005/api/users/by-username/${username}`, {
+            credentials: "include"
+        });
         const userData = await resUser.json();
 
         if (!userData?.id) {
@@ -147,7 +149,7 @@ export default function Dashboard(props) {
                 >
                     <p>
                         Project: <strong>{proj.name}</strong> with {" "}
-                        {proj.collaborators?.map(c = c.username).join(", ") || "no other reviewers"}
+                        {proj.collaborators?.map(c => c.username).join(", ") || "no other reviewers"}
                     </p>
                     <p>Create: {" "}
                         {new Date(proj.created_at).toLocaleDateString()}

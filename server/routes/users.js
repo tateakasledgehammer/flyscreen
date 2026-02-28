@@ -29,6 +29,8 @@ router.get(
             return res.status(404).json({ error: "User not found" });
         }
 
+        return res.json(user);
+
     } catch (err) {
         console.error("Lookup failed:", err);
         return res.status(500).json({ error: "Failed to look up user" });
