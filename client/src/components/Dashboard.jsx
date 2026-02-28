@@ -156,7 +156,7 @@ export default function Dashboard(props) {
                 <div 
                     key={proj.id}
                     className="homepage-section"
-                    style={{ cursor: "pointer", background: proj.id === projectId ? "#e8f5e9" : "white" }}
+                    style={{ cursor: "pointer", background: proj.id === projectId ? "lightgray" : "white" }}
                     onClick={() => handleSelectProject(proj.id)}
                 >
                     <p>Project: <strong>{proj.name}</strong> with {" "} </p>
