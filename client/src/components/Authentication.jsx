@@ -105,7 +105,7 @@ export default function Authentication(props) {
             )}
 
             {loginNotSignUp && (
-                <form onSubmit={handleSubmit}>
+                <form id="loginorsignup" onSubmit={handleSubmit}>
                     <fieldset className="log-in">
                         <legend><strong>Log in to your account</strong></legend>
                         <label htmlFor="username">Username</label>

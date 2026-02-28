@@ -196,51 +196,88 @@ router.get(
     (req, res) => {
         const projectId = Number(req.params.projectId);
         
-        const total = projectProgressRepo.getTotalStudies.get(projectId).total;
-        const votes = projectProgressRepo.getVotes.get(projectId);
+        // defaults
+        const totalRow = projectProgressRepo.getTotalStudies.get(projectId);
+
+        const total = totalRow?.total || 0;
+        const votes = projectProgressRepo.getVotes.get(projectId) || [];
 
         // Structure
         const perStudy = {};
+
         for (const v of votes) {
             if (!perStudy[v.study_id]) {
-                perStudy(v.study_id) = { TA: [], FULLTEXT: [] };
+                perStudy[v.study_id] = { TA: [], FULLTEXT: [] };
             }
             perStudy[v.study_id][v.stage].push(v.vote);
         }
 
-        let taDone = 0, taConflict = 0, taPending = 0;
-        let ftDone = 0, ftConflict = 0, ftPending = 0;
+        // initialise
+        let 
+            taUnscreened = 0,
+            taPending = 0, 
+            taConflict = 0, 
+            taAccepted = 0,
+            taRejected = 0;
+        let 
+            ftUnscreened = 0,
+            ftPending = 0, 
+            ftConflict = 0, 
+            ftAccepted = 0,
+            ftRejected = 0;
         
         for (const studyId in perStudy) {
             const taVotes = perStudy[studyId].TA;
             const ftVotes = perStudy[studyId].FULLTEXT;
 
             // TA
-            if (taVotes.length === 0) taPending++;
-            else if (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) taConflict++;
-            else if (taVotes.length >= 2) taDone++;
-            else taPending++;
+            if (taVotes.length === 0) {
+                taUnscreened++;
+            } else if 
+                (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) {
+                    taConflict++;
+            } else if
+                (taVotes.every(v => v === "ACCEPT") && taVotes.length >= 2) {
+                    taAccepted++;
+            } else if
+                (taVotes.every(v => v === "REJECT") && taVotes.length >= 2) {
+                    taRejected++;
+            } else {
+                taPending++;
+            }
 
-            // TA
-            if (ftVotes.length === 0) ftPending++;
-            else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) ftConflict++;
-            else if (ftVotes.length >= 2) ftDone++;
-            else ftPending++;
+            // FT
+            if (ftVotes.length === 0) {
+                ftUnscreened++;
+            } else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) {
+                ftConflict++;
+            } else if (ftVotes.every(v => v === "ACCEPT") && ftVotes.length >= 2) {
+                ftAccepted++;
+            } else if (ftVotes.every(v => v === "REJECT") && ftVotes.length >= 2) {
+                ftRejected++;
+            } else {
+                ftPending++;
+            }
         }
 
         res.json({
             totalStudies: total,
-            TA: {
-                done: taDone,
+            ta: {
+                unscreened: taUnscreened,
+                pending: taPending,
+                accepted: taAccepted,
                 conflict: taConflict,
-                pending: taPending
+                rejected: taRejected
             },
-            FULLTEXT: {
-                done: ftDone,
+            ft: {
+                unscreened: ftUnscreened,
+                pending: ftPending,
+                accepted: ftAccepted,
                 conflict: ftConflict,
-                pending: ftPending
+                rejected: ftRejected
             }
         });
+
     }
 );
 

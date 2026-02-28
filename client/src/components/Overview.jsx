@@ -89,6 +89,40 @@ export default function Overview(props) {
         alert("This function has not been set up")
     }
 
+    if (!projectId) {
+        return (
+            <>
+            <Navbar />
+            <div className="page-container">
+                <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
+                
+                {/* Add class and styling for the homepage cards + progress bar */}
+                <div className="homepage-section">
+                    <h3>Overview</h3>
+                    <p>Please go to dashboard and select or create a project.</p>
+                </div>
+            </div>
+            </>
+        );
+    }
+
+    if (!!project || !progress || !progress.ta || !progress.ft) {
+        return (
+            <>
+            <Navbar />
+            <div className="page-container">
+                <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
+                
+                {/* Add class and styling for the homepage cards + progress bar */}
+                <div className="homepage-section">
+                    <h3>Loading overview...</h3>
+                    <p>(you may need to upload some studies)</p>
+                </div>
+            </div>
+            </>
+        );
+    }
+    
     return (
         <>
         <Navbar />
