@@ -49,8 +49,23 @@ router.get(
     requireAuth, 
     (req, res) => {
         try {
+            const userid = req.user.userid;
             const projects = getProjectsForUser.all(req.user.userid);
-            res.json(projects);
+
+            const getCollaborators = db.prepare(`
+                SELECT u.id, u.username, pu.role
+                FROM project_users pu
+                JOIN users u ON u.id = pu.user_id
+                WHERE pu.project_id = ?    
+            `);
+
+            const enrichedProjects = projects.map(p => ({
+                ...p,
+                collaborators: getCollaborators.all(p.id)
+            }));
+
+            res.json(enrichedProjects);
+
         } catch (err) {
             console.error("Error loading projects for user", req.user, err);
             res.status(500).json({ error: "Failed to load projects" })
@@ -200,6 +215,27 @@ router.post(
             res.status(500).json({ error: "Failed to archive project" });
         }
     });
+
+router.delete(
+    "/projects/:projectId/collaborators/:userId",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const { projectId, userId } = req.params;
+
+        try {
+            db.prepare(`
+                DELETE FROM project_users
+                WHERE project_id = ? AND user_id = ?
+            `).run(projectId, userId);
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("Remove collaborator failed:", err);
+            res.status(500).json({ error: "Failed to remove collaborator" });
+        }
+    }
+)
 
 router.delete(
     "/projects/:projectId",

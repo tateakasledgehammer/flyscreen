@@ -81,7 +81,19 @@ export default function Dashboard(props) {
             body: JSON.stringify({ userId: userData.id })
         });
 
+        await fetchProjects();
         alert("Reviewer added");
+    }
+
+    async function handleRemoveCollaborator(projectId, userId) {
+        if (!window.confirm("Remove this collaborator?")) return;
+
+        await fetch(`http://localhost:5005/api/projects/${projectId}/collaborators/${userId}`, {
+            method: "DELETE",
+            credentials: "include"
+        })
+
+        await fetchProjects();
     }
 
     async function handleArchiveProject(id) {
@@ -147,10 +159,25 @@ export default function Dashboard(props) {
                     style={{ cursor: "pointer", background: proj.id === projectId ? "#e8f5e9" : "white" }}
                     onClick={() => handleSelectProject(proj.id)}
                 >
-                    <p>
-                        Project: <strong>{proj.name}</strong> with {" "}
-                        {proj.collaborators?.map(c => c.username).join(", ") || "no other reviewers"}
-                    </p>
+                    <p>Project: <strong>{proj.name}</strong> with {" "} </p>
+                    {proj.collaborators?.length > 0 ? (
+                        <ul>
+                            {proj.collaborators.map(c => (
+                                <li key={c.id}>
+                                    {c.username} ({c.role})
+                                    <button onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveCollaborator(proj.id, c.id);
+                                    }}>
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        "no other reviewers"
+                    )}
+
                     <p>Create: {" "}
                         {new Date(proj.created_at).toLocaleDateString()}
                     </p>
