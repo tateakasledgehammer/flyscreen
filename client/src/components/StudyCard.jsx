@@ -55,6 +55,7 @@ export default function StudyCard(props) {
         filteredWords = []
     ) {
         if (!text) return ""
+        if (typeof text !== "string") text = String(text || "");
 
         const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -138,8 +139,6 @@ export default function StudyCard(props) {
                     <StudyInfo
                         study={study}
                         highlightContent={highlightContent}
-                        inclusionCriteria={inclusionCriteria || []}
-                        exclusionCriteria={exclusionCriteria || []}
                         isExpanded={isExpanded}
                         handleToggleDetails={handleToggleDetails}
                     />

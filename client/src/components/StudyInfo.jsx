@@ -13,20 +13,20 @@ export default function StudyInfo(props) {
     const inclusionTerms = study.matchedInclusionTerms || [];
     const exclusionTerms = study.matchedExclusionTerms || [];
 
+    const safeTitle = study.title || "N/A";
+    const safeAbstract = study.abstract || "N/A";
+    const safeKeywords = formatKeywords(study.keywords) || "N/A";
+
     return (
         <>
         <div className="title-wrapper">
             <h3 className="study-title">
                 {highlightContent(
-                    <span className="highlightable">
-                        {highlightContent(
-                            study.title, 
-                            inclusionTerms,
-                            exclusionTerms,
-                            []
-                        )}
-                    </span>
-                )}
+                    safeTitle, 
+                    inclusionTerms,
+                    exclusionTerms,
+                    []
+                )}      
             </h3>
         </div>
 
@@ -66,28 +66,20 @@ export default function StudyInfo(props) {
                 <div>
                     <p className="keywords">
                         <strong>Keywords: </strong>
-                        {highlighted(
-                            <span className="highlightable">
-                                {highlightContent(
-                                    formatKeywords(study.keywords), 
-                                    inclusionTerms, 
-                                    exclusionTerms, 
-                                    []
-                                )}
-                            </span>
+                        {highlightContent(
+                            safeKeywords, 
+                            inclusionTerms, 
+                            exclusionTerms, 
+                            []
                         )}
                     </p>
                     <p className="abstract">
                         <strong>Abstract: </strong>
-                        {highlighted(
-                            <span className="highlightable">
-                                {highlightContent(
-                                    study.abstract, 
-                                    inclusionTerms,
-                                    exclusionTerms,
-                                    []
-                                )}
-                            </span>
+                        {highlightContent(
+                            safeAbstract, 
+                            inclusionTerms,
+                            exclusionTerms,
+                            []
                         )}
                     </p>
                 </div>
