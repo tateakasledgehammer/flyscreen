@@ -17,8 +17,12 @@ router.post(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
+    const projectId = Number(req.params.projectId);
     const { name } = req.body;
-    if (!name.trim()) return res.status(400).json({ error: "Tag name required" });
+
+    if (!name.trim()) {
+        return res.status(400).json({ error: "Tag name required" });
+    }
 
     tagRepo.createTag.run(name.trim());
     res.json({ success: true });
@@ -29,16 +33,17 @@ router.post(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
+    const projectId = Number(req.params.projectId);
     const { study_id, tag } = req.body;
 
     if (!study_id || !tag?.trim()) {
         return res.status(400).json({ error: "study_id and tag required" });
     }
 
-    tagRepo.createTag.run(tag.trim());
-    const tagRow = tagRepo.getTagByName.get(tag.trim());
+    tagRepo.createTag.run(tag.trim(), projectId);
 
-    tagRepo.attachTag.run(study_id, tagRow.id);
+    const tagRow = tagRepo.getTagByName.get(tag.trim(), projectId);
+    tagRepo.attachTag.run(study_id, tagRow.id, projectId);
 
     res.json({ success: true });
 });
@@ -48,7 +53,10 @@ router.get(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const tags = tagRepo.getTagsForStudy.all(req.params.studyId);
+    const projectId = Number(req.params.projectId);
+    const studyId = Number(req.params.studyId);
+
+    const tags = tagRepo.getTagsForStudy.all(studyId, projectId);
     res.json(tags);
 });
 
@@ -57,7 +65,8 @@ router.get(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const tags = tagRepo.getAllTags.all();
+    const projectId = Number(req.params.projectId);
+    const tags = tagRepo.getAllTags.all(projectId);
     res.json(tags);
 });
 

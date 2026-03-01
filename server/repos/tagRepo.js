@@ -8,7 +8,8 @@ module.exports = {
     `),
 
     getTagByName: db.prepare(`
-        SELECT * FROM tags WHERE name = ? AND project_id = ?
+        SELECT * FROM tags 
+        WHERE name = ? AND project_id = ?
     `),
 
     attachTag: db.prepare(`
@@ -20,11 +21,13 @@ module.exports = {
         SELECT t.*
         FROM tags t
         JOIN study_tags st ON st.tag_id = t.id
-        JOIN studies s ON s.id = st.study_id
         WHERE st.study_id = ? AND st.project_id = ?  
+        ORDER BY t.name ASC
     `),
     
     getAllTags: db.prepare(`
-        SELECT * FROM tags WHERE project_id = ? ORDER BY name ASC
+        SELECT * FROM tags 
+        WHERE project_id = ? 
+        ORDER BY name ASC
     `),
 }

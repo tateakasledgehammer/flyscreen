@@ -41,6 +41,17 @@ const initSchema = db.transaction(() => {
     `).run();
 
     db.prepare(`
+        CREATE TABLE IF NOT EXISTS project_background (
+            project_id INTEGER PRIMARY KEY,
+            title TEXT,
+            study_type TEXT,
+            question_type TEXT,
+            research_area TEXT,
+            
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+    `).run();
+
+    db.prepare(`
         CREATE TABLE IF NOT EXISTS project_users (
             project_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
@@ -49,6 +60,17 @@ const initSchema = db.transaction(() => {
             PRIMARY KEY (project_id, user_id),
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `).run();
+
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS reviewer_settings (
+            project_id INTEGER NOT NULL,
+            screening INTEGER DEFAULT 2,
+            fulltext INTEGER DEFAULT 2,
+            extraction INTEGER DEFAULT 2,
+            
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
         )
     `).run();
 
@@ -175,20 +197,39 @@ const initSchema = db.transaction(() => {
         )
     `).run();
 
-    // Probability
+    // Inclusion + Exclusion Criteria
     db.prepare(`
-        CREATE TABLE IF NOT EXISTS project_criteria (
-            project_id INTEGER PRIMARY KEY,
-            population TEXT,
-            intervention TEXT,
-            comparator TEXT,
-            outcomes TEXT,
-            study_design TEXT,
-            exclusions TEXT,
+        CREATE TABLE IF NOT EXISTS criteria_sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER NOT NULL,
+            type TEXT NOT NULL, -- "inclusion" or "exclusion"
+            name TEXT NOT NULL,
+            
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         )
     `).run();
 
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS criteria_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            section_id INTEGER NOT NULL,
+            text TEXT NOT NULL,
+            
+            FOREIGN KEY (section_id) REFERENCES criteria_sections(id) ON DELETE CASCADE
+        )
+    `).run();
+
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS fulltext_exclusion_reasons (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER NOT NULL,
+            reason TEXT NOT NULL,
+            
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
+    `).run();
+
+    // Probability
     db.prepare(`
         CREATE TABLE IF NOT EXISTS study_scores (
             study_id INTEGER PRIMARY KEY,

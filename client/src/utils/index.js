@@ -351,3 +351,25 @@ ER  -
     // function handleSortByType(value) {
     //     setSelectedType(value)
     // }
+
+
+
+
+    /// SETUP
+
+    // UI STATES
+        const [studyTags, setStudyTags] = useState([])
+        const [newTagInput, setNewTagInput] = useState('');
+    
+        const [inclusionSection, setInclusionSection] = useState([]);
+        const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
+        const [criteriaInputs, setCriteriaInputs] = useState({});
+    
+        const [exclusionSection, setExclusionSection] = useState([]);
+        const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
+        const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
+    
+        const [fullTextSub, setFullTextSub] = useState([]);
+        const [fullTextInput, setFullTextInput] = useState('');
+    
+        

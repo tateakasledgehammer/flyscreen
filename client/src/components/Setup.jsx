@@ -15,7 +15,6 @@ export default function Setup(props) {
         setStudies
     } = props;
 
-    // UI STATES
     const [studyTags, setStudyTags] = useState([])
     const [newTagInput, setNewTagInput] = useState('');
 
@@ -32,60 +31,96 @@ export default function Setup(props) {
 
     // Background info
     const [backgroundInformationForReview, setBackgroundInformationForReview] = useState({
-      title: "",
-      studyType: "",
-      questionType: "",
-      researchArea: "",
-      numberOfReviewersForScreening: 2,
-      numberOfReviewersForFullText: 2,
-      numberOfReviewersForExtraction: 2,
-  });
+        title: "",
+        studyType: "",
+        questionType: "",
+        researchArea: "",
+        numberOfReviewersForScreening: 2,
+        numberOfReviewersForFullText: 2,
+        numberOfReviewersForExtraction: 2,
+    });
+
+    async function loadBackgroundInfo() {
+        const res = await fetch(`/api/projects/${projectId}/background`, { credentials: "include" });
+        const data = await res.json();
+        setBackgroundInformationForReview(data);
+    }
+    async function saveBackgroundInfo() {
+        await fetch(`/api/projects/${projectId}/background`, {  
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(backgroundInformationForReview)
+        });
+    }
+
+    async function loadReviewerSettings() {
+        const res = await fetch(`/api/projects/${projectId}/reviewers`, { credentials: "include" });
+        const data = await res.json();
+        setBackgroundInformationForReview(prev => ({
+            ...prev,
+            numberOfReviewersForScreening: data.screening,
+            numberOfReviewersForFullText: data.fulltext,
+            numberOfReviewersForExtraction: data.extraction
+        }));    
+    }
+    async function saveReviewerSettings() {
+        await fetch(`/api/projects/${projectId}/reviewers`, {  
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                screening: backgroundInformationForReview.numberOfReviewersForScreening,
+                fulltext: backgroundInformationForReview.numberOfReviewersForFullText,
+                extraction: backgroundInformationForReview.numberOfReviewersForExtraction,
+            })
+        });
+    }
 
     // LOAD CRITERIA FROM BACKEND
-  useEffect(() => {
-    if (!projectId) return;
+    useEffect(() => {
+        if (!projectId) return;
 
-    async function loadCriteria() {
-        try {
-            const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
-                credentials: "include"
-            });
-            const data = await res.json();
+        async function loadCriteria() {
+            try {
+                const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
+                    credentials: "include"
+                });
+                const data = await res.json();
 
-            if (!data) return;
+                if (!data) return;
 
-            // map backend > UI
-            if (data.inclusionCriteria) {
-                setInclusionSection(
-                    data.inclusionCriteria.map(sec => ({
-                        name: sec.category,
-                        criteria: sec.criteria
-                    }))
-                );
+                // map backend > UI
+                if (data.inclusionCriteria) {
+                    setInclusionSection(
+                        data.inclusionCriteria.map(sec => ({
+                            name: sec.category,
+                            criteria: sec.criteria
+                        }))
+                    );
+                }
+                if (data.exclusionCriteria) {
+                    setExclusionSection(
+                        data.exclusionCriteria.map(sec => ({
+                            name: sec.category,
+                            criteria: sec.criteria
+                        }))
+                    );
+                }
+
+                if (data.fullTextExclusionReasons) {
+                    setFullTextSub(data.fullTextExclusionReasons);
+                }
+            } catch (err) {
+                console.error("Failed to load criteria", err)
             }
-            if (data.exclusionCriteria) {
-                setExclusionSection(
-                    data.exclusionCriteria.map(sec => ({
-                        name: sec.category,
-                        criteria: sec.criteria
-                    }))
-                );
-            }
-
-            if (data.fullTextExclusionReasons) {
-                setFullTextSub(data.fullTextExclusionReasons);
-            }
-        } catch (err) {
-            console.error("Failed to load criteria", err)
         }
-    }
-    
-    loadCriteria();
-  }, [projectId]);
+        
+        loadCriteria();
+    }, [projectId]);
 
 
     // Save criteria to backend when they change
-
     async function saveCriteriaToBackend() {
         if (!projectId) return;
 
@@ -119,24 +154,39 @@ export default function Setup(props) {
     }, [inclusionSection, exclusionSection, fullTextSub]);
 
     // TAGS
-    function handleNewTag() {        
-        const tag = newTagInput.trim();
-        if (!tag) return;
-        if (studyTags.includes(tag)) {
-            return alert("Tag already exists");
-        }
+    
+    useEffect(() => {
+        if (!projectId) return;
+        loadTags();
+        loadCriteria();
+        loadBackgroundInfo();
+        loadReviewerSettings();
+    }, [projectId]);
 
-        setStudyTags([...studyTags, tag]);
-        setNewTagInput('');
+    async function loadTags() {
+        const res = await fetch(`/api/projects/${projectId}/tags`,
+            { credentials: "include" }
+        );
+        const data = await res.json();
+        setStudyTags(data);
     }
 
-    function handleClearTags() {
-        setStudyTags([]);
+    async function addTag(name) {
+        await fetch(`/api/projects/${projectId}/tags`, { 
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name })
+        });
+        loadTags();
     }
 
-    function handleDeleteTag(index) {
-        const amendedStudyTags = studyTags.filter((_, i) => i !== index);
-        setStudyTags(amendedStudyTags);
+    async function deleteTag(tagId) {
+        await fetch(`/api/projects/${projectId}/tags`, { 
+            method: "DELETE",
+            credentials: "include" 
+        });
+        loadTags();
     }
 
     //
