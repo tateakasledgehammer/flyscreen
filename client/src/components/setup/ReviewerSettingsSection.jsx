@@ -1,52 +1,48 @@
-export default function ReviewerSettingsSection({ backgroundInformationForReview, setBackgroundInformationForReview }) {
+export default function ReviewerSettingsSection({ 
+    reviewerSettings, 
+    setReviewerSettings, 
+    saveReviewerSettings, 
+ }) {
     return (
         <div>
             <h3>Reviewer Settings</h3>
             <p>Reviewers required for title & abstract screening</p>
             <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForScreening: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForScreening} 
+                value={reviewerSettings.screening} 
                 id="screener-no"
+                onChange={(e) => 
+                    setReviewerSettings(prev => ({ ...prev, screening: Number(e.target.value) }))
+                }
+                onBlur={saveReviewerSettings}
                 >
-                <option value="1">1</option>
-                <option value="2">2</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
             </select>
 
             <p>Reviewers required for full text screening</p>
             <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForFullText: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForFullText}
+                value={reviewerSettings.fulltext}
                 id="full-text-screener-no"
-                data-storage-key="fullTextScreenerNo"
+                onChange={(e) => 
+                    setReviewerSettings(prev => ({ ...prev, fulltext: Number(e.target.value) }))
+                }
+                onBlur={saveReviewerSettings}
                 >
-                <option value="1">1</option>
-                <option value="2">2</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
             </select>
 
             <p>Reviewers required for data extraction</p>
             <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        numberOfReviewersForExtraction: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.numberOfReviewersForExtraction}
+                value={reviewerSettings.extraction}
                 id="data-extraction-screener-no"
-                data-storage-key="dataExtractionNo"
+                onChange={(e) => 
+                    setReviewerSettings(prev => ({ ...prev, extraction: Number(e.target.value) }))
+                }
+                onBlur={saveReviewerSettings}
                 >
-                <option value="1">1</option>
-                <option value="2">2</option>
+                <option value={1}>1</option>
+                <option value={2}>2</option>
             </select>
 
             <button id="invite-reviewer">Invite Reviewer</button>

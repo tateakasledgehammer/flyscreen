@@ -9,7 +9,6 @@ const cors = require("cors");
 
 const requireProjectAccess = require("./middleware/projectAuth.js");
 const scoringEngine = require("./utils/scoringEngine.js");
-const criteriaRepo = require("./repos/projectCriteriaRepo.js");
 
 const screeningRoutes = require("./routes/screenings.js");
 const notesRoutes = require("./routes/notes.js");
@@ -264,9 +263,27 @@ app.delete(
 
         try {
             const deleteProjectTx = db.transaction(() => {
-                db.prepare("DELETE FROM screening_votes WHERE project_id = ?").run(projectId);
-                db.prepare("DELETE FROM studies WHERE project_id = ?").run(projectId);
-                db.prepare("DELETE FROM project_criteria WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM screenings WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM notes WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM tags WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM study_tags WHERE project_id = ?").run(projectId);
+
+                const sectionIds = db.prepare(`
+                    SELECT id FROM criteria_sections WHERE project_id = ?
+                `).all(projectId);
+
+                sectionIds.forEach(sec => {
+                    db.prepare("DELETE FROM criteria_items WHERE section_id = ?").run(sec.id);
+                });
+
+                db.prepare("DELETE FROM criteria_sections WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM fulltext_exclusion_reasons WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM project_background WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM reviewer_settings WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM study_scores WHERE id = ?").run(projectId);
+                db.prepare("DELETE FROM duplicates WHERE id = ?").run(projectId);
+                db.prepare("DELETE FROM uploads WHERE id = ?").run(projectId);
+                db.prepare("DELETE FROM studies WHERE id = ?").run(projectId);
                 db.prepare("DELETE FROM projects WHERE id = ?").run(projectId);
             });
 

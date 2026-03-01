@@ -49,6 +49,7 @@ const initSchema = db.transaction(() => {
             research_area TEXT,
             
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+        )
     `).run();
 
     db.prepare(`
@@ -70,7 +71,7 @@ const initSchema = db.transaction(() => {
             fulltext INTEGER DEFAULT 2,
             extraction INTEGER DEFAULT 2,
             
-            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         )
     `).run();
 
@@ -202,7 +203,7 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS criteria_sections (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             project_id INTEGER NOT NULL,
-            type TEXT NOT NULL, -- "inclusion" or "exclusion"
+            type TEXT NOT NULL CHECK(type IN ('inclusion', 'exclusion')),
             name TEXT NOT NULL,
             
             FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE

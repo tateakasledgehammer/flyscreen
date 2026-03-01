@@ -357,19 +357,19 @@ ER  -
 
     /// SETUP
 
-    // UI STATES
-        const [studyTags, setStudyTags] = useState([])
-        const [newTagInput, setNewTagInput] = useState('');
+    // // UI STATES
+    //     const [studyTags, setStudyTags] = useState([])
+    //     const [newTagInput, setNewTagInput] = useState('');
     
-        const [inclusionSection, setInclusionSection] = useState([]);
-        const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
-        const [criteriaInputs, setCriteriaInputs] = useState({});
+    //     const [inclusionSection, setInclusionSection] = useState([]);
+    //     const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
+    //     const [criteriaInputs, setCriteriaInputs] = useState({});
     
-        const [exclusionSection, setExclusionSection] = useState([]);
-        const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
-        const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
+    //     const [exclusionSection, setExclusionSection] = useState([]);
+    //     const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
+    //     const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
     
-        const [fullTextSub, setFullTextSub] = useState([]);
-        const [fullTextInput, setFullTextInput] = useState('');
+    //     const [fullTextSub, setFullTextSub] = useState([]);
+    //     const [fullTextInput, setFullTextInput] = useState('');
     
         

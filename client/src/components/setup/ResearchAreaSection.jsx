@@ -1,16 +1,19 @@
-export default function ResearchAreaSection({ backgroundInformationForReview, setBackgroundInformationForReview }) {
+export default function ResearchAreaSection({ 
+    background, 
+    setBackground, 
+    saveBackgroundInfo
+ }) {
     return (
         <div>
             <h3>Area of Research</h3>
             <select 
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        researchArea: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.researchArea} 
+                value={background.research_area} 
                 id="research-area"
+                onChange={(e) => 
+                    setBackground(prev => ({ ...prev, research_area: e.target.value }))
+                }
+                onBlur={saveBackgroundInfo}
+                
                     >
                     <option value="">Set research area</option>
                     <option value="arts">Arts & Humanities</option>

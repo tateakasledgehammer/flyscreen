@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
+
 import ReviewTitleSection from "./setup/ReviewTitleSection";
 import StudyTypeSection from "./setup/StudyTypeSection";
 import TagSetupSection from "./setup/TagSetupSection";
@@ -15,169 +16,31 @@ export default function Setup(props) {
         setStudies
     } = props;
 
-    const [studyTags, setStudyTags] = useState([])
-    const [newTagInput, setNewTagInput] = useState('');
-
-    const [inclusionSection, setInclusionSection] = useState([]);
-    const [newIncludedSectionInput, setNewIncludedSectionInput] = useState('');
-    const [criteriaInputs, setCriteriaInputs] = useState({});
-
-    const [exclusionSection, setExclusionSection] = useState([]);
-    const [newExcludedSectionInput, setNewExcludedSectionInput] = useState('');
-    const [exclusionCriteriaInputs, setExclusionCriteriaInputs] = useState({});
-
-    const [fullTextSub, setFullTextSub] = useState([]);
-    const [fullTextInput, setFullTextInput] = useState('');
-
-    // Background info
-    const [backgroundInformationForReview, setBackgroundInformationForReview] = useState({
-        title: "",
-        studyType: "",
-        questionType: "",
-        researchArea: "",
-        numberOfReviewersForScreening: 2,
-        numberOfReviewersForFullText: 2,
-        numberOfReviewersForExtraction: 2,
-    });
-
-    async function loadBackgroundInfo() {
-        const res = await fetch(`/api/projects/${projectId}/background`, { credentials: "include" });
-        const data = await res.json();
-        setBackgroundInformationForReview(data);
-    }
-    async function saveBackgroundInfo() {
-        await fetch(`/api/projects/${projectId}/background`, {  
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(backgroundInformationForReview)
-        });
-    }
-
-    async function loadReviewerSettings() {
-        const res = await fetch(`/api/projects/${projectId}/reviewers`, { credentials: "include" });
-        const data = await res.json();
-        setBackgroundInformationForReview(prev => ({
-            ...prev,
-            numberOfReviewersForScreening: data.screening,
-            numberOfReviewersForFullText: data.fulltext,
-            numberOfReviewersForExtraction: data.extraction
-        }));    
-    }
-    async function saveReviewerSettings() {
-        await fetch(`/api/projects/${projectId}/reviewers`, {  
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                screening: backgroundInformationForReview.numberOfReviewersForScreening,
-                fulltext: backgroundInformationForReview.numberOfReviewersForFullText,
-                extraction: backgroundInformationForReview.numberOfReviewersForExtraction,
-            })
-        });
-    }
-
-    // LOAD CRITERIA FROM BACKEND
-    useEffect(() => {
-        if (!projectId) return;
-
-        async function loadCriteria() {
-            try {
-                const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
-                    credentials: "include"
-                });
-                const data = await res.json();
-
-                if (!data) return;
-
-                // map backend > UI
-                if (data.inclusionCriteria) {
-                    setInclusionSection(
-                        data.inclusionCriteria.map(sec => ({
-                            name: sec.category,
-                            criteria: sec.criteria
-                        }))
-                    );
-                }
-                if (data.exclusionCriteria) {
-                    setExclusionSection(
-                        data.exclusionCriteria.map(sec => ({
-                            name: sec.category,
-                            criteria: sec.criteria
-                        }))
-                    );
-                }
-
-                if (data.fullTextExclusionReasons) {
-                    setFullTextSub(data.fullTextExclusionReasons);
-                }
-            } catch (err) {
-                console.error("Failed to load criteria", err)
-            }
-        }
-        
-        loadCriteria();
-    }, [projectId]);
-
-
-    // Save criteria to backend when they change
-    async function saveCriteriaToBackend() {
-        if (!projectId) return;
-
-        const payload = {
-            inclusionCriteria: inclusionSection.map(sec => ({
-                category: sec.name,
-                criteria: sec.criteria
-            })),
-            exclusionCriteria: exclusionSection.map(sec => ({
-                category: sec.name,
-                criteria: sec.criteria
-            })),
-            fullTextExclusionReasons: fullTextSub
-        };
-
-        try {
-            await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-        });
-
-        } catch (err) {
-            console.error("Failed to save criteria", err);
-        }
-    }
-    // save when criteria changes
-    useEffect(() => {
-        saveCriteriaToBackend();
-    }, [inclusionSection, exclusionSection, fullTextSub]);
-
+    //
     // TAGS
-    
-    useEffect(() => {
-        if (!projectId) return;
-        loadTags();
-        loadCriteria();
-        loadBackgroundInfo();
-        loadReviewerSettings();
-    }, [projectId]);
+    //
+
+    const [tags, setTags] = useState([])
+    const [newTag, setNewTag] = useState('');
 
     async function loadTags() {
+        if (!projectId) return;
         const res = await fetch(`/api/projects/${projectId}/tags`,
             { credentials: "include" }
         );
         const data = await res.json();
-        setStudyTags(data);
+        setTags(data);
     }
 
     async function addTag(name) {
+        if (!newTag.trim()) return;
         await fetch(`/api/projects/${projectId}/tags`, { 
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name })
+            body: JSON.stringify({ name: newTag.trim() })
         });
+        setNewTag("");
         loadTags();
     }
 
@@ -190,119 +53,132 @@ export default function Setup(props) {
     }
 
     //
-    // Inclusion
-    //
-
-    function handleNewInclusionCriteriaSection() {
-        const name = newIncludedSectionInput.trim();
-        if (!name) return;
-        if (inclusionSection.some(sec => sec.name === name)) return alert("Section exists");
-
-        setInclusionSection([...inclusionSection, { name, criteria: [] }])
-        setNewIncludedSectionInput('');
-    }
-
-    // has an error idk
-    // const handleCriteriaInputChange(index, value) {
-    //     setCriteriaInputs(prev => ({ ...prev, [index]: value }));
-    // }
-
-    function handleNewInclusionCriteria(index) {
-        const term = (criteriaInputs[index] || "").trim();
-        if (!term) return;
-
-        const updated = [...inclusionSection];
-        if (updated[index].criteria.includes(term)) {
-            return alert("Inclusion criteria already exists");
-        }
-
-        updated[index].criteria.push(term);
-        setInclusionSection(updated);
-
-        setCriteriaInputs(prev => ({ ...prev, [index]: "" }));
-    }
-
-    async function handleDeleteInclusionCriteria(index, termIndex) {
-        const updated = [...inclusionSection];
-        updated[index].criteria.splice(termIndex, 1);
-        setInclusionSection(updated);
-    }
-
-    async function handleDeleteInclusionSection(index) {
-        const amendedInclusionSections = inclusionSection.filter((_, i) => i !== index);
-        setInclusionSection(amendedInclusionSections);
-    }
-
-    async function handleClearInclusionSection() {
-        setInclusionSection([]);
-    }
-
-    //
-    // Exclusion
-    //
-
-    function handleNewExclusionCriteriaSection() {
-        const name = newExcludedSectionInput.trim();
-        if (!name) return;
-        if (exclusionSection.some(sec => sec.name === name)) return alert("Section exists");
-
-        setExclusionSection([...exclusionSection, { name, criteria: [] }])
-        setNewExcludedSectionInput('');
-    }
-
-    function handleNewExclusionCriteria(index) {
-        const term = (exclusionCriteriaInputs[index] || "").trim();
-        if (!term) return;
-
-        const updated = [...exclusionSection];
-        if (updated[index].criteria.includes(term)) {
-            return alert("Exclusion criteria already exists");
-        }
-
-        updated[index].criteria.push(term);
-        setExclusionSection(updated);
-
-        setExclusionCriteriaInputs(prev => ({ ...prev, [index]: "" }));
-    }
-
-    async function handleDeleteExclusionCriteria(index, termIndex) {
-        const updated = [...exclusionSection];
-        updated[index].criteria.splice(termIndex, 1);
-        setExclusionSection(updated);
-    }
-
-    async function handleDeleteExclusionSection(index) {
-        const amendedExclusionSections = exclusionSection.filter((_, i) => i !== index);
-        setExclusionSection(amendedExclusionSections);
-    }
-
-    async function handleClearExclusionSection() {
-        setExclusionSection([]);
-    }
-
-    // 
-    // Full Text Criteria
+    // Criteria
     // 
 
-    function handleNewFullTextExclusion() {
-        const term = fullTextInput.trim();
-        if (!term) return;
-        if (fullTextSub.includes(term)) {
-            return alert("Criteria already exists");
+    const [inclusionSections, setInclusionSections] = useState([]);
+    const [exclusionSections, setExclusionSections] = useState([]);
+    const [fullTextReasons, setFullTextReasons] = useState([]);
+
+    async function loadCriteria() {
+        if (!projectId) return;
+
+        const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
+            credentials: "include"
+        });
+        const data = await res.json();
+
+        const hasInclusion = Array.isArray(data.inclusionCriteria) && data.inclusionCriteria.length > 0;
+        const hasExclusion = Array.isArray(data.exclusionCriteria) && data.exclusionCriteria.length > 0;
+
+        if (!hasInclusion && !hasExclusion) {
+            setInclusionSections([
+                { category: "Population", criteria: [], type: "inclusion" },
+                { category: "Intervention", criteria: [], type: "inclusion" },
+                { category: "Comparator", criteria: [], type: "inclusion" },
+                { category: "Outcomes", criteria: [], type: "inclusion" },
+                { category: "Study Design", criteria: [], type: "inclusion" },
+            ]);
+            setExclusionSections([
+                { category: "Population", criteria: [], type: "exclusion" },
+                { category: "Intervention", criteria: [], type: "exclusion" },
+                { category: "Comparator", criteria: [], type: "exclusion" },
+                { category: "Outcomes", criteria: [], type: "exclusion" },
+                { category: "Study Design", criteria: [], type: "exclusion" },
+            ]);
+
+            setFullTextReasons([]);
+            return;
         }
-        setFullTextSub([...fullTextSub, term]);
-        setFullTextInput('');
+        
+        setInclusionSections(data.inclusionCriteria || []);
+        setExclusionSections(data.exclusionCriteria || []);
+        setFullTextReasons(data.fullTextExclusionReasons || []);
+    }
+    
+    async function saveCriteriaToBackend() {
+        await fetch(`/api/projects/${projectId}/criteria`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                inclusionCriteria: inclusionSections,
+                exclusionCriteria: exclusionSections,
+                fullTextExclusionReasons: fullTextReasons
+            })
+        });
     }
 
-    function handleDeleteFullTextExclusion(index) {
-        const amendedFullText = fullTextSub.filter((_, i) => i !== index);
-        setFullTextSub(amendedFullText);
+    //
+    // Background info
+    //
+
+    const [background, setBackground] = useState({
+        title: "",
+        study_type: "",
+        question_type: "",
+        research_area: ""
+    });
+
+    async function loadBackgroundInfo() {
+        if (!projectId) return;
+        const res = await fetch(`/api/projects/${projectId}/background`, { credentials: "include" });
+        const data = await res.json();
+        setBackground({
+            title: data?.title || "",
+            study_type: data?.study_type || "",
+            question_type: data?.question_type || "",
+            research_area: data?.research_area || ""
+        });
+    }
+    async function saveBackgroundInfo() {
+        await fetch(`/api/projects/${projectId}/background`, {  
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(background)
+        });
     }
 
-    function handleClearFullTextReasons() {
-        setFullTextSub([])
-        setFullTextInput('')
+    //
+    // Reviewer settings
+    //
+    const [reviewerSettings, setReviewerSettings] = useState({
+        screening: 2,
+        fulltext: 2,
+        extraction: 2
+    })
+
+    async function loadReviewerSettings() {
+        if (!project) return;
+        const res = await fetch(`/api/projects/${projectId}/reviewers`, { credentials: "include" });
+        const data = await res.json();
+        setReviewerSettings(prev => ({
+            screening: data?.screening || 2,
+            fulltext: data?.fulltext || 2,
+            extraction: data?.extraction || 2,
+        }));    
     }
+    async function saveReviewerSettings() {
+        await fetch(`/api/projects/${projectId}/reviewers`, {  
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reviewerSettings)
+        });
+    }
+
+    //
+    // Load everything
+    //
+
+    useEffect(() => {
+        if (!projectId) return;
+        loadTags();
+        loadCriteria();
+        loadBackgroundInfo();
+        loadReviewerSettings();
+    }, [projectId]);
 
     //
     // Reset
@@ -310,7 +186,6 @@ export default function Setup(props) {
 
     function resetApp() {
         setStudies([]);
-        setUser(null);
         localStorage.clear();
         window.location.href = "/";
     }
@@ -329,41 +204,44 @@ export default function Setup(props) {
         </div>
 
         <ReviewTitleSection
-            backgroundInformationForReview={backgroundInformationForReview}
-            setBackgroundInformationForReview={setBackgroundInformationForReview}
+            background={background}
+            setBackground={setBackground}
+            saveBackgroundInfo={saveBackgroundInfo}
         />
         <StudyTypeSection
-            backgroundInformationForReview={backgroundInformationForReview}
-            setBackgroundInformationForReview={setBackgroundInformationForReview}
+            background={background}
+            setBackground={setBackground}
+            saveBackgroundInfo={saveBackgroundInfo}
         />
         <QuestionTypeSection
-            backgroundInformationForReview={backgroundInformationForReview}
-            setBackgroundInformationForReview={setBackgroundInformationForReview}
+            background={background}
+            setBackground={setBackground}
+            saveBackgroundInfo={saveBackgroundInfo}
         />
         <ResearchAreaSection
-            backgroundInformationForReview={backgroundInformationForReview}
-            setBackgroundInformationForReview={setBackgroundInformationForReview}
+            background={background}
+            setBackground={setBackground}
+            saveBackgroundInfo={saveBackgroundInfo}
         />
         
         <br />
         <hr />
 
         <ReviewerSettingsSection
-            backgroundInformationForReview={backgroundInformationForReview}
-            setBackgroundInformationForReview={setBackgroundInformationForReview}
+            reviewerSettings={reviewerSettings}
+            setReviewerSettings={setReviewerSettings}
+            saveReviewerSettings={saveReviewerSettings}
         />
 
         <br />
         <hr />
 
         <TagSetupSection
-            studyTags={studyTags}
-            setStudyTags={setStudyTags}
-            newTagInput={newTagInput}
-            setNewTagInput={setNewTagInput}
-            handleNewTag={handleNewTag}
-            handleDeleteTag={handleDeleteTag}
-            handleClearTags={handleClearTags}
+            tags={tags}
+            newTag={newTag}
+            setNewTag={setNewTag}
+            addTag={addTag}
+            deleteTag={deleteTag}
         />
 
         <br />
@@ -371,36 +249,18 @@ export default function Setup(props) {
 
         <CriteriaSetupSection
             // Inclusion
-            inclusionSection={inclusionSection}
-            newIncludedSectionInput={newIncludedSectionInput}
-            setNewIncludedSectionInput={setNewIncludedSectionInput}
-            criteriaInputs={criteriaInputs}
-            // handleCriteriaInputChange={handleCriteriaInputChange}
-            handleNewInclusionCriteriaSection={handleNewInclusionCriteriaSection}
-            handleNewInclusionCriteria={handleNewInclusionCriteria}
-            handleDeleteInclusionCriteria={handleDeleteInclusionCriteria}
-            handleDeleteInclusionSection={handleDeleteInclusionSection}
-            handleClearInclusionSection={handleClearInclusionSection}
-
-            // Exclusion
-            exclusionSection={exclusionSection}
-            newExcludedSectionInput={newExcludedSectionInput}
-            setNewExcludedSectionInput={setNewExcludedSectionInput}
-            exclusionCriteriaInputs={exclusionCriteriaInputs}
-            // handleExclusionCriteriaInputChange={handleExclusionCriteriaInputChange}
-            handleNewExclusionCriteria={handleNewExclusionCriteria}
-            handleDeleteExclusionCriteria={handleDeleteExclusionCriteria}
-            handleDeleteExclusionSection={handleDeleteExclusionSection}
-            handleClearExclusionSection={handleClearExclusionSection}
-
-            // Full text
-            fullTextSub={fullTextSub}
-            fullTextInput={fullTextInput}
-            setFullTextInput={setFullTextInput}
-            handleNewFullTextExclusion={handleNewFullTextExclusion}
-            handleDeleteFullTextExclusion={handleDeleteFullTextExclusion}
-            handleClearFullTextReasons={handleClearFullTextReasons}
+            inclusionSections={inclusionSections}
+            exclusionSections={exclusionSections}
+            setInclusionSections={setInclusionSections}
+            setExclusionSections={setExclusionSections}
+            fullTextReasons={fullTextReasons}
+            setFullTextReasons={setFullTextReasons}
+            saveCriteriaToBackend={saveCriteriaToBackend}
         />
+
+        <button onClick={resetApp}>
+            Reset
+        </button>
 
         </div>
         </>

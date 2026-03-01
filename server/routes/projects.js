@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db.js");
-const criteriaRepo = require("../repos/projectCriteriaRepo.js")
 const requireProjectAccess = require("../middleware/projectAuth.js");
 const scoringEngine = require("../utils/scoringEngine.js");
 const studyScoreRepo = require("../repos/studyScoreRepo.js");

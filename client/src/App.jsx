@@ -221,7 +221,7 @@ function App() {
           </Route>             
 
           {/* Redirect */}
-          <Route path="*" element={<Navigate to={isAuthenticated ? "/overview" : "/dashboard"} />} />
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/overview"} />} />
       </Routes>
     </Router>
   );

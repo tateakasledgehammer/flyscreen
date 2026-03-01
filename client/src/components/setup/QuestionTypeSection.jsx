@@ -1,16 +1,18 @@
-export default function QuestionTypeSection({ backgroundInformationForReview, setBackgroundInformationForReview }) {
+export default function QuestionTypeSection({ 
+    background, 
+    setBackground, 
+    saveBackgroundInfo
+ }) {
     return (
         <div>
             <h3>Question Type</h3>
             <select
-                onChange={(e) => 
-                    setBackgroundInformationForReview({
-                        ...backgroundInformationForReview, 
-                        questionType: e.target.value
-                    })
-                }
-                value={backgroundInformationForReview.questionType} 
+                value={background.question_type} 
                 id="question-type"
+                onChange={(e) => 
+                    setBackground(prev => ({ ...prev, question_type: e.target.value }))
+                }
+                onBlur={saveBackgroundInfo}
                 >
                     <option value="">Set question type</option>
                     <option value="intervention">Intervention / Treatment</option>

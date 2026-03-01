@@ -1,35 +1,115 @@
 export default function CriteriaSetupSection({ 
-    // Inclusion
-    inclusionSection,
-    newIncludedSectionInput,
-    setNewIncludedSectionInput,
-    criteriaInputs,
-    handleCriteriaInputChange,
-    handleNewInclusionCriteriaSection,
-    handleNewInclusionCriteria,
-    handleDeleteInclusionCriteria,
-    handleDeleteInclusionSection,
-    handleClearInclusionSection,
-
-    // Exclusion
-    exclusionSection,
-    newExcludedSectionInput,
-    setNewExcludedSectionInput,
-    exclusionCriteriaInputs,
-    handleExclusionCriteriaInputChange,
-    handleNewExclusionCriteria,
-    handleDeleteExclusionCriteria,
-    handleDeleteExclusionSection,
-    handleClearExclusionSection,
-
-    // Full text
-    fullTextSub,
-    fullTextInput,
-    setFullTextInput,
-    handleNewFullTextExclusion,
-    handleDeleteFullTextExclusion,
-    handleClearFullTextReasons
+   inclusionSections,
+   exclusionSections,
+   setInclusionSections,
+   setExclusionSections,
+   fullTextReasons,
+   setFullTextReasons,
+   saveCriteria
 }) {
+
+    //
+    // inclusion
+    //
+
+    function addInclusionSection() {
+        const name = prompt("New inclusion section name:");
+        if (!name?.trim()) return;
+
+        setInclusionSections(prev => [
+            ...prev,
+            { category: name.trim(), criteria: [], type: "inclusion" }
+        ])
+    }
+
+    function deleteInclusionSection(index) {
+        setInclusionSections(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function addInclusionCriteria(sectionIndex) {
+        const term = prompt("New inclusion term");
+        if (!term?.trim()) return;
+        setInclusionSections(prev => {
+            const updated = [...prev];
+            updated[sectionIndex].criteria.push(term.trim());
+            return updated;
+        });
+    }
+
+    function deleteInclusionCriteria(sectionIndex, termIndex) {
+        setInclusionSections(prev => {
+            const updated = [...prev];
+            updated[sectionIndex].criteria.splice(termIndex, 1);
+            return updated;
+        });
+    }
+
+    function clearInclusion() {
+        setInclusionSections([]);
+    }
+
+    //
+    // exclusion
+    //
+
+    function addExclusionSection() {
+        const name = prompt("New exclusion section name:");
+        if (!name?.trim()) return;
+
+        setExclusionSections(prev => [
+            ...prev,
+            { category: name.trim(), criteria: [], type: "exclusion" }
+        ])
+    }
+
+    function deleteExclusionSection(index) {
+        setExclusionSections(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function addExclusionCriteria(sectionIndex) {
+        const term = prompt("New Exclusion term");
+        if (!term?.trim()) return;
+        setExclusionSections(prev => {
+            const updated = [...prev];
+            updated[sectionIndex].criteria.push(term.trim());
+            return updated;
+        });
+    }
+
+    function deleteExclusionCriteria(sectionIndex, termIndex) {
+        setExclusionSections(prev => {
+            const updated = [...prev];
+            updated[sectionIndex].criteria.splice(termIndex, 1);
+            return updated;
+        });
+    }
+
+    function clearExclusion() {
+        setExclusionSections([]);
+    }
+
+    //
+    // full text reasons
+    //
+
+    function addFullTextReason() {
+        const name = prompt("New full text reason:");
+        if (!name?.trim()) return;
+
+        setFullTextReasons(prev => [
+            ...prev,
+            term.trim()
+        ]);
+    }
+
+    function deleteFullTextReason(index) {
+        setFullTextReasons(prev => prev.filter((_, i) => i !== index));
+    }
+
+    function clearFullTextReasons() {
+        setFullTextReasons([]);
+    }
+
     return (
         <>
         <div>
@@ -38,166 +118,106 @@ export default function CriteriaSetupSection({
 
             {/* INCLUSION */}
             <div>
-                <div>
-                    <h3>Inclusion Criteria</h3>
-                    <input 
-                        onChange={(e) => setNewIncludedSectionInput(e.target.value)}
-                        value={newIncludedSectionInput}
-                        type="text" 
-                        id="newInclusionSection" 
-                        placeholder="New Section (i.e. Population, Intervention...)"
-                    />
-                    
-                    <button onClick={() => handleNewInclusionCriteriaSection()}>Add Section</button>
+                <h3>Inclusion Criteria</h3>
+                <button onClick={addInclusionSection}>Add Inclusion Section (i.e. Population, Intervention...)</button>
+                {inclusionSections.length === 0 && <p>No inclusion sections set.</p>}
 
-                    {!inclusionSection || inclusionSection.length === 0 && (
-                        <p>No criteria categories set.</p>
-                    )}
+                {inclusionSections && inclusionSections.length > 0 && (
+                    <div className="criteria-section">
+                        {(inclusionSections.map((section, index) => (
+                            <div key={index}>
+                                <h4>
+                                    {section.category}
+                                    <button onClick={() => deleteInclusionSection(index)}>X</button>
+                                </h4>
 
-                    {inclusionSection && inclusionSection.length > 0 && (
-                        <div className="criteria-section">
-                            {(inclusionSection.map((section, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {section.name}
-                                        <button onClick={() => handleDeleteInclusionSection(index)}
-                                        >X</button>
-                                    </h3>
-                                    <input
-                                        onChange={(e) => handleCriteriaInputChange(index, e.target.value)}
-                                        value={criteriaInputs[index] || ""}
-                                        id="newInclusionCriteria"
-                                        placeholder="Provide your term for inclusion..."
-                                    >
-                                    </input>
-                                    <button onClick={() => handleNewInclusionCriteria(index)}>Add</button>
+                                <button onClick={() => addInclusionCriteria(index)}>Add Term</button>
+                                
+                                {section.criteria.length === 0 && (
+                                    <p>No terms for inclusion added.</p>
+                                )}
 
-                                    {(!section.criteria || section.criteria.length === 0) && (
-                                        <p>No terms for inclusion added.</p>
-                                    )}
-
-                                    {(section.criteria && section.criteria.length > 0) && (
-                                        <div className="inclusion-exclusion-criteria">
-                                            {(section.criteria.map((term, termIndex) => (
-                                                <div key={termIndex}>
-                                                    <h4>
-                                                        {term}
-                                                        <button onClick={() => handleDeleteInclusionCriteria(index, termIndex)}
-                                                        >X</button>
-                                                    </h4>
-                                                </div>
-                                            )))}
-                                        </div>
-                                    )}
-
-
-                                </div>
-                            )))}
-                        </div>
-                    )}
-                    
-                    <button onClick={() => handleClearInclusionSection()}>Clear Inclusion Criteria</button>
-                </div>
-
-                {/* EXCLUSION */}
-                <div>
-                    <h3>Exclusion Criteria</h3>
-                    <input 
-                        onChange={(e) => setNewExcludedSectionInput(e.target.value)}
-                        value={newExcludedSectionInput}
-                        type="text" 
-                        id="newExclusionSection" 
-                        placeholder="New Section (i.e. Population, Intervention...)"
-                    />
-
-                    <button onClick={() => handleNewExclusionCriteriaSection()}>Add Section</button>
-
-                    {!exclusionSection || exclusionSection.length === 0 && (
-                        <p>No criteria categories set.</p>
-                    )}
-
-                    {exclusionSection && exclusionSection.length > 0 && (
-                        <div className="criteria-section">
-                            {(exclusionSection.map((section, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {section.name}
-                                        <button onClick={() => handleDeleteExclusionSection(index)}
-                                        >X</button>
-                                    </h3>
-                                    <input
-                                        onChange={(e) => handleExclusionCriteriaInputChange(index, e.target.value)}
-                                        value={exclusionCriteriaInputs[index] || ""}
-                                        id="newExclusionCriteria"
-                                        placeholder="Provide your term for exclusion..."
-                                    >
-                                    </input>
-                                    <button onClick={() => handleNewExclusionCriteria(index)}>Add</button>
-
-                                    {(!section.criteria || section.criteria.length === 0) && (
-                                        <p>No terms for exclusion added.</p>
-                                    )}
-
-                                    {(section.criteria && section.criteria.length > 0) && (
-                                        <div className="inclusion-exclusion-criteria">
-                                            {(section.criteria.map((term, termIndex) => (
-                                                <div key={termIndex}>
-                                                    <h4>
-                                                        {term}
-                                                        <button onClick={() => handleDeleteExclusionCriteria(index, termIndex)}
-                                                        >X</button>
-                                                    </h4>
-                                                </div>
-                                            )))}
-                                        </div>
-                                    )}
-
-
-                                </div>
-                            )))}
-                        </div>
-                    )}
-                    
-                    <button onClick={() => handleClearExclusionSection()}>Clear Exclusion Criteria</button>
-                </div>
-
+                            <div className="inclusion-exclusion-criteria">
+                                {(section.criteria.map((term, termIndex) => (
+                                    <div key={termIndex}>
+                                        <h4>
+                                            {term}
+                                            <button onClick={() => deleteInclusionCriteria(index, termIndex)}>X</button>
+                                        </h4>
+                                    </div>
+                                )))}
+                            </div>
+                            </div>
+                        )))}
+                    </div>
+                )}
+                
+                <button onClick={clearInclusion()}>Clear Inclusion Criteria</button>
             </div>
-        </div>    
+            {/* EXCLUSION */}
+            <div>
+                <h3>Exclusion Criteria</h3>
+                <button onClick={addExclusionSection}>Add Exclusion Section (i.e. Population, Intervention...)</button>
+                {exclusionSections.length === 0 && <p>No Exclusion sections set.</p>}
+
+                {exclusionSections && exclusionSections.length > 0 && (
+                    <div className="criteria-section">
+                        {(exclusionSections.map((section, index) => (
+                            <div key={index}>
+                                <h4>
+                                    {section.category}
+                                    <button onClick={() => deleteExclusionSection(index)}>X</button>
+                                </h4>
+
+                                <button onClick={() => addExclusionCriteria(index)}>Add Term</button>
+                                
+                                {section.criteria.length === 0 && (
+                                    <p>No terms for Exclusion added.</p>
+                                )}
+
+                            <div className="inclusion-exclusion-criteria">
+                                {(section.criteria.map((term, termIndex) => (
+                                    <div key={termIndex}>
+                                        <h4>
+                                            {term}
+                                            <button onClick={() => deleteExclusionCriteria(index, termIndex)}>X</button>
+                                        </h4>
+                                    </div>
+                                )))}
+                            </div>
+                            </div>
+                        )))}
+                    </div>
+                )}
+                
+                <button onClick={clearExclusion()}>Clear Exclusion Criteria</button>
+            </div>
+            </div>
 
         <br />
         <hr />
 
-        {/* FULL TEXT */}
-        <div>
-            <h3>Full Text Exclusion Criteria</h3>
-            <input 
-                onChange={(e) => setFullTextInput(e.target.value)}
-                value={fullTextInput}
-                type="text" 
-                placeholder="New full text exclusion reasons (i.e. not a study, unavailable in English..."
-            />
-            <button onClick={() => handleNewFullTextExclusion()}>Add Reason</button>
+            {/* FULL TEXT */}
+            <div>
+                <h3>Full Text Exclusion Criteria</h3>
+                <button onClick={addFullTextReason}>Add Full Text Exclusion Reason (i.e. primary study, unavailable, incorrect population...)</button>
+                {fullTextReasons.length === 0 && <p>No criteria set.</p>}
 
-            {!fullTextSub || fullTextSub.length === 0 && (
-                <p>No criteria set.</p>
-            )}
-
-            {fullTextSub && fullTextSub.length > 0 && (
-                <div className="criteria-section">
-                    <div className="inclusion-exclusion-criteria">
-                        {fullTextSub.map((term, index) => (
-                            <h4 key={index}>
+                    {(fullTextReasons.map((term, index) => (
+                        <div key={index}>
+                            <h4>
                                 {term}
-                                <button onClick={() => handleDeleteFullTextExclusion(index)}
-                                >X</button>
+                                <button onClick={() => deleteFullTextReason(index)}>X</button>
                             </h4>
-                        ))}
-                    </div>
-                </div>
-            )}
-                    
-            <button onClick={() => handleClearFullTextReasons()}>Clear Criteria</button>
-        </div>
+                        </div>
+                    )))}
+                
+                <button onClick={clearFullTextReasons()}>Clear Full Text Criteria</button>
+            </div>
+
+            <hr />
+
+            <button onClick={saveCriteria}>Save All Criteria</button>
         </>
     );
 }
