@@ -77,7 +77,20 @@ const initSchema = db.transaction(() => {
             is_duplicate INTEGER DEFAULT 0,
 
             project_id INTEGER NOT NULL,
+            upload_id INTEGER NOT NULL,
             
+            FOREIGN KEY (project_id) REFERENCES projects(id),
+            FOREIGN KEY (upload_id) REFERENCES uploads(id)
+        )
+    `).run();
+
+    // Uploads
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS uploads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER NOT NULL,
+            file_name TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (project_id) REFERENCES projects(id)
         )
     `).run();
@@ -215,24 +228,24 @@ db.prepare(`
 `).run();
 
 // BULK INSERT
-const insertManyStudies = db.transaction((studies, projectId) => {
+const insertManyStudies = db.transaction((cleanStudies) => {
     const insert = db.prepare(`
         INSERT INTO studies (
             title, abstract, authors, year, type,
             journal, volume, issue, doi, link,
-            keywords, language, project_id
+            keywords, language, project_id, upload_id
         ) VALUES (
             @title, @abstract, @authors, @year, @type,
             @journal, @volume, @issue, @doi, @link,
-            @keywords, @language, @project_id
+            @keywords, @language, @project_id, @upload_id
         )
     `);
 
     const findByDOI = db.prepare(`SELECT id FROM studies WHERE doi = ?`);
 
     const logDuplicate = db.prepare(`
-        INSERT INTO duplicates (original_study_id, duplicate_payload)
-        VALUES (?, ?)
+        INSERT INTO duplicates (original_study_id, duplicate_payload, project_id)
+        VALUES (?, ?, ?)
     `);
 
     const markDuplicate = db.prepare(`
@@ -241,9 +254,7 @@ const insertManyStudies = db.transaction((studies, projectId) => {
 
     const insertedIds = [];
 
-    for (const study of studies) {
-        study.project_id = projectId;
-
+    for (const study of cleanStudies) {
         try {
             const result = insert.run(study);
             insertedIds.push(result.lastInsertRowid);
@@ -252,7 +263,7 @@ const insertManyStudies = db.transaction((studies, projectId) => {
             if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
                 const existing = findByDOI.get(study.doi);
                 if (existing) {
-                    logDuplicate.run(existing.id, JSON.stringify(study), projectId);
+                    logDuplicate.run(existing.id, JSON.stringify(study), study.project_id);
                     markDuplicate.run(existing.id);
                 }
 

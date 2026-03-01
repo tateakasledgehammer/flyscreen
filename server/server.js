@@ -18,6 +18,7 @@ const duplicateRoutes = require("./routes/duplicates.js");
 const studyDetailRoutes = require("./routes/studyDetails.js");
 const projectRoutes = require("./routes/projects.js");
 const userRoutes = require("./routes/users.js");
+const uploadRoutes = require("./routes/uploads.js");
 
 console.log("server.js loaded successfully");
 
@@ -86,6 +87,7 @@ app.use("/api", duplicateRoutes);
 app.use("/api", studyDetailRoutes);
 app.use("/api", projectRoutes);
 app.use("/api", userRoutes);
+app.use("/api", uploadRoutes);
 
 // ---- STUDIES ----
 
@@ -119,22 +121,33 @@ app.post(
         const dbSafeStudy = study => ({
             title: study.title,
             abstract: study.abstract,
-            authors: study.authors,
-            year: study.year,
+            authors: Array.isArray(study.authors) ? study.authors.join("; ") : study.authors,
+            year: Number(study.year),
             type: study.type,
             journal: study.journal,
             volume: study.volume,
             issue: study.issue,
             doi: study.doi,
             link: study.link,
-            keywords: study.keywords,
+            keywords: Array.isArray(study.keywords) ? study.keywords.join("; ") : study.keywords,
             language: study.language
         });
 
         try {
-            const cleanStudies = studies.map(dbSafeStudy);
+            const uploadResult = db.prepare(`
+                INSERT INTO uploads (project_id, file_name)
+                VALUES (?, ?)                
+            `).run(projectId, req.body.fileName || "Unknown File");
+
+            const uploadId = uploadResult.lastInsertRowid;
+
+            const cleanStudies = studies.map(s => ({
+                ...dbSafeStudy(s),
+                project_id: projectId,
+                upload_id: uploadId
+            }));
             
-            const insertedIds = insertManyStudies(cleanStudies, projectId);
+            const insertedIds = insertManyStudies(cleanStudies);
 
             const criteria = criteriaRepo.getCriteria.get(projectId);
 
@@ -152,7 +165,7 @@ app.post(
 
             res.json({ 
                 success: true, 
-                message: `Inserted ${studies.length} studies.`,
+                message: `Inserted ${cleanStudies.length} studies.`,
                 insertedCount: insertedIds.length
             });
             

@@ -12,7 +12,8 @@ export default function Import(props) {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [uploadHistory, setUploadHistory] = useState([]);
-    const [uploadProgress, setUploadProgress] = useState('');
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadMessage, setUploadMessage] = useState('');
 
     async function fetchStudiesFromServer() {
         try {
@@ -27,6 +28,45 @@ export default function Import(props) {
         }
     }
 
+    async function getExistingStudies() {
+        const res = await fetch(
+            `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+            { credentials: "include" }
+        );
+        return await res.json();
+    }
+
+    async function fetchUploads() {
+        const res = await fetch(
+            `http://localhost:5005/api/projects/${projectId}/uploads`, 
+            { credentials: "include" }
+        );
+        const data = await res.json();
+        setUploadHistory(data);
+    }
+
+    async function deleteUpload(uploadId) {
+        const proceed = window.confirm("Delete this upload and all its studies");
+        if (!proceed) return;
+
+        const res = await fetch(
+            `http://localhost:5005/api/projects/${projectId}/uploads`, 
+            { 
+                method: "DELETE",
+                credentials: "include" 
+            }
+        );
+
+        if (!res.ok) {
+            const err = await res.json();
+            setError(err.error || "Failed to delete upload");
+            return;
+        }
+
+        await fetchUploads();
+        await fetchStudiesFromServer();           
+    }
+
     async function handleFileUpload(e) {
         if (!projectId) return setError("No project selected");
 
@@ -35,17 +75,15 @@ export default function Import(props) {
         if (!file.name.toLowerCase().endsWith('.ris')) 
             return setError("Please upload a .ris file");
 
-        setError('')
+        setError('');
         setIsLoading(true);
         setFileName(file.name);
-
-        const formData = new FormData();
-        formData.append("file", file);
+        setUploadProgress(10);
 
         try {
-            setUploadProgress(10);
             const text = await file.text();
             setUploadProgress(30);
+
             const studies = parseRIS(text);
             setUploadProgress(50);
 
@@ -63,58 +101,57 @@ export default function Import(props) {
                 return;
             }
 
-            const seen = new Set();
-            const duplicates = [];
+            // const seen = new Set();
+            // const duplicates = [];
 
-            studies.forEach((s) => {
-                const key = `${s.title.toLowerCase()}-${s.year}`;
-                if (seen.has(key)) duplicates.push(`${s.title} ${s.year}`);
-                seen.add(key);
-            });
+            // studies.forEach((s) => {
+            //     const key = `${s.title.toLowerCase()}-${s.year}`;
+            //     if (seen.has(key)) duplicates.push(`${s.title} ${s.year}`);
+            //     seen.add(key);
+            // });
 
-            if (duplicates.length > 0) {
-                const proceed = window.confirm(
-                    "Duplicate entries found in the RIS file:\n" +
-                    duplicates.join("\n") +
-                    "\n\nContinue anyway?"
-                );
-                if (!proceed) {
-                    setIsLoading(false);
-                    return;
-                }
-            }
+            // if (duplicates.length > 0) {
+            //     const proceed = window.confirm(
+            //         "Duplicate entries found in the RIS file:\n" +
+            //         duplicates.join("\n") +
+            //         "\n\nContinue anyway?"
+            //     );
+            //     if (!proceed) {
+            //         setIsLoading(false);
+            //         return;
+            //     }
+            // }
 
-            // fetchexistingstudies doesnt exist!!
-            const existingKeys = new Set(
-                (await fetchExistingStudies()).map(
-                    (s) => `${s.title.toLowerCase()}-${year}`
-                )
-            );
+            // const existingKeys = new Set(
+            //     (await getExistingStudies()).map(
+            //         s => `${s.title.toLowerCase()}-${s.year}`
+            //     )
+            // );
 
-            const duplicatesInDB = studies.filter((s) =>
-                existingKeys.has(`${s.title.toLowerCase()}-${s.year}`)
-            );
+            // const duplicatesInDB = studies.filter(
+            //     s => existingKeys.has(`${s.title.toLowerCase()}-${s.year}`)
+            // );
 
-            if (duplicatesInDB.length > 0) {
-                const proceed = window.confirm(
-                    `${duplicatesInDB.length} studies already exist in this project. \nContinue anyway?`
-                );
-                if (!proceed) {
-                    setIsLoading(false);
-                    return;
-                }
-            }
+            // if (duplicatesInDB.length > 0) {
+            //     const proceed = window.confirm(
+            //         `${duplicatesInDB.length} studies already exist in this project. \nContinue anyway?`
+            //     );
+            //     if (!proceed) {
+            //         setIsLoading(false);
+            //         return;
+            //     }
+            // }
 
-            // formData might not be right
             const res = await fetch(
                 `http://localhost:5005/api/projects/${projectId}/studies/bulk`,
                 { 
                     method: "POST",
                     headers: { "Content-Type": "application/json"},
                     credentials: "include",
-                    body: formData
+                    body: JSON.stringify({ studies, fileName: file.name })
                 }
             );
+
             setUploadProgress(70);
 
             if (!res.ok) {
@@ -123,27 +160,15 @@ export default function Import(props) {
             }
 
             const result = await res.json();
-
-            const newEntry = {
-                
-            };
-            setUploadHistory((prev) => [
-                ...prev, 
-                {
-                    fileName: file.name,
-                    studyCount: result.importedCount,
-                    timestamp: new Date().toLocaleString()
-                }
-            ]);
             
-            setUploadProgress(
-                `Imported ${result.importedCount} studies successfully`
-            );
+            setUploadMessage(`Imported ${result.importedCount} studies successfully`);
 
             await fetchStudiesFromServer();
+            await fetchUploads();
 
             setUploadProgress(100);
             setTimeout(() => setUploadProgress(0), 1000);
+
         } catch (err) {
             console.error("Upload failed:", err);
             setError(err.message || "Failed to upload file");
@@ -175,6 +200,7 @@ export default function Import(props) {
             setFileName('');
             setUploadHistory([]);
             setUploadProgress("");
+            setUploadMessage("");
 
         } catch (err) {
             console.error(err);
@@ -193,24 +219,30 @@ export default function Import(props) {
             
             {error && (<p style={{ color: "red" }}>{error}</p>)}
             {isLoading && <p>Importing file...</p>}
-            {uploadProgress && <p>{uploadProgress}</p>}
-
-            <h3>Uploaded Files</h3>
+            {uploadMessage && <p>{uploadMessage}</p>}
 
             {uploadProgress > 0 && (
                 <div style={{ width: "100%", background: "#eee", height: "10px", marginTop: "10px" }}>
-                    <div style ={{ width: `${uploadProgress}`, height: "100%", background: "#4caf50", transition: "width 0.3s" }} />
+                    <div style ={{ 
+                        width: `${uploadProgress}%`, 
+                        height: "100%", 
+                        background: "#4caf50", 
+                        transition: "width 0.3s" 
+                    }} />
                 </div>   
             )}
+
+            <h3>Uploaded Files</h3>
 
             {uploadHistory.length === 0 ? (
                 <p>No uploads yet.</p>
             ) : (
                 <ul>
-                    {uploadHistory.map((entry, fileIndex) => (
-                        <li key={fileIndex}>
+                    {uploadHistory.map((entry) => (
+                        <li key={entry.upload_id}>
                             <strong>Uploaded File: </strong>
-                            {entry.fileName} - {entry.studyCount} studies uploaded - {entry.timestamp}
+                            {entry.file_name} - {entry.study_count} studies uploaded - {entry.created_at}
+                            <button onClick={() => deleteUpload(entry.upload_id)}>Delete</button>
                         </li>
                     ))}
                 </ul>

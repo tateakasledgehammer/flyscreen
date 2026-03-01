@@ -16,7 +16,7 @@ export function parseRIS(text) {
             issue: "",
             doi: "",
             link: "",
-            keywords: "",
+            keywords: [],
             language: ""
         };
     };
@@ -40,7 +40,7 @@ export function parseRIS(text) {
                 current.authors.push(value);
                 break;
             case "PY":
-                current.year = value;
+                current.year = Number(value);
                 break;
             case "JO":
                 current.journal = value;
@@ -75,17 +75,17 @@ export function parseRIS(text) {
 export function validateStudy(study) {
     const errors = [];
 
-    if (!study.title || study.title.trim().length === 0)
-        errors.push("Missing title");
+    // if (!study.title || study.title.trim().length === 0)
+    //     errors.push("Missing title");
 
-    if (!study.year || isNaN(study.year))
-        errors.push("Missing or invalid year");
+    // if (!study.year || isNaN(study.year))
+    //     errors.push("Missing or invalid year");
 
-    if (!Array.isArray(study.authors) || study.authors.length === 0)
-        errors.push("Missing authors");
+    // if (!Array.isArray(study.authors) || study.authors.length === 0)
+    //     errors.push("Missing authors");
 
-    if (!study.abstract || study.abstract.trim().length === 0)
-        errors.push("Missing abstract");
+    // if (!study.abstract || study.abstract.trim().length === 0)
+    //     errors.push("Missing abstract");
 
     return errors;
 }

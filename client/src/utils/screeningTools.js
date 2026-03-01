@@ -95,20 +95,33 @@ export function getFullTextStatus(screening, currentUserId) {
 }
 
 /* FORMATTING */
-export function formatAuthors(authorString) {
-    if (!authorString) return "N/A";
+export function formatAuthors(authors) {
+    if (!authors) return "N/A";
 
-    const parts = authorString.split(",").map(a => a.trim());
-    const authors = [];
-
-    for (let i = 0; i < parts.length; i +=2) {
-        const last = parts[i] || "";
-        authors.push(`${last}`.trim());
+    if (Array.isArray(authors)) {
+        if (authors.length === 1) return authors;
+        if (authors.length === 2) return `${authors[0]} & ${authors[1]}`;
+        if (authors.length > 2) return `${authors[0]} et al.`
+        return "N/A";
     }
 
-    if (authors.length === 1) return authorString;
-    if (authors.length === 2) return `${authors[0]} & ${authors[1]}`;
-    if (authors.length > 2) return `${authors[0]} et al.`
+    const parts = authors.split(";").map(a => a.trim()).filter(Boolean);
+
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return `${parts[0]} & ${parts[1]}`;
+    if (parts.length > 2) return `${parts[0]} et al.`;
+    
+    return "N/A";
+}
+
+export function formatKeywords(keywords) {
+    if (!keywords) return "N/A";
+
+    if (Array.isArray(keywords)) {
+        return keywords.join(", ");
+    }
+
+    return keywords.split(";").map(k => k.trim()).join(", ");
 }
 
 export function capitaliseFirstLetter(str) {

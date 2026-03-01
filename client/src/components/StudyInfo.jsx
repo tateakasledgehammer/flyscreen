@@ -1,4 +1,4 @@
-import { formatAuthors } from "../utils/screeningTools";
+import { formatAuthors, formatKeywords } from "../utils/screeningTools";
 
 export default function StudyInfo(props) {
     const {
@@ -69,7 +69,7 @@ export default function StudyInfo(props) {
                         {highlighted(
                             <span className="highlightable">
                                 {highlightContent(
-                                    study.keywords, 
+                                    formatKeywords(study.keywords), 
                                     inclusionTerms, 
                                     exclusionTerms, 
                                     []
