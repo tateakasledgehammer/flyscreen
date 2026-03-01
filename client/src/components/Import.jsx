@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { parseRIS, validateStudy } from "../utils/risParser";
 
@@ -14,6 +14,12 @@ export default function Import(props) {
     const [uploadHistory, setUploadHistory] = useState([]);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadMessage, setUploadMessage] = useState('');
+
+    useEffect(() => {
+        if (projectId) {
+            fetchUploads();
+        }
+    }, [projectId]);
 
     async function fetchStudiesFromServer() {
         try {
@@ -50,7 +56,7 @@ export default function Import(props) {
         if (!proceed) return;
 
         const res = await fetch(
-            `http://localhost:5005/api/projects/${projectId}/uploads`, 
+            `http://localhost:5005/api/projects/${projectId}/uploads/${uploadId}`, 
             { 
                 method: "DELETE",
                 credentials: "include" 
@@ -237,15 +243,30 @@ export default function Import(props) {
             {uploadHistory.length === 0 ? (
                 <p>No uploads yet.</p>
             ) : (
-                <ul>
+                <table>
+                <thead>
+                    <tr style={{ background: "#f0f0f0" }}>
+                        <th>File Name</th>
+                        <th>Studies</th>
+                        <th>Uploaded</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {uploadHistory.map((entry) => (
-                        <li key={entry.upload_id}>
-                            <strong>Uploaded File: </strong>
-                            {entry.file_name} - {entry.study_count} studies uploaded - {entry.created_at}
-                            <button onClick={() => deleteUpload(entry.upload_id)}>Delete</button>
-                        </li>
+                        <tr key={entry.upload_id}>
+                            <td>{entry.file_name}</td>
+                            <td>{entry.study_count}</td>
+                            <td>{new Date(entry.created_at).toLocaleString()}</td>
+                            <td>
+                                <button onClick={() => deleteUpload(entry.upload_id)}>
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
                     ))}
-                </ul>
+                </tbody>
+                </table>
             )}
 
             <button onClick={handleClear}>Clear studies</button>
