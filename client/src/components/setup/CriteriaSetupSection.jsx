@@ -28,19 +28,27 @@ export default function CriteriaSetupSection({
     function addInclusionCriteria(sectionIndex) {
         const term = prompt("New inclusion term");
         if (!term?.trim()) return;
-        setInclusionSections(prev => {
-            const updated = [...prev];
-            updated[sectionIndex].criteria.push(term.trim());
-            return updated;
-        });
+
+        setInclusionSections(prev =>
+            prev.map((section, i) =>
+                i === sectionIndex
+                    ? { ...section, criteria: [...section.criteria, term.trim()] }
+                    : section
+            )
+        )
     }
 
     function deleteInclusionCriteria(sectionIndex, termIndex) {
-        setInclusionSections(prev => {
-            const updated = [...prev];
-            updated[sectionIndex].criteria.splice(termIndex, 1);
-            return updated;
-        });
+        setInclusionSections(prev =>
+            prev.map((section, i) =>
+                i === sectionIndex
+                    ? {
+                        ...section,
+                        criteria: section.criteria.filter((_, j) => j !== termIndex)
+                    }
+                    : section
+            )
+        );
     }
 
     function clearInclusion() {
@@ -66,21 +74,29 @@ export default function CriteriaSetupSection({
     }
 
     function addExclusionCriteria(sectionIndex) {
-        const term = prompt("New Exclusion term");
+        const term = prompt("New exclusion term");
         if (!term?.trim()) return;
-        setExclusionSections(prev => {
-            const updated = [...prev];
-            updated[sectionIndex].criteria.push(term.trim());
-            return updated;
-        });
+
+        setExclusionSections(prev =>
+            prev.map((section, i) =>
+                i === sectionIndex
+                    ? { ...section, criteria: [...section.criteria, term.trim()] }
+                    : section
+            )
+        )
     }
 
     function deleteExclusionCriteria(sectionIndex, termIndex) {
-        setExclusionSections(prev => {
-            const updated = [...prev];
-            updated[sectionIndex].criteria.splice(termIndex, 1);
-            return updated;
-        });
+        setExclusionSections(prev =>
+            prev.map((section, i) =>
+                i === sectionIndex
+                    ? {
+                        ...section,
+                        criteria: section.criteria.filter((_, j) => j !== termIndex)
+                    }
+                    : section
+            )
+        );
     }
 
     function clearExclusion() {

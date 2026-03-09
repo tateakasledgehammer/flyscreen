@@ -139,16 +139,26 @@ export default function Setup(props) {
     async function addTag() {
         if (!newTag.trim()) return;
 
+        const res = await fetch(`/api/projects/${projectId}/tags`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newTag.trim() })
+        });
+
+        const created = await res.json();
+
         setTags(prev => [...prev, { name: newTag.trim() }]);
         setNewTag("");
-        scheduleAutosave();
-        loadSetup();
     }
 
     async function deleteTag(tagId) {
+        const res = await fetch(`/api/projects/${projectId}/tags/${tagId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
         setTags(prev => prev.filter(t => t.id !== tagId));
-        scheduleAutosave();
-        loadSetup();
     }
 
     // Reset
