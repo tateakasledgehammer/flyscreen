@@ -1,7 +1,6 @@
 export default function QuestionTypeSection({ 
     background, 
     setBackground, 
-    saveBackgroundInfo
  }) {
     return (
         <div>
@@ -12,7 +11,6 @@ export default function QuestionTypeSection({
                 onChange={(e) => 
                     setBackground(prev => ({ ...prev, question_type: e.target.value }))
                 }
-                onBlur={saveBackgroundInfo}
                 >
                     <option value="">Set question type</option>
                     <option value="intervention">Intervention / Treatment</option>

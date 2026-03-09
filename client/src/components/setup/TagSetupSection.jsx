@@ -34,7 +34,7 @@ export default function TagSetupSection({
                         <div className="inclusion-exclusion-criteria">
                             {(tags.map((tag, index) => (
                                 <h4 key={index}>
-                                    {tag}
+                                    {tag.name}
                                     <button onClick={() => deleteTag(tag.id)}>X</button>
                                 </h4>
                             )))}

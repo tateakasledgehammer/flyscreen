@@ -84,7 +84,7 @@ router.get(
         `).all(projectId);
     
         const sections = criteriaRepo.getSections.all(projectId);
-        const fulltext = criteriaRepo.getFullText.all(projectId);
+        const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
     
         const inclusion = [];
         const exclusion = [];
@@ -99,15 +99,15 @@ router.get(
 
         const background = db.prepare(`
             SELECT * FROM project_background WHERE project_id = ?                
-        `).get(projectId || {});
+        `).get(projectId) || {};
 
         const reviewerSettings = db.prepare(`
             SELECT * FROM reviewer_settings WHERE project_id = ?                
-        `).get(projectId || {
+        `).get(projectId) || {
             screening: 2,
             fulltext: 2,
             extraction: 2
-        });
+        };
 
         res.json({
             tags,
@@ -119,6 +119,112 @@ router.get(
             background,
             reviewerSettings
         });
+    }
+)
+
+router.post(
+    "/projects/:projectId/setup", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+        const {
+            tags,
+            inclusionCriteria,
+            exclusionCriteria,
+            fullTextExclusionReasons,
+            background,
+            reviewerSettings
+        } = req.body;
+
+        try {
+            const tx = db.transaction(() => {
+                // tags
+                if (Array.isArray(tags)) {
+                    db.prepare(`DELETE FROM tags WHERE project_id = ?`).run(projectId);
+                    const insertTag = db.prepare(`
+                        INSERT INTO tags (name, project_id)
+                        VALUES (?, ?)
+                    `);
+
+                    tags.forEach(t => {
+                        if (t?.name?.trim()) {
+                            insertTag.run(t.name.trim(), projectId);
+                        }
+                    })
+                }
+
+                // criteria
+                criteriaRepo.clearItems.run(projectId);
+                criteriaRepo.clearSections.run(projectId);
+                criteriaRepo.clearFullText.run(projectId);
+
+                const insertSection = criteriaRepo.insertSection;
+                const insertItem = criteriaRepo.insertItem;
+
+                if (Array.isArray(inclusionCriteria)) {
+                    inclusionCriteria.forEach(sec => {
+                        const result = insertSection.run(projectId, "inclusion", sec.category);
+                        sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
+                    })
+                }
+                if (Array.isArray(exclusionCriteria)) {
+                    exclusionCriteria.forEach(sec => {
+                        const result = insertSection.run(projectId, "exclusion", sec.category);
+                        sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
+                    })
+                }
+                if (Array.isArray(fullTextExclusionReasons)) {
+                    fullTextExclusionReasons.forEach(reason => {
+                        criteriaRepo.insertFullText.run(projectId, reason);
+                    })
+                }
+
+                // background
+                if (background) {
+                    db.prepare(`
+                        INSERT INTO project_background (project_id, title, study_type, question_type, research_area)    
+                        VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(project_id) DO UPDATE SET
+                            title = excluded.title,
+                            study_type = excluded.study_type,
+                            question_type = excluded.question_type,
+                            research_area = excluded.research_area
+                    `).run(
+                        projectId,
+                        background.title || "",
+                        background.study_type || "",
+                        background.question_type || "",
+                        background.research_area || ""
+                    )
+                }
+
+                // reviewer settings
+                if (reviewerSettings) {
+                    db.prepare(`
+                        INSERT INTO reviewer_settings (project_id, screening, fulltext, extraction)    
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(project_id) DO UPDATE SET
+                            screening = excluded.screening,
+                            fulltext = excluded.fulltext,
+                            extraction = excluded.extraction
+                    `).run(
+                        projectId,
+                        reviewerSettings.screening ?? 2,
+                        reviewerSettings.fulltext ?? 2,
+                        reviewerSettings.extraction ?? 2
+                    );
+                }
+            });
+
+            tx();
+
+            res.json({ success: true });
+
+        } catch (err) {
+            console.error("Unified setup save failed:", err);
+            res.status(500).json({ error: "Failed to save setup" });
+        }
     }
 )
 

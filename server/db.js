@@ -66,7 +66,7 @@ const initSchema = db.transaction(() => {
 
     db.prepare(`
         CREATE TABLE IF NOT EXISTS reviewer_settings (
-            project_id INTEGER NOT NULL,
+            project_id INTEGER PRIMARY KEY,
             screening INTEGER DEFAULT 2,
             fulltext INTEGER DEFAULT 2,
             extraction INTEGER DEFAULT 2,

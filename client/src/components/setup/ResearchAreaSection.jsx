@@ -1,7 +1,6 @@
 export default function ResearchAreaSection({ 
     background, 
     setBackground, 
-    saveBackgroundInfo
  }) {
     return (
         <div>
@@ -11,9 +10,7 @@ export default function ResearchAreaSection({
                 id="research-area"
                 onChange={(e) => 
                     setBackground(prev => ({ ...prev, research_area: e.target.value }))
-                }
-                onBlur={saveBackgroundInfo}
-                
+                }                
                     >
                     <option value="">Set research area</option>
                     <option value="arts">Arts & Humanities</option>

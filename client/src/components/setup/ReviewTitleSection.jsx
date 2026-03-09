@@ -1,7 +1,6 @@
 export default function ReviewTitleSection({ 
     background, 
     setBackground, 
-    saveBackgroundInfo 
 }) {
     return (
         <div>
@@ -14,7 +13,6 @@ export default function ReviewTitleSection({
                 onChange={(e) => 
                     setBackground(prev => ({ ...prev, title: e.target.value }))
                 }
-                onBlur={saveBackgroundInfo}
             />
         </div>
     )

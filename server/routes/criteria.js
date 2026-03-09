@@ -17,7 +17,7 @@ router.get("/projects/:projectId/criteria", requireAuth, requireProjectAccess, (
     const projectId = Number(req.params.projectId);
 
     const sections = criteriaRepo.getSections.all(projectId);
-    const fulltext = criteriaRepo.getFullText.all(projectId);
+    const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
 
     const inclusion = [];
     const exclusion = [];

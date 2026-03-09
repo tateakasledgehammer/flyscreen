@@ -1,7 +1,6 @@
 export default function ReviewerSettingsSection({ 
     reviewerSettings, 
     setReviewerSettings, 
-    saveReviewerSettings, 
  }) {
     return (
         <div>
@@ -13,7 +12,6 @@ export default function ReviewerSettingsSection({
                 onChange={(e) => 
                     setReviewerSettings(prev => ({ ...prev, screening: Number(e.target.value) }))
                 }
-                onBlur={saveReviewerSettings}
                 >
                 <option value={1}>1</option>
                 <option value={2}>2</option>
@@ -26,7 +24,6 @@ export default function ReviewerSettingsSection({
                 onChange={(e) => 
                     setReviewerSettings(prev => ({ ...prev, fulltext: Number(e.target.value) }))
                 }
-                onBlur={saveReviewerSettings}
                 >
                 <option value={1}>1</option>
                 <option value={2}>2</option>
@@ -39,7 +36,6 @@ export default function ReviewerSettingsSection({
                 onChange={(e) => 
                     setReviewerSettings(prev => ({ ...prev, extraction: Number(e.target.value) }))
                 }
-                onBlur={saveReviewerSettings}
                 >
                 <option value={1}>1</option>
                 <option value={2}>2</option>

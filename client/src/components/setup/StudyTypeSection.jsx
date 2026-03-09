@@ -1,7 +1,6 @@
 export default function StudyTypeSection({ 
     background, 
     setBackground, 
-    saveBackgroundInfo
  }) {
     return (
         <div>
@@ -12,7 +11,6 @@ export default function StudyTypeSection({
             onChange={(e) => 
                 setBackground(prev => ({ ...prev, study_type: e.target.value }))
             }
-            onBlur={saveBackgroundInfo}
         >
             <option value="">Set study type</option>
             <option value="Systematic Review">Systematic Review</option>

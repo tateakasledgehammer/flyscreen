@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "./Navbar";
 
 import ReviewTitleSection from "./setup/ReviewTitleSection";
@@ -15,10 +15,6 @@ export default function Setup(props) {
         setUser,
         setStudies
     } = props;
-
-    //
-    // TAGS
-    //
 
     const [tags, setTags] = useState([])
     const [newTag, setNewTag] = useState('');
@@ -40,10 +36,14 @@ export default function Setup(props) {
         extraction: 2
     });
 
-    //
-    // Load everything
-    //
+    // toast
+    const [savedToast, setSavedToast] = useState(false);
+    function showSavedToast() {
+        setSavedToast(true);
+        setTimeout(() => setSavedToast(false), 1500);
+    }
 
+    // Load everything
     async function loadSetup() {
         if (!projectId) return;
 
@@ -79,14 +79,13 @@ export default function Setup(props) {
                     { category: "Outcomes", criteria: [], type: "exclusion" },
                     { category: "Study Design", criteria: [], type: "exclusion" },
                 ]);
-    
                 setFullTextReasons([]);
                 return;
             }
             
-            setInclusionSections(data.criteria?.inclusionCriteria || []);
-            setExclusionSections(data.criteria?.exclusionCriteria || []);
-            setFullTextReasons(data.criteria?.fullTextExclusionReasons || []);
+            setInclusionSections(data.criteria.inclusionCriteria || []);
+            setExclusionSections(data.criteria.exclusionCriteria || []);
+            setFullTextReasons(data.criteria.fullTextExclusionReasons || []);
         
             setBackground({
                 title: data.background?.title || "",
@@ -106,65 +105,53 @@ export default function Setup(props) {
         }
     }
 
+    // save
+    const saveTimeout = useRef(null);
+
+    function scheduleAutosave() {
+        if (saveTimeout.current) clearTimeout(saveTimeout.current);
+        saveTimeout.current = setTimeout(() => saveSetup(), 500);
+    }
+
+    async function saveSetup() {
+        try {
+            await fetch(`/api/projects/${projectId}/setup`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    tags,
+                    inclusionCriteria: inclusionSections,
+                    exclusionCriteria: exclusionSections,
+                    fullTextExclusionReasons: fullTextReasons,
+                    background,
+                    reviewerSettings
+                })
+            });
+            showSavedToast();
+
+        } catch (err) {
+            console.error("Unified save failed:", err);
+        }
+    }
+
     // tags
-    async function addTag(name) {
+    async function addTag() {
         if (!newTag.trim()) return;
-        await fetch(`/api/projects/${projectId}/tags`, { 
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: newTag.trim() })
-        });
+
+        setTags(prev => [...prev, { name: newTag.trim() }]);
         setNewTag("");
+        scheduleAutosave();
         loadSetup();
     }
 
     async function deleteTag(tagId) {
-        await fetch(`/api/projects/${projectId}/tags/${tagId}`, { 
-            method: "DELETE",
-            credentials: "include" 
-        });
+        setTags(prev => prev.filter(t => t.id !== tagId));
+        scheduleAutosave();
         loadSetup();
     }
 
-    // Criteria
-    async function saveCriteriaToBackend() {
-        await fetch(`/api/projects/${projectId}/criteria`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                inclusionCriteria: inclusionSections,
-                exclusionCriteria: exclusionSections,
-                fullTextExclusionReasons: fullTextReasons
-            })
-        });
-    }
-
-    // Background info
-    async function saveBackgroundInfo() {
-        await fetch(`/api/projects/${projectId}/background`, {  
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(background)
-        });
-    }
-
-    // Reviewer settings
-    async function saveReviewerSettings() {
-        await fetch(`/api/projects/${projectId}/reviewers`, {  
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reviewerSettings)
-        });
-    }
-
-    //
     // Reset
-    //
-
     function resetApp() {
         setStudies([]);
         localStorage.clear();
@@ -176,11 +163,22 @@ export default function Setup(props) {
         loadSetup();
     }, [projectId]);
 
+    useEffect(() => scheduleAutosave(), [background]);
+    useEffect(() => scheduleAutosave(), [reviewerSettings]);
+    useEffect(() => scheduleAutosave(), [tags]);
+    useEffect(() => scheduleAutosave(), [inclusionSections, exclusionSections, fullTextReasons]);
+
     return (
         <>
         <Navbar />
         <div className="page-container">
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
+
+        {savedToast && (
+            <div className="saved-toast">
+                Saved!
+            </div>
+        )}
 
         <div className="homepage-section">
                 <h3>Clear</h3>
@@ -191,22 +189,18 @@ export default function Setup(props) {
         <ReviewTitleSection
             background={background}
             setBackground={setBackground}
-            saveBackgroundInfo={saveBackgroundInfo}
         />
         <StudyTypeSection
             background={background}
             setBackground={setBackground}
-            saveBackgroundInfo={saveBackgroundInfo}
         />
         <QuestionTypeSection
             background={background}
             setBackground={setBackground}
-            saveBackgroundInfo={saveBackgroundInfo}
         />
         <ResearchAreaSection
             background={background}
             setBackground={setBackground}
-            saveBackgroundInfo={saveBackgroundInfo}
         />
         
         <br />
@@ -215,7 +209,6 @@ export default function Setup(props) {
         <ReviewerSettingsSection
             reviewerSettings={reviewerSettings}
             setReviewerSettings={setReviewerSettings}
-            saveReviewerSettings={saveReviewerSettings}
         />
 
         <br />
@@ -240,7 +233,6 @@ export default function Setup(props) {
             setExclusionSections={setExclusionSections}
             fullTextReasons={fullTextReasons}
             setFullTextReasons={setFullTextReasons}
-            saveCriteriaToBackend={saveCriteriaToBackend}
         />
 
         <button onClick={resetApp}>

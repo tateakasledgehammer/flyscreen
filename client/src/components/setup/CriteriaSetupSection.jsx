@@ -5,7 +5,6 @@ export default function CriteriaSetupSection({
    setExclusionSections,
    fullTextReasons,
    setFullTextReasons,
-   saveCriteria
 }) {
 
     //
@@ -216,8 +215,6 @@ export default function CriteriaSetupSection({
             </div>
 
             <hr />
-
-            <button onClick={saveCriteria}>Save All Criteria</button>
         </>
     );
 }
