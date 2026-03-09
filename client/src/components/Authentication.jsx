@@ -24,10 +24,10 @@ export default function Authentication(props) {
         setErrors([]);
         setMessage("")
 
-        const endpoint = loginNotSignUp ? "api/auth/login" : "api/auth/register";
+        const endpoint = loginNotSignUp ? "auth/login" : "auth/register";
 
         try {
-            const res = await fetch(`http://localhost:5005/${endpoint}`, {
+            const res = await fetch(`/api/${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -41,7 +41,7 @@ export default function Authentication(props) {
                 return;
             } 
             
-            const whoamiRes = await fetch("http://localhost:5005/api/auth/whoami", {
+            const whoamiRes = await fetch("/api/auth/whoami", {
                 credentials: "include"
             });
             if (whoamiRes.ok) {

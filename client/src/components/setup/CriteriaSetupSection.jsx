@@ -98,7 +98,7 @@ export default function CriteriaSetupSection({
 
         setFullTextReasons(prev => [
             ...prev,
-            term.trim()
+            name.trim()
         ]);
     }
 
@@ -152,7 +152,7 @@ export default function CriteriaSetupSection({
                     </div>
                 )}
                 
-                <button onClick={clearInclusion()}>Clear Inclusion Criteria</button>
+                <button onClick={clearInclusion}>Clear Inclusion Criteria</button>
             </div>
             {/* EXCLUSION */}
             <div>
@@ -190,7 +190,7 @@ export default function CriteriaSetupSection({
                     </div>
                 )}
                 
-                <button onClick={clearExclusion()}>Clear Exclusion Criteria</button>
+                <button onClick={clearExclusion}>Clear Exclusion Criteria</button>
             </div>
             </div>
 
@@ -212,7 +212,7 @@ export default function CriteriaSetupSection({
                         </div>
                     )))}
                 
-                <button onClick={clearFullTextReasons()}>Clear Full Text Criteria</button>
+                <button onClick={clearFullTextReasons}>Clear Full Text Criteria</button>
             </div>
 
             <hr />

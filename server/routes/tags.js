@@ -24,7 +24,7 @@ router.post(
         return res.status(400).json({ error: "Tag name required" });
     }
 
-    tagRepo.createTag.run(name.trim());
+    tagRepo.createTag.run(name.trim(), projectId);
     res.json({ success: true });
 });
 
@@ -68,6 +68,18 @@ router.get(
     const projectId = Number(req.params.projectId);
     const tags = tagRepo.getAllTags.all(projectId);
     res.json(tags);
+});
+
+router.delete(
+    "/projects/:projectId/tags/:tagId", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const tagId = Number(req.params.tagId);
+
+    tagRepo.deleteTag.run(tagId, projectId);
+    res.json({ success: true });    
 });
 
 module.exports = router;

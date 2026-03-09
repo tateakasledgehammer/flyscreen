@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { db } = require("../db");
 
 const requireProjectAccess = require("../middleware/projectAuth.js");
 
@@ -33,7 +34,7 @@ router.post("/projects/:projectId/reviewers",
         ON CONFLICT(project_id) DO UPDATE SET
             screening = excluded.screening,
             fulltext = excluded.fulltext,
-            extraction = excluded.extraction,
+            extraction = excluded.extraction
     `).run(projectId, screening, fulltext, extraction);
 
     res.json({ success: true });

@@ -27,7 +27,7 @@ export default function FullTextScreening(props) {
     async function fetchStudies() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                `/api/projects/${projectId}/studies-with-scores`,
                 { credentials: "include" }
             );
             const data = await res.json();

@@ -23,15 +23,90 @@ export default function Setup(props) {
     const [tags, setTags] = useState([])
     const [newTag, setNewTag] = useState('');
 
-    async function loadTags() {
+    const [inclusionSections, setInclusionSections] = useState([]);
+    const [exclusionSections, setExclusionSections] = useState([]);
+    const [fullTextReasons, setFullTextReasons] = useState([]);
+    
+    const [background, setBackground] = useState({
+        title: "",
+        study_type: "",
+        question_type: "",
+        research_area: ""
+    });
+
+    const [reviewerSettings, setReviewerSettings] = useState({
+        screening: 2,
+        fulltext: 2,
+        extraction: 2
+    });
+
+    //
+    // Load everything
+    //
+
+    async function loadSetup() {
         if (!projectId) return;
-        const res = await fetch(`/api/projects/${projectId}/tags`,
-            { credentials: "include" }
-        );
-        const data = await res.json();
-        setTags(data);
+
+        try {
+            const res = await fetch(`/api/projects/${projectId}/setup`, {
+                credentials: "include"
+            });
+
+            if (!res.ok) {
+                console.error("Setup load failed", res.status);
+                return;
+            }
+
+            const data = await res.json();
+
+            setTags(data.tags || []);
+    
+            const hasInclusion = Array.isArray(data.criteria?.inclusionCriteria) && data.criteria?.inclusionCriteria.length > 0;
+            const hasExclusion = Array.isArray(data.criteria?.exclusionCriteria) && data.criteria?.exclusionCriteria.length > 0;
+    
+            if (!hasInclusion && !hasExclusion) {
+                setInclusionSections([
+                    { category: "Population", criteria: [], type: "inclusion" },
+                    { category: "Intervention", criteria: [], type: "inclusion" },
+                    { category: "Comparator", criteria: [], type: "inclusion" },
+                    { category: "Outcomes", criteria: [], type: "inclusion" },
+                    { category: "Study Design", criteria: [], type: "inclusion" },
+                ]);
+                setExclusionSections([
+                    { category: "Population", criteria: [], type: "exclusion" },
+                    { category: "Intervention", criteria: [], type: "exclusion" },
+                    { category: "Comparator", criteria: [], type: "exclusion" },
+                    { category: "Outcomes", criteria: [], type: "exclusion" },
+                    { category: "Study Design", criteria: [], type: "exclusion" },
+                ]);
+    
+                setFullTextReasons([]);
+                return;
+            }
+            
+            setInclusionSections(data.criteria?.inclusionCriteria || []);
+            setExclusionSections(data.criteria?.exclusionCriteria || []);
+            setFullTextReasons(data.criteria?.fullTextExclusionReasons || []);
+        
+            setBackground({
+                title: data.background?.title || "",
+                study_type: data.background?.study_type || "",
+                question_type: data.background?.question_type || "",
+                research_area: data.background?.research_area || ""
+            });
+            
+            setReviewerSettings({
+                screening: data.reviewerSettings?.screening ?? 2,
+                fulltext: data.reviewerSettings?.fulltext ?? 2,
+                extraction: data.reviewerSettings?.extraction ?? 2,
+            });    
+
+        } catch (err) {
+            console.error("Unified setup load error:", err);
+        }
     }
 
+    // tags
     async function addTag(name) {
         if (!newTag.trim()) return;
         await fetch(`/api/projects/${projectId}/tags`, { 
@@ -41,61 +116,18 @@ export default function Setup(props) {
             body: JSON.stringify({ name: newTag.trim() })
         });
         setNewTag("");
-        loadTags();
+        loadSetup();
     }
 
     async function deleteTag(tagId) {
-        await fetch(`/api/projects/${projectId}/tags`, { 
+        await fetch(`/api/projects/${projectId}/tags/${tagId}`, { 
             method: "DELETE",
             credentials: "include" 
         });
-        loadTags();
+        loadSetup();
     }
 
-    //
     // Criteria
-    // 
-
-    const [inclusionSections, setInclusionSections] = useState([]);
-    const [exclusionSections, setExclusionSections] = useState([]);
-    const [fullTextReasons, setFullTextReasons] = useState([]);
-
-    async function loadCriteria() {
-        if (!projectId) return;
-
-        const res = await fetch(`http://localhost:5005/api/projects/${projectId}/criteria`, {
-            credentials: "include"
-        });
-        const data = await res.json();
-
-        const hasInclusion = Array.isArray(data.inclusionCriteria) && data.inclusionCriteria.length > 0;
-        const hasExclusion = Array.isArray(data.exclusionCriteria) && data.exclusionCriteria.length > 0;
-
-        if (!hasInclusion && !hasExclusion) {
-            setInclusionSections([
-                { category: "Population", criteria: [], type: "inclusion" },
-                { category: "Intervention", criteria: [], type: "inclusion" },
-                { category: "Comparator", criteria: [], type: "inclusion" },
-                { category: "Outcomes", criteria: [], type: "inclusion" },
-                { category: "Study Design", criteria: [], type: "inclusion" },
-            ]);
-            setExclusionSections([
-                { category: "Population", criteria: [], type: "exclusion" },
-                { category: "Intervention", criteria: [], type: "exclusion" },
-                { category: "Comparator", criteria: [], type: "exclusion" },
-                { category: "Outcomes", criteria: [], type: "exclusion" },
-                { category: "Study Design", criteria: [], type: "exclusion" },
-            ]);
-
-            setFullTextReasons([]);
-            return;
-        }
-        
-        setInclusionSections(data.inclusionCriteria || []);
-        setExclusionSections(data.exclusionCriteria || []);
-        setFullTextReasons(data.fullTextExclusionReasons || []);
-    }
-    
     async function saveCriteriaToBackend() {
         await fetch(`/api/projects/${projectId}/criteria`, {
             method: "POST",
@@ -109,28 +141,7 @@ export default function Setup(props) {
         });
     }
 
-    //
     // Background info
-    //
-
-    const [background, setBackground] = useState({
-        title: "",
-        study_type: "",
-        question_type: "",
-        research_area: ""
-    });
-
-    async function loadBackgroundInfo() {
-        if (!projectId) return;
-        const res = await fetch(`/api/projects/${projectId}/background`, { credentials: "include" });
-        const data = await res.json();
-        setBackground({
-            title: data?.title || "",
-            study_type: data?.study_type || "",
-            question_type: data?.question_type || "",
-            research_area: data?.research_area || ""
-        });
-    }
     async function saveBackgroundInfo() {
         await fetch(`/api/projects/${projectId}/background`, {  
             method: "POST",
@@ -140,25 +151,7 @@ export default function Setup(props) {
         });
     }
 
-    //
     // Reviewer settings
-    //
-    const [reviewerSettings, setReviewerSettings] = useState({
-        screening: 2,
-        fulltext: 2,
-        extraction: 2
-    })
-
-    async function loadReviewerSettings() {
-        if (!project) return;
-        const res = await fetch(`/api/projects/${projectId}/reviewers`, { credentials: "include" });
-        const data = await res.json();
-        setReviewerSettings(prev => ({
-            screening: data?.screening || 2,
-            fulltext: data?.fulltext || 2,
-            extraction: data?.extraction || 2,
-        }));    
-    }
     async function saveReviewerSettings() {
         await fetch(`/api/projects/${projectId}/reviewers`, {  
             method: "POST",
@@ -167,18 +160,6 @@ export default function Setup(props) {
             body: JSON.stringify(reviewerSettings)
         });
     }
-
-    //
-    // Load everything
-    //
-
-    useEffect(() => {
-        if (!projectId) return;
-        loadTags();
-        loadCriteria();
-        loadBackgroundInfo();
-        loadReviewerSettings();
-    }, [projectId]);
 
     //
     // Reset
@@ -190,6 +171,11 @@ export default function Setup(props) {
         window.location.href = "/";
     }
 
+    useEffect(() => {
+        if (!projectId) return;
+        loadSetup();
+    }, [projectId]);
+
     return (
         <>
         <Navbar />
@@ -199,8 +185,7 @@ export default function Setup(props) {
         <div className="homepage-section">
                 <h3>Clear</h3>
                 <button onClick={resetApp}>Reset</button>
-                <br />
-                <br />
+                <br /><br />
         </div>
 
         <ReviewTitleSection

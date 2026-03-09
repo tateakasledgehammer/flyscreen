@@ -17,7 +17,7 @@ export default function CreateProject(props) {
         }
 
         try {
-            const res = await fetch("http://localhost:5005/api/projects", {
+            const res = await fetch("/api/projects", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

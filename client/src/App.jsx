@@ -39,7 +39,7 @@ function App() {
 
     const fetchStudies = async () => {
       try {
-        const res = await fetch(`http://localhost:5005/api/projects/${projectId}/studies-with-scores`, {
+        const res = await fetch(`/api/projects/${projectId}/studies-with-scores`, {
           credentials: "include"
         });
 
@@ -69,7 +69,7 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5005/api/auth/whoami", {
+        const res = await fetch("/api/auth/whoami", {
           method: "GET",
           credentials: "include",
         })

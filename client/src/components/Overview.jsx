@@ -17,7 +17,7 @@ export default function Overview(props) {
     async function fetchProject() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}`,
+                `/api/projects/${projectId}`,
                 { credentials: "include" }
             );
             const data = await res.json();
@@ -30,7 +30,7 @@ export default function Overview(props) {
     async function fetchStudiesCount() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                `/api/projects/${projectId}/studies-with-scores`,
                 { credentials: "include" }
             );
             const data = await res.json();
@@ -43,7 +43,7 @@ export default function Overview(props) {
     async function fetchProgress() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/progress`,
+                `/api/projects/${projectId}/progress`,
                 { credentials: "include" }
             );
             const data = await res.json();
@@ -56,7 +56,7 @@ export default function Overview(props) {
     async function fetchMyStats() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/my-stats`,
+                `/api/projects/${projectId}/my-stats`,
                 { credentials: "include" }
             );
             const data = await res.json();

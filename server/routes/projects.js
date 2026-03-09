@@ -4,6 +4,7 @@ const { db } = require("../db.js");
 const requireProjectAccess = require("../middleware/projectAuth.js");
 const scoringEngine = require("../utils/scoringEngine.js");
 const studyScoreRepo = require("../repos/studyScoreRepo.js");
+const criteriaRepo = require("../repos/criteriaRepo.js")
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -71,6 +72,56 @@ router.get(
         }
 });
 
+router.get(
+    "/projects/:projectId/setup", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+
+        const tags = db.prepare(`
+            SELECT * FROM tags WHERE project_id = ?    
+        `).all(projectId);
+    
+        const sections = criteriaRepo.getSections.all(projectId);
+        const fulltext = criteriaRepo.getFullText.all(projectId);
+    
+        const inclusion = [];
+        const exclusion = [];
+    
+        for (const sec of sections) {
+            const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
+            const obj = { category: sec.name, criteria: items };
+    
+            if (sec.type === "inclusion") inclusion.push(obj);
+            else exclusion.push(obj);
+        }
+
+        const background = db.prepare(`
+            SELECT * FROM project_background WHERE project_id = ?                
+        `).get(projectId || {});
+
+        const reviewerSettings = db.prepare(`
+            SELECT * FROM reviewer_settings WHERE project_id = ?                
+        `).get(projectId || {
+            screening: 2,
+            fulltext: 2,
+            extraction: 2
+        });
+
+        res.json({
+            tags,
+            criteria: {
+                inclusionCriteria: inclusion,
+                exclusionCriteria: exclusion,
+                fullTextExclusionReasons: fulltext
+            },
+            background,
+            reviewerSettings
+        });
+    }
+)
+
 const getProjectById = db.prepare(`
    SELECT * FROM projects WHERE id = ? 
 `);
@@ -88,55 +139,6 @@ router.get(
         res.json(project);
     }
 )
-
-router.post(
-    "/projects/:projectId/criteria", 
-    requireAuth, 
-    requireProjectAccess,
-    (req, res) => {
-        const projectId = Number(req.params.projectId);
-        const { population, intervention, comparator, outcomes, study_design, exclusions } = req.body;
-
-        criteriaRepo.upsertCriteria.run(
-            projectId,
-            population ?? null,
-            intervention ?? null,
-            comparator ?? null,
-            outcomes ?? null,
-            study_design ?? null,
-            exclusions ?? null,
-        );
-
-        // recompute scores
-        const studies = db.prepare(`
-            SELECT * FROM studies WHERE project_id = ?
-        `).all(projectId);
-
-        for (const study of studies) {
-            const { score, explanation } = scoringEngine.scoreStudy(study, {
-                population,
-                intervention,
-                comparator,
-                outcomes,
-                study_design,
-                exclusions
-            });
-
-            studyScoreRepo.upsertScore.run(study.id, projectId, score, explanation);
-        }
-
-        res.json({ success: true });
-});
-
-router.get(
-    "/projects/:projectId/criteria", 
-    requireAuth, 
-    requireProjectAccess,
-    (req, res) => {
-        const projectId = Number(req.params.projectId);
-        const criteria = criteriaRepo.getCriteria.get(projectId);
-        res.json(criteria || {});
-    });
 
 router.get(
     "/projects/:projectId/studies-with-scores", 

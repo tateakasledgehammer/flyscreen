@@ -9,14 +9,20 @@ const cors = require("cors");
 
 const requireProjectAccess = require("./middleware/projectAuth.js");
 const scoringEngine = require("./utils/scoringEngine.js");
+const criteriaRepo = require("./repos/criteriaRepo.js");
+
+const userRoutes = require("./routes/users.js");
+const projectRoutes = require("./routes/projects.js");
+
+const tagRoutes = require("./routes/tags.js");
+const criteriaRoutes = require("./routes/criteria.js");
+const backgroundRoutes = require("./routes/background.js");
+const reviewerRoutes = require("./routes/reviewers.js");
 
 const screeningRoutes = require("./routes/screenings.js");
 const notesRoutes = require("./routes/notes.js");
-const tagRoutes = require("./routes/tags.js");
 const duplicateRoutes = require("./routes/duplicates.js");
 const studyDetailRoutes = require("./routes/studyDetails.js");
-const projectRoutes = require("./routes/projects.js");
-const userRoutes = require("./routes/users.js");
 const uploadRoutes = require("./routes/uploads.js");
 
 console.log("server.js loaded successfully");
@@ -87,6 +93,9 @@ app.use("/api", studyDetailRoutes);
 app.use("/api", projectRoutes);
 app.use("/api", userRoutes);
 app.use("/api", uploadRoutes);
+app.use("/api", criteriaRoutes);
+app.use("/api", backgroundRoutes);
+app.use("/api", reviewerRoutes);
 
 // ---- STUDIES ----
 
@@ -148,8 +157,26 @@ app.post(
             
             const insertedIds = insertManyStudies(cleanStudies);
 
-            const criteria = criteriaRepo.getCriteria.get(projectId);
+            const sections = criteriaRepo.getSections.all(projectId);
+            const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
 
+            const inclusion = [];
+            const exclusion = [];
+
+            for (const sec of sections) {
+                const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
+                const obj = { category: sec.name, criteria: items }
+
+                if (sec.type === "inclusion") inclusion.push(obj);
+                else exclusion.push(obj)
+            }
+
+            const criteria = {
+                inclusionCriteria: inclusion,
+                exclusionCriteria: exclusion,
+                fullTextExclusionReasons: fulltext,
+            }
+            
             const getStudyByIdStmt = db.prepare(`
                 SELECT * FROM studies WHERE id = ?    
             `);
@@ -421,8 +448,15 @@ app.post("/api/auth/register", async (req, res) => {
 
 // ERROR 
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("SERVER ERROR: ", err);
+
+    if (res.headersSent) return next(err);
+    
+    res.status(500).json({ 
+        success: false,
+        error: "Internal Server Error",
+        details: process.env.NODE_ENV === "development" ? err.message : undefined
+    });
 });
   
 app.listen(PORT, () => {

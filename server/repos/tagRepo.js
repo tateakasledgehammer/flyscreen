@@ -30,4 +30,8 @@ module.exports = {
         WHERE project_id = ? 
         ORDER BY name ASC
     `),
+
+    deleteTag: db.prepare(`
+        DELETE FROM tags WHERE id = ? AND project_id = ?    
+    `)
 }

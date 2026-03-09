@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { db } = require("../db");
 
 const requireProjectAccess = require("../middleware/projectAuth.js");
 
@@ -34,7 +35,7 @@ router.post("/projects/:projectId/background",
             title = excluded.title,
             study_type = excluded.study_type,
             question_type = excluded.question_type,
-            research_area = excluded.research_area,
+            research_area = excluded.research_area
     `).run(projectId, title, study_type, question_type, research_area);
 
     res.json({ success: true });

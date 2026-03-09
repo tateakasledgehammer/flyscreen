@@ -15,7 +15,7 @@ export default function Dashboard(props) {
 
     async function fetchProjects() {
         try {
-            const res = await fetch("http://localhost:5005/api/projects", {
+            const res = await fetch("/api/projects", {
                 credentials: "include"
             });
             const data = await res.json();
@@ -46,7 +46,7 @@ export default function Dashboard(props) {
         const newName = prompt("New project:", proj.name);
         if (!newName || !newName.trim()) return;
 
-        const res = await fetch(`http://localhost:5005/api/projects/${proj.id}`, {
+        const res = await fetch(`/api/projects/${proj.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -64,7 +64,7 @@ export default function Dashboard(props) {
         const username = prompt("Enter collaborator username:");
         if (!username || !username.trim()) return;
 
-        const resUser = await fetch(`http://localhost:5005/api/users/by-username/${username}`, {
+        const resUser = await fetch(`/api/users/by-username/${username}`, {
             credentials: "include"
         });
         const userData = await resUser.json();
@@ -74,7 +74,7 @@ export default function Dashboard(props) {
             return;
         }
 
-        await fetch(`http://localhost:5005/api/projects/${proj.id}/collaborators`, {
+        await fetch(`/api/projects/${proj.id}/collaborators`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -88,7 +88,7 @@ export default function Dashboard(props) {
     async function handleRemoveCollaborator(projectId, userId) {
         if (!window.confirm("Remove this collaborator?")) return;
 
-        await fetch(`http://localhost:5005/api/projects/${projectId}/collaborators/${userId}`, {
+        await fetch(`/api/projects/${projectId}/collaborators/${userId}`, {
             method: "DELETE",
             credentials: "include"
         })
@@ -99,7 +99,7 @@ export default function Dashboard(props) {
     async function handleArchiveProject(id) {
         if (!window.confirm("Archive this project? It will be hidden but not deleted")) return;
 
-        const res = await fetch(`http://localhost:5005/api/projects/${id}/archive`, {
+        const res = await fetch(`/api/projects/${id}/archive`, {
                 method: "PATCH",
                 credentials: "include"
             });
@@ -113,7 +113,7 @@ export default function Dashboard(props) {
         if (!window.confirm("Delete this project and all its data?")) return;
 
         try {
-            const res = await fetch(`http://localhost:5005/api/projects/${id}`, {
+            const res = await fetch(`/api/projects/${id}`, {
                 method: "DELETE",
                 credentials: "include"
             });

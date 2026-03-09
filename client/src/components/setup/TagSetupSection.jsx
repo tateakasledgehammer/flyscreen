@@ -8,7 +8,13 @@ export default function TagSetupSection({
     return (
         <div>
             <h3>Define Tags</h3>
-            <p>Tags will appear while you are screening and are helpful for you to place into groups to check later - whether it be to look into more, to inform another piece of research, or provide valuable background information.</p>
+            <p>
+                Tags will appear while you are screening and are 
+                helpful for you to place into groups to check later - 
+                whether it be to look into more, to inform another 
+                piece of research, or provide valuable background 
+                information.
+            </p>
             
             <div>
                 <input 

@@ -24,7 +24,7 @@ export default function Import(props) {
     async function fetchStudiesFromServer() {
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+                `/api/projects/${projectId}/studies-with-scores`,
                 { credentials: "include" }
             );
             const data = await res.json();
@@ -36,7 +36,7 @@ export default function Import(props) {
 
     async function getExistingStudies() {
         const res = await fetch(
-            `http://localhost:5005/api/projects/${projectId}/studies-with-scores`,
+            `/api/projects/${projectId}/studies-with-scores`,
             { credentials: "include" }
         );
         return await res.json();
@@ -44,7 +44,7 @@ export default function Import(props) {
 
     async function fetchUploads() {
         const res = await fetch(
-            `http://localhost:5005/api/projects/${projectId}/uploads`, 
+            `/api/projects/${projectId}/uploads`, 
             { credentials: "include" }
         );
         const data = await res.json();
@@ -56,7 +56,7 @@ export default function Import(props) {
         if (!proceed) return;
 
         const res = await fetch(
-            `http://localhost:5005/api/projects/${projectId}/uploads/${uploadId}`, 
+            `/api/projects/${projectId}/uploads/${uploadId}`, 
             { 
                 method: "DELETE",
                 credentials: "include" 
@@ -149,7 +149,7 @@ export default function Import(props) {
             // }
 
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/studies/bulk`,
+                `/api/projects/${projectId}/studies/bulk`,
                 { 
                     method: "POST",
                     headers: { "Content-Type": "application/json"},
@@ -190,7 +190,7 @@ export default function Import(props) {
 
         try {
             const res = await fetch(
-                `http://localhost:5005/api/projects/${projectId}/studies`, 
+                `/api/projects/${projectId}/studies`, 
                 {
                     method: "DELETE",
                     credentials: "include",

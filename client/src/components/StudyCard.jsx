@@ -24,7 +24,7 @@ export default function StudyCard(props) {
     } = props;
 
     function submitVote(studyId, stage, vote) { 
-        fetch("http://localhost:5005/api/screenings", {
+        fetch("/api/screenings", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
