@@ -246,19 +246,58 @@ router.get(
     }
 )
 
+function normaliseScreening(votes) {
+    const result = {
+        TA: { ACCEPT: [], REJECT: [] },
+        FULLTEXT: { ACCEPT: [], REJECT: [] }
+    };
+
+    votes.forEach(v => {
+        if (!v.stage || !v.vote) return;
+        if (!result[v.stage]) return;
+
+        result[v.stage][v.vote] = [
+            ...(result[v.stage][v.vote] || []),
+            v.user_id
+        ];
+    });
+
+    return result;
+}
+
 router.get(
     "/projects/:projectId/studies-with-scores", 
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
         const projectId = Number(req.params.projectId);
-        const rows = db.prepare(`
-            SELECT s.*, sc.score, sc.explanation
+        let rows = db.prepare(`
+            SELECT 
+                s.*, 
+                sc.score, 
+                sc.explanation,
+                json_group_array(
+                    json_object(
+                        'user_id', scr.user_id,
+                        'stage', scr.stage,
+                        'vote', scr.vote
+                    )
+                ) AS screening
             FROM studies s
             LEFT JOIN study_scores sc ON sc.study_id = s.id
+            LEFT JOIN screenings scr ON scr.study_id = s.id
             WHERE s.project_id = ?
+            GROUP BY s.id
             ORDER BY sc.score DESC
         `).all(projectId);
+
+        rows = rows.map(r => {
+            const raw = JSON.parse(r.screening || "[]");
+            return {
+                ...r,
+                screening: normaliseScreening(raw)
+            };
+        });
 
         res.json(rows)
     }

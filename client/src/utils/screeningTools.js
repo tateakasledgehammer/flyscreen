@@ -63,8 +63,14 @@ export function canUserVoteTA(screening, currentUserId) {
 }
 
 export function canUserVoteFT(screening, currentUserId) {
-    return;
-    // need to update to match TA version once resolved
+    if (!screening || !screening.FULLTEXT || !currentUserId) return false;
+
+    const { ACCEPT = [], REJECT = [] } = screening.FULLTEXT;
+    const totalVotes = ACCEPT.length + REJECT.length;
+
+    if (ACCEPT.includes(currentUserId) || REJECT.includes(currentUserId)) return false;
+
+    return totalVotes < 2;
 }
 
 /* SCREENING STATUS */
@@ -91,7 +97,22 @@ export function getTAStatus(screening, currentUserId) {
 }
 
 export function getFullTextStatus(screening, currentUserId) {
-    return;
+    if (!screening || !screening.FULLTEXT) return "UNSCREENED";
+    
+    const { ACCEPT = [], REJECT = [], myVote = null } = screening.FULLTEXT;
+    const totalVotes = ACCEPT.length + REJECT.length;
+
+    if (totalVotes === 0) return "UNSCREENED";
+    if (ACCEPT.length === 2) return "ACCEPTED";
+    if (REJECT.length === 2) return "REJECTED";
+    if (ACCEPT.length === 1 && REJECT.length === 1) return "CONFLICT"
+
+    const userAccepted = ACCEPT.includes(currentUserId);
+    const userRejected = REJECT.includes(currentUserId);
+    const userHasVoted = userAccepted || userRejected;
+
+    if (!userHasVoted && totalVotes === 1) return "PENDING";
+    if (userHasVoted && totalVotes === 1) return "ALREADY VOTED";
 }
 
 /* FORMATTING */
