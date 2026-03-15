@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getFullTextStatus, getTAStatus } from "../utils/screeningTools";
+import { getFTStatus, getTAStatus } from "../utils/screeningTools";
 import StudyCard from "./StudyCard";
 import Navbar from "./Navbar";
 import StatusToggleBar from "./StatusToggleBar";
@@ -72,7 +72,7 @@ export default function FullTextScreening(props) {
         clearFilters
     } = useScreeningFilters(taAcceptedStudies)
 
-    const { countByStatus, matchesStatus } = useStatusCounts(taAcceptedStudies, user, getFullTextStatus);
+    const { countByStatus, matchesStatus } = useStatusCounts(taAcceptedStudies, user, getFTStatus);
 
     const finalFiltered = useMemo(() => {
         return filteredStudies.filter(study => 

@@ -27,13 +27,31 @@ export default function TAScreening(props) {
     const [toggleDetails, setToggleDetails] = useState({});
     const [statusFilter, setStatusFilter] = useState("");
 
+    async function fetchScreeningSummary() {
+        const res = await fetch(`/api/projects/${projectId}/screenings/summary`, {
+            credentials: "include"
+        });
+        return await res.json();
+    }
+
     async function fetchStudies() {
         try {
-            const res = await fetch(
-                `/api/projects/${projectId}/studies-with-scores`,
-                { credentials: "include" }
-            );
-            const data = await res.json();
+            const [studiesRes, summary] = await Promise.all([
+                fetch(`/api/projects/${projectId}/studies-with-scores`,
+                { credentials: "include" }),
+                fetchScreeningSummary()
+            ]);
+
+            const studies = await studiesRes.json();
+
+            const data = studies.map(s => ({
+                ...s,
+                screening: summary[s.id] || {
+                    TA: { votes: [], myVote: null, status: "UNSCREENED" },
+                    FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
+                }
+            }))
+                
             setStudies(data);
         } catch (err) {
             console.error("Failed to fetch studies:", err);

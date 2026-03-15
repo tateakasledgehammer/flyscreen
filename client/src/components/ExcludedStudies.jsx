@@ -5,7 +5,7 @@ import StudyCard from "./StudyCard";
 import ScreeningFiltersBar from "./ScreeningFiltersBar";
 import PaginationBar from "./PaginationBar";
 
-import { getFullTextStatus } from "../utils/screeningTools";
+import { getFTStatus } from "../utils/screeningTools";
 import useScreeningFilters from "../hooks/useScreeningFilters";
 import useStatusCounts from "../hooks/useStatusCounts";
 
@@ -40,7 +40,7 @@ export default function ExcludedScreening({
     // Only FT-rejected studies
     const excludedStudies = useMemo(() => {
         return studies.filter(
-            study => getFullTextStatus(study.screening, user?.userid) === "REJECTED"
+            study => getFTStatus(study.screening, user?.userid) === "REJECTED"
         );
     }, [studies, user]);
 

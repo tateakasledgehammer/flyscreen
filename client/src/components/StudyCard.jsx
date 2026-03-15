@@ -1,9 +1,9 @@
 import { 
     getTAStatus, 
-    getFullTextStatus, 
+    getFTStatus, 
     canUserVoteTA, 
     canUserVoteFT, 
-    formatAuthors  
+    formatAuthors,  
 } from "../utils/screeningTools";
 
 import StudyInfo from "./StudyInfo";
@@ -20,11 +20,12 @@ export default function StudyCard(props) {
         refreshScreenings,
         handleAssignTag,
         handleAddNote,
-        handleFullTextExclusion
+        handleFullTextExclusion,
+        projectId
     } = props;
 
     function submitVote(studyId, stage, vote) { 
-        fetch("/api/screenings", {
+        fetch(`/api/projects/${projectId}/screenings`, {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -115,15 +116,24 @@ export default function StudyCard(props) {
     return (
         <div>
             {studies.map((study) => {
+
+                console.log("screening for study", 
+                    study.id, 
+                    study.screening, 
+                    "status:", getTAStatus(study.screening),
+                    "can vote?", canUserVoteTA(study.screening, user?.userid),
+                    "user:", user?.id
+                );
+  
                 const isExpanded = 
                     toggleDetails.hasOwnProperty(study.id)
                         ? toggleDetails[study.id] 
                         : false;
 
-                const taStatus = getTAStatus(study.screening, user?.userid);
-                const ftStatus = getFullTextStatus(study.screening, user?.userid);
-                const canVoteTA = canUserVoteTA(study.screening, user?.userid);
-                const canVoteFT = canUserVoteFT(study.screening, user?.userid);
+                const taStatus = getTAStatus(study.screening);
+                const ftStatus = getFTStatus(study.screening);
+                const canVoteTA = canUserVoteTA(study.screening, user?.id);
+                const canVoteFT = canUserVoteFT(study.screening, user?.id);
                 
                 const scoreColour = getScoreColour(study.score ?? 0)
 
