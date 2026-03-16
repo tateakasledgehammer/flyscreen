@@ -61,8 +61,8 @@ export default function Setup(props) {
 
             setTags(data.tags || []);
     
-            const hasInclusion = Array.isArray(data.criteria?.inclusionCriteria) && data.criteria?.inclusionCriteria.length > 0;
-            const hasExclusion = Array.isArray(data.criteria?.exclusionCriteria) && data.criteria?.exclusionCriteria.length > 0;
+            const hasInclusion = Array.isArray(data.inclusionCriteria) && data.inclusionCriteria.length > 0;
+            const hasExclusion = Array.isArray(data.exclusionCriteria) && data.exclusionCriteria.length > 0;
     
             if (!hasInclusion && !hasExclusion) {
                 setInclusionSections([
@@ -83,15 +83,15 @@ export default function Setup(props) {
                 return;
             }
             
-            setInclusionSections(data.criteria.inclusionCriteria || []);
-            setExclusionSections(data.criteria.exclusionCriteria || []);
-            setFullTextReasons(data.criteria.fullTextExclusionReasons || []);
+            setInclusionSections(data.inclusionCriteria || []);
+            setExclusionSections(data.exclusionCriteria || []);
+            setFullTextReasons(data.fullTextExclusionReasons || []);
         
             setBackground({
-                title: data.background?.title || "",
-                study_type: data.background?.study_type || "",
-                question_type: data.background?.question_type || "",
-                research_area: data.background?.research_area || ""
+                title: data.title || "",
+                study_type: data.study_type || "",
+                question_type: data.question_type || "",
+                research_area: data.research_area || ""
             });
             
             setReviewerSettings({

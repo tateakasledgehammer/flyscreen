@@ -153,9 +153,9 @@ export default function Overview(props) {
                     <li>Project Name: {project.name}</li>
                     <li>Study Title: {project.title}</li>
                     <li>Study Type: {project.study_type}</li>
-                    <li>Reviewers needed for screening: {project.reviewerSettings?.screening ?? 2}</li>
-                    <li>Reviewers needed for full text view: {project.reviewerSettings?.fulltext ?? 2}</li>
-                    <li>Reviewers needed for extraction: {project.reviewerSettings?.extraction ?? 2}</li>
+                    <li>Reviewers needed for screening: {project.reviewerSettings?.screening}</li>
+                    <li>Reviewers needed for full text view: {project.reviewerSettings?.fulltext}</li>
+                    <li>Reviewers needed for extraction: {project.reviewerSettings?.extraction}</li>
                 </ul>
 
                 {/*  REVIEWERS !! */}
