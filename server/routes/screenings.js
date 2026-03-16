@@ -198,14 +198,17 @@ router.get(
         const projectId = Number(req.params.projectId);
         
         // defaults
-        const totalRow = projectProgressRepo.getTotalStudies.get(projectId);
+        const studies = db.prepare(`
+            SELECT id FROM studies WHERE project_id = ?
+        `).all(projectId);
+        const total = studies.length;
 
-        const total = totalRow?.total || 0;
-        const votes = projectProgressRepo.getVotes.all(projectId) || [];
-
-        // Structure
         const perStudy = {};
+        for (const s of studies) {
+            perStudy[s.id] = { TA: [], FULLTEXT: [] };
+        }
 
+        const votes = projectProgressRepo.getVotes.all(projectId) || [];
         for (const v of votes) {
             if (!perStudy[v.study_id]) {
                 perStudy[v.study_id] = { TA: [], FULLTEXT: [] };

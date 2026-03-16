@@ -171,38 +171,45 @@ export default function Overview(props) {
             <div className="homepage-section">   
                 <h3>Review Settings</h3>
 
-                    <p>Tags:</p>
                     <ul>
-                        {project.tags?.length > 0
-                            ? project.tags.map(tag => (<li key={tag.id}>{tag.name}</li>))
-                            : <li>No tags provided.</li>
-                        }
+                        <li><strong>Tags:</strong></li>
+                        <ul>
+                            {project.tags?.length > 0
+                                ? project.tags.map(tag => (<li key={tag.id}>{tag.name}</li>))
+                                : <li>No tags provided.</li>
+                            }
+                        </ul>
                     </ul>
 
-                    <p>Inclusion Criteria:</p>
                     <ul>
-                        {project.inclusionCriteria?.map(section => (
-                            <li key={section.category}>
-                                <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
-                            </li>
-                        ))}
+                        <li><strong>Inclusion Criteria:</strong></li>
+                        <ul>
+                            {project.inclusionCriteria?.map(section => (
+                                <li key={section.category}>
+                                    <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
+                                </li>
+                            ))}
+                        </ul>
                     </ul>
 
-                    <p>Exclusion Criteria:</p>
                     <ul>
-                        {project.exclusionCriteria?.map(section => (
-                            <li key={section.category}>
-                                <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
-                            </li>
-                        ))}
+                        <li><strong>Exclusion Criteria:</strong></li>
+                        <ul>
+                            {project.exclusionCriteria?.map(section => (
+                                <li key={section.category}>
+                                    <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
+                                </li>
+                            ))}
+                        </ul>
                     </ul>
                 
-                    {/* Full Text Exclusion Criteria */}
-                    <p>Full Text Exclusion Criteria:</p>
                     <ul>
-                        {project.fullTextExclusionReasons?.map(reason => (
-                            <li key={reason}>{reason}</li>
-                        ))}
+                        <li><strong>Full Text Exclusion Criteria:</strong></li>
+                        <ul>
+                            {project.fullTextExclusionReasons?.map(reason => (
+                                <li key={reason}>{reason}</li>
+                            ))}
+                        </ul>
                     </ul>
             </div>
 
@@ -260,8 +267,8 @@ export default function Overview(props) {
             <div className="homepage-section">
                 <h3>Your Screening Stats</h3>
                 <ul>
-                    <li>Title & Abstract Screened: {myStats?.taScreened}</li>
-                    <li>Full Text Screened: {myStats?.ftScreened}</li>
+                    <li>Title & Abstract Screened: {myStats?.TA?.ACCEPT + myStats?.TA?.REJECT}</li>
+                    <li>Full Text Screened: {myStats?.FULLTEXT?.ACCEPT + myStats?.FULLTEXT?.REJECT}</li>
                 </ul>
             </div>
         </div>

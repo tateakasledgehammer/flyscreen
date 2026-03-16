@@ -79,8 +79,19 @@ router.get(
     (req, res) => {
         const projectId = Number(req.params.projectId);
 
+        const projectRow = db.prepare(`
+            SELECT * FROM projects WHERE id = ?
+        `).get(projectId) || {};
+
         const tags = db.prepare(`
             SELECT * FROM tags WHERE project_id = ?    
+        `).all(projectId);
+
+        const collaborators = db.prepare(`
+            SELECT u.id, u.username, pu.role
+            FROM project_users pu
+            JOIN users u ON u.id = pu.user_id
+            WHERE pu.project_id = ?    
         `).all(projectId);
     
         const sections = criteriaRepo.getSections.all(projectId);
@@ -92,7 +103,6 @@ router.get(
         for (const sec of sections) {
             const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
             const obj = { category: sec.name, criteria: items };
-    
             if (sec.type === "inclusion") inclusion.push(obj);
             else exclusion.push(obj);
         }
@@ -110,14 +120,21 @@ router.get(
         };
 
         res.json({
+            id: projectRow.id,
+            name: projectRow.name,
+            description: projectRow.description,
+
+            title: background.title,
+            study_type: background.study_type,
+            question_type: background.question_type,
+            research_area: background.research_area,
+
+            reviewerSettings,
+            collaborators,
             tags,
-            criteria: {
-                inclusionCriteria: inclusion,
-                exclusionCriteria: exclusion,
-                fullTextExclusionReasons: fulltext
-            },
-            background,
-            reviewerSettings
+            inclusionCriteria: inclusion,
+            exclusionCriteria: exclusion,
+            fullTextExclusionReasons: fulltext
         });
     }
 )
