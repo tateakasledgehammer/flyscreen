@@ -2,6 +2,29 @@ import { capitaliseFirstLetter } from "../utils/screeningTools"
 import Navbar from "./Navbar"
 import { useState, useEffect } from "react"
 
+function ProgressBar({ label, completed, total, color }) {
+    const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+    return (
+        <div style={{ marginBottom: "10px", maxWidth: "90%" }}>
+            <strong>{label}: {completed}/{total} ({pct}%)</strong>
+            <div style={{
+                height: "40px",
+                background: "#e5e7eb",
+                borderRadius: "4px",
+                marginTop: "4px"
+            }}>
+                <div style={{
+                    width: `${pct}%`,
+                    height: "100%",
+                    background: color,
+                    borderRadius: "4px"
+                }} />
+            </div>
+        </div>
+    );
+}
+
 export default function Overview(props) {
     const { 
         user,
@@ -16,7 +39,7 @@ export default function Overview(props) {
     async function fetchProject() {
         try {
             const res = await fetch(
-                `/api/projects/${projectId}`,
+                `/api/projects/${projectId}/setup`,
                 { credentials: "include" }
             );
             const data = await res.json();
@@ -102,6 +125,14 @@ export default function Overview(props) {
         )
     }
 
+    const taFinished = progress.ta.accepted + progress.ta.rejected + progress.ta.conflict;
+    const taAwaiting = progress.ta.pending;
+    const taUnscreened = progress.ta.unscreened;
+
+    const ftFinished = progress.ft.accepted + progress.ft.rejected + progress.ft.conflict;
+    const ftAwaiting = progress.ft.pending;
+    const ftUnscreened = progress.ft.unscreened;
+
     function handlePrismaDiagram() {
         alert("This function has not been set up")
     }
@@ -110,97 +141,103 @@ export default function Overview(props) {
         <>
         <Navbar />
         <div className="page-container">
-            <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
+            <h2>
+                <i className="fa-solid fa-house-chimney"></i>
+                Your Homepage
+            </h2>
             
             {/* Add class and styling for the homepage cards + progress bar */}
             <div className="homepage-section">
-                <h3>Overview</h3>
+                <h3>Project Overview</h3>
                 <ul>
-                    <li>Study Title: {project.title || "No title set"}</li>
-                    <li>Study Type: {project.studyType || "No study type set"}</li>
-                    <li>Reviewers needed for screening: {project.numberOfReviewersForScreening || "Screener number not set"}</li>
-                    <li>Reviewers needed for full text view: {project.numberOfReviewersForFullText || "Reviewer number not set"}</li>
-                    <li>Reviewers needed for extraction: {project.numberOfReviewersForExtraction || "Extraction number not set"}</li>
-                    
-                    {/*  OTHER REVIEWERS !! */}
-                    <li>Primary reviewer: {user.username}</li>
-                    <li>Other reviewers: {project.collaborators}</li>
+                    <li>Project Name: {project.name}</li>
+                    <li>Study Title: {project.title}</li>
+                    <li>Study Type: {project.study_type}</li>
+                    <li>Reviewers needed for screening: {project.reviewerSettings?.screening ?? 2}</li>
+                    <li>Reviewers needed for full text view: {project.reviewerSettings?.fulltext ?? 2}</li>
+                    <li>Reviewers needed for extraction: {project.reviewerSettings?.extraction ?? 2}</li>
                 </ul>
-            </div>
-            <div className="homepage-section">
-                <h3>Import Your Studies</h3>
+
+                {/*  REVIEWERS !! */}
+                <h3>Collaborators:</h3>
                 <ul>
-                    <li>Number of imported studies: {studiesCount}</li>
+                    {project.collaborators?.map(c => (
+                        <li key={c.id}>{c.username} ({c.role})</li>
+                    ))}
                 </ul>
+
             </div>
+
             <div className="homepage-section">   
-                <h3>Set Up Your Review</h3>
-                <ul>
-                    {/* Study Tags */}
-                    {(!project.tags || project.tags.length === 0) && <li>Tags: No tags provided.</li>}
+                <h3>Review Settings</h3>
 
-                    {project.tags && project.tags.length > 0 && (
-                    <>
-                        <li>Tags: </li>
-                        <ul>
-                            {(project.tags?.map((tag, i) => (
-                                <li key={i}>{tag}</li>
-                            )))}
-                        </ul>
-                    </>
-                    )}                  
+                    <p>Tags:</p>
+                    <ul>
+                        {project.tags?.length > 0
+                            ? project.tags.map(tag => (<li key={tag.id}>{tag.name}</li>))
+                            : <li>No tags provided.</li>
+                        }
+                    </ul>
 
-                    {/* Inclusion Criteria */}
-                    <li>Inclusion Criteria:</li>
+                    <p>Inclusion Criteria:</p>
+                    <ul>
+                        {project.inclusionCriteria?.map(section => (
+                            <li key={section.category}>
+                                <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
+                            </li>
+                        ))}
+                    </ul>
 
-                    {project.inclusionCriteria && project.inclusionCriteria.length > 0 && (
-                    <>
-                        <ul>
-                            {(!project.inclusionCriteria || project.inclusionCriteria.length === 0) && <li>No inclusion criteria set provided.</li>}
-
-                            {(project.inclusionCriteria?.map((section, i) => (
-                                <li key={i}>
-                                    {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
-                                </li>
-                            )))}
-                        </ul>
-                    </>
-                    )}
-                    {/* Exclusion Criteria */}
-                    <li>Exclusion Criteria:</li>
-
-                    {project.exclusionCriteria && project.exclusionCriteria.length > 0 && (
-                    <>
-                        <ul>
-                            {(!project.exclusionCriteria || project.exclusionCriteria.length === 0) && <li>No exclusion criteria set provided.</li>}
-
-                            {(project.exclusionCriteria?.map((section, i) => (
-                                <li key={i}>
-                                    {capitaliseFirstLetter(section.category)}: {section.criteria.join(", ")}
-                                </li>
-                            )))}
-                        </ul>
-                    </>
-                    )}
+                    <p>Exclusion Criteria:</p>
+                    <ul>
+                        {project.exclusionCriteria?.map(section => (
+                            <li key={section.category}>
+                                <strong>{capitaliseFirstLetter(section.category)}</strong>: {section.criteria.join(", ")}
+                            </li>
+                        ))}
+                    </ul>
+                
                     {/* Full Text Exclusion Criteria */}
-                    <li>Full Text Exclusion Criteria:</li>
-
-                    {project.fullTextExclusionReasons && project.fullTextExclusionReasons.length > 0 && (
-                    <>
-                        <ul>
-                            {(!project.fullTextExclusionReasons || project.fullTextExclusionReasons.length === 0) && <li>No exclusion criteria set provided.</li>}
-
-                            {(project.fullTextExclusionReasons?.map((reason, i) => (
-                                <li key={i}>{reason}</li>
-                            )))}
-                        </ul>
-                    </>
-                    )}
-                </ul>
+                    <p>Full Text Exclusion Criteria:</p>
+                    <ul>
+                        {project.fullTextExclusionReasons?.map(reason => (
+                            <li key={reason}>{reason}</li>
+                        ))}
+                    </ul>
             </div>
+
+            <br />
+            <br />
+            
+            <h3>Title & Abstract Screening Progress</h3>
+            <ProgressBar
+                label="Unscreened"
+                completed={taUnscreened}
+                total={progress.totalStudies}
+                color="#9ca3af"
+            />
+            <ProgressBar
+                label="Awaiting Second Vote"
+                completed={taAwaiting}
+                total={progress.totalStudies}
+                color="#fb923c"
+            />
+            <ProgressBar
+                label="Finished"
+                completed={taFinished}
+                total={progress.totalStudies}
+                color="#22c55e"
+            />
+
+            <button onClick={handlePrismaDiagram}>
+                See PRISMA Flow Diagram
+            </button>
+
+            <br />
+            <br />
+
             <div className="homepage-section">
                 <h3>Title & Abstract Screening</h3>
-                <button onClick={handlePrismaDiagram}>See PRISMA Flow Diagram</button>
                 <ul>
                     <li>Unscreened: {progress.ta.unscreened}</li>
                     <li>One Vote: {progress.ta.pending}</li>
@@ -223,8 +260,8 @@ export default function Overview(props) {
             <div className="homepage-section">
                 <h3>Your Screening Stats</h3>
                 <ul>
-                    <li>TA Screened: {myStats?.taScreened}</li>
-                    <li>TA Screened: {myStats?.ftScreened}</li>
+                    <li>Title & Abstract Screened: {myStats?.taScreened}</li>
+                    <li>Full Text Screened: {myStats?.ftScreened}</li>
                 </ul>
             </div>
         </div>
