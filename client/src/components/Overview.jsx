@@ -5,8 +5,7 @@ import { useState, useEffect } from "react"
 export default function Overview(props) {
     const { 
         user,
-        projectId,
-        studies
+        projectId
     } = props
 
     const [project, setProject] = useState(null);
@@ -74,21 +73,6 @@ export default function Overview(props) {
         fetchProject();
     }, [projectId]);
 
-    if (!project || !progress) {
-        return (
-            <>
-            <Navbar />
-            <div className="page-container">
-                <h2>Loading overview...</h2>
-            </div>
-            </>
-        )
-    }
-
-    function handlePrismaDiagram() {
-        alert("This function has not been set up")
-    }
-
     if (!projectId) {
         return (
             <>
@@ -106,21 +90,20 @@ export default function Overview(props) {
         );
     }
 
-    if (!!project || !progress || !progress.ta || !progress.ft) {
+    if (!project || !progress) {
         return (
             <>
             <Navbar />
             <div className="page-container">
-                <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
-                
-                {/* Add class and styling for the homepage cards + progress bar */}
-                <div className="homepage-section">
-                    <h3>Loading overview...</h3>
-                    <p>(you may need to upload some studies)</p>
-                </div>
+                <h2>Loading overview...</h2>
+                <p>(you may need to upload some studies)</p>
             </div>
             </>
-        );
+        )
+    }
+
+    function handlePrismaDiagram() {
+        alert("This function has not been set up")
     }
     
     return (
@@ -141,7 +124,7 @@ export default function Overview(props) {
                     
                     {/*  OTHER REVIEWERS !! */}
                     <li>Primary reviewer: {user.username}</li>
-                    <li>Other reviewers: {user.username}</li>
+                    <li>Other reviewers: {project.collaborators}</li>
                 </ul>
             </div>
             <div className="homepage-section">

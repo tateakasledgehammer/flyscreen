@@ -126,7 +126,8 @@ router.post(
                 study_id,
                 stage,
                 vote,
-                reason: reason ?? null
+                reason: reason ?? null,
+                project_id: Number(req.params.projectId)
             });
 
             auditRepo.logVoteChange({
@@ -200,7 +201,7 @@ router.get(
         const totalRow = projectProgressRepo.getTotalStudies.get(projectId);
 
         const total = totalRow?.total || 0;
-        const votes = projectProgressRepo.getVotes.get(projectId) || [];
+        const votes = projectProgressRepo.getVotes.all(projectId) || [];
 
         // Structure
         const perStudy = {};

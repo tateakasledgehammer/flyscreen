@@ -5,7 +5,7 @@ module.exports = {
         SELECT s.user_id, s.vote
         FROM screenings s
         JOIN studies st ON st.id = s.study_id
-        WHERE study_id = ? AND stage = ? AND st.project_id = ?   
+        WHERE s.study_id = ? AND stage = ? AND st.project_id = ?   
     `),
 
     getAllScreeningsForProject: db.prepare(`

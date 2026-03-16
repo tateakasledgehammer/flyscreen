@@ -1,11 +1,11 @@
 const { db } = require("../db");
-const { getTotalStudies } = require("./screeningStatsRepo");
 
 module.exports = {
     getVotes: db.prepare(`
-        SELECT study_id, stage, vote
-        FROM screenings
-        WHERE project_id = ?    
+        SELECT s.study_id, s.stage, s.vote
+        FROM screenings s
+        JOIN studies st ON st.id = s.study_id
+        WHERE st.project_id = ?    
     `),
 
     getTotalStudies: db.prepare(`
