@@ -33,35 +33,55 @@ router.get(
         const summary = {};
 
         for (const row of rows) {
-            const { study_id, stage, vote, user_id } = row;
+            const { study_id, stage, vote, user_id, is_final } = row;
 
             // Study + Stage structure
             if (!summary[study_id]) {
                 summary[study_id] = {
-                    TA: { votes: [], myVote: null, status: "UNSCREENED" },
-                    FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
+                    TA: { votes: [], myVote: null, final: null, status: "UNSCREENED" },
+                    FULLTEXT: { votes: [], myVote: null, final: null, status: "UNSCREENED" }
                 };
             }
 
-            // Push vote at the stage
-            summary[study_id][stage].votes.push({ vote, user_id });
+            const bucket = summary[study_id][stage];
 
-            // Track vote
+            if (is_final === 1) {
+                bucket.final = { user_id, vote };
+                continue;
+            } 
+
             if (user_id === req.user.userid) {
-                summary[study_id][stage].myVote = vote;
+                bucket.myVote = { user_id, vote }
+            } else {
+                bucket.votes.push({ user_id, vote });
             }
         }
 
         for (const studyId of Object.keys(summary)) {
             for (const stage of ["TA", "FULLTEXT"]) {
                 const stageData = summary[studyId][stage];
-                const votes = stageData.votes;
 
-                const accepts = votes.filter(v => v.vote === "ACCEPT").length;
-                const rejects = votes.filter(v => v.vote === "REJECT").length;
+                const final = rows.filter(
+                    r => r.study_id === Number(studyId) &&
+                    r.stage === stage &&
+                    r.is_final === 1
+                );
+
+                if (final.length > 0) {
+                    stageData.status = final[0].vote === "ACCEPT" ? "ACCEPTED" : "REJECTED";
+                    continue;
+                }
+
+                const allVotes = [
+                    ...stageData.votes,
+                    ...(stageData.myVote ? [stageData.myVote] : [])
+                ];
+
+                const accepts = allVotes.filter(v => v.vote === "ACCEPT").length;
+                const rejects = allVotes.filter(v => v.vote === "REJECT").length;
                 
                 let status = "UNSCREENED";
-                if (votes.length === 1) status = "PENDING";
+                if (allVotes.length === 1) status = "PENDING";
                 if (accepts >= 2) status = "ACCEPTED";
                 if (rejects >= 2) status = "REJECTED";
                 if (accepts === 1 && rejects === 1) status = "CONFLICT";
@@ -69,6 +89,7 @@ router.get(
                 stageData.status = status;
             }
         }
+        // console.log("SUMMARY BUILDER OUTPUT:", JSON.stringify(summary, null, 2));
 
         res.json(summary);
 
@@ -160,6 +181,46 @@ router.post(
         res.status(500).json({ error: err.message });
     }
 });
+
+// conflict resolution
+router.post(
+    "/projects/:projectId/studies/:studyId/resolve", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const { decision, stage } = req.body;
+
+        console.log("RESOLVE ROUTE:", {
+            studyId: req.params.studyId,
+            projectId: req.params.projectId,
+            userId: req.user.userid,
+            decision,
+            stage
+        });
+
+        db.prepare(`
+            DELETE FROM screenings
+            WHERE study_id = ? AND stage = ? AND is_final = 1    
+        `).run(req.params.studyId, stage);
+
+        try {
+            db.prepare(`
+                INSERT INTO screenings (study_id, project_id, stage, vote, is_final, user_id)
+                VALUES (?, ?, ?, ?, 1, ?)    
+            `).run(
+                req.params.studyId, 
+                req.params.projectId, 
+                stage, 
+                decision,
+                req.user.userid);
+        } catch (err) {
+            console.error("RESOLVE ERROR:", err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.json({ success: true })
+    }
+)
 
 // screening stats
 router.get(

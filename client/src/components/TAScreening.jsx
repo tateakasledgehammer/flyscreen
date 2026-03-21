@@ -86,7 +86,7 @@ export default function TAScreening(props) {
     } = useScreeningFilters(studies)
 
     const { countByStatus, matchesStatus } = 
-        useStatusCounts(studies, user, getTAStatus);
+        useStatusCounts(studies, user, getTAStatus, "TA");
 
     const finalFiltered = useMemo(() => {
         return filteredStudies.filter(study => 

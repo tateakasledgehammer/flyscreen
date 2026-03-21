@@ -148,8 +148,9 @@ const initSchema = db.transaction(() => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
             project_id INTEGER NOT NULL,
+            is_final INTEGER DEFAULT 0,
 
-            UNIQUE(user_id, study_id, stage),
+            UNIQUE(user_id, study_id, stage, is_final),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             FOREIGN KEY (project_id) REFERENCES projects(id)
@@ -321,17 +322,17 @@ const insertManyStudies = db.transaction((cleanStudies) => {
 // SCREENING HELPERS
 
  const getScreeningsForProject = db.prepare(`
-    SELECT s.study_id, s.stage, s.vote, s.user_id
+    SELECT s.study_id, s.stage, s.vote, s.user_id, s.is_final
     FROM screenings s
     JOIN studies st ON st.id = s.study_id
     WHERE st.project_id = ?    
 `)
 
  const upsertScreening = db.prepare(`
-    INSERT INTO screenings (user_id, study_id, project_id, stage, vote, reason, updated_at)
-    VALUES (@user_id, @study_id, @project_id, @stage, @vote, @reason, CURRENT_TIMESTAMP)
+    INSERT INTO screenings (user_id, study_id, project_id, stage, vote, reason, updated_at, is_final)
+    VALUES (@user_id, @study_id, @project_id, @stage, @vote, @reason, CURRENT_TIMESTAMP, 0)
     
-    ON CONFLICT(user_id, study_id, stage)
+    ON CONFLICT(user_id, study_id, stage, is_final)
     DO UPDATE SET
      vote = excluded.vote,
      reason = excluded.reason,

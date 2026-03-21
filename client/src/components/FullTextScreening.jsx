@@ -72,7 +72,7 @@ export default function FullTextScreening(props) {
         clearFilters
     } = useScreeningFilters(taAcceptedStudies)
 
-    const { countByStatus, matchesStatus } = useStatusCounts(taAcceptedStudies, user, getFTStatus);
+    const { countByStatus, matchesStatus } = useStatusCounts(taAcceptedStudies, user, getFTStatus, "FULLTEXT");
 
     const finalFiltered = useMemo(() => {
         return filteredStudies.filter(study => 

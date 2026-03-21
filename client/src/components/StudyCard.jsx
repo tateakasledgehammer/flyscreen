@@ -26,21 +26,21 @@ export default function StudyCard(props) {
 
     function submitVote(studyId, stage, vote) { 
         fetch(`/api/projects/${projectId}/screenings`, {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    study_id: studyId,
-                    stage,
-                    vote
-                })
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                study_id: studyId,
+                stage,
+                vote
             })
-            .then(res => {
-                if (!res.ok) return console.error("Vote failed");
-                refreshScreenings();
-            })
-            .catch(err => console.error("Error submitting vote", err));
-        }
+        })
+        .then(res => {
+            if (!res.ok) return console.error("Vote failed");
+            refreshScreenings();
+        })
+        .catch(err => console.error("Error submitting vote", err));
+    }
 
     function handleToggleDetails(studyID) {
         setToggleDetails(prev => ({
@@ -117,13 +117,24 @@ export default function StudyCard(props) {
         <div>
             {studies.map((study) => {
 
-                console.log("screening for study", 
-                    study.id, 
-                    study.screening, 
-                    "status:", getTAStatus(study.screening),
-                    "can vote?", canUserVoteTA(study.screening, user?.userid),
-                    "user:", user?.id
-                );
+                // console.log("screening for study", 
+                //     study.id, 
+                //     study.screening, 
+                //     "status:", getTAStatus(study.screening),
+                //     "can vote?", canUserVoteTA(study.screening, user?.userid),
+                //     "user:", user?.id
+                // );
+
+                async function resolve(decision) {
+                    await fetch(`/api/projects/${projectId}/studies/${study.id}/resolve`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ decision, stage: "TA" })
+                    });
+            
+                    refreshScreenings();
+                }
   
                 const isExpanded = 
                     toggleDetails.hasOwnProperty(study.id)
@@ -156,10 +167,17 @@ export default function StudyCard(props) {
                     {/* Actions section */}
                     <div className="actions">
                         {/* TITLE ABSTRACT SCREENING BUTTONS */}
-                        {(taStatus === "UNSCREENED" || taStatus === "PENDING" || taStatus === "CONFLICT") && (
+                        {(taStatus === "UNSCREENED" || taStatus === "PENDING") && (
                             <>
                                 <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "ACCEPT")}>ACCEPT</button>
                                 <button disabled={!canVoteTA} onClick={() => submitVote(study.id, "TA", "REJECT")}>REJECT</button>
+                            </>
+                        )}
+
+                        {(taStatus === "CONFLICT") && (
+                            <>
+                            <button onClick={() => resolve("ACCEPT")}>Resolve as ACCEPT</button>
+                            <button onClick={() => resolve("REJECT")}>Resolve as REJECT</button>
                             </>
                         )}
 
