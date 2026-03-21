@@ -222,6 +222,42 @@ router.post(
     }
 )
 
+// revert vote
+router.post(
+    "/projects/:projectId/studies/:studyId/revert", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const { stage } = req.body;
+        const studyId = req.params.studyId;
+        const userId = req.user.userid;
+
+        console.log("REVERT ROUTE:", {
+            studyId,
+            projectId: req.params.projectId,
+            userId,
+            stage
+        });
+
+        try {  
+            db.prepare(`
+                DELETE FROM screenings
+                WHERE study_id = ? AND stage = ? AND user_id = ? AND is_final = 0
+            `).run(studyId, stage, userId);
+            
+            db.prepare(`
+                DELETE FROM screenings
+                WHERE study_id = ? AND stage = ? AND is_final = 1
+            `).run(studyId, stage);
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error("REVERT ERROR:", err);
+            res.status(500).json({ error: err.message });
+        }
+    }
+)
+
 // screening stats
 router.get(
     "/projects/:projectId/my-stats", 

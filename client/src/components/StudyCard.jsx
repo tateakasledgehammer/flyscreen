@@ -110,21 +110,17 @@ export default function StudyCard(props) {
     }
 
     if (!studies || studies.length === 0) {
-        return <p>No studies visible. None uploaded or studies per page not set.</p>;
+        return (
+            <>
+            <br />
+            <h3>No studies visible.</h3>
+            </>
+        );
     }
 
     return (
         <div>
             {studies.map((study) => {
-
-                // console.log("screening for study", 
-                //     study.id, 
-                //     study.screening, 
-                //     "status:", getTAStatus(study.screening),
-                //     "can vote?", canUserVoteTA(study.screening, user?.userid),
-                //     "user:", user?.id
-                // );
-
                 async function resolve(decision) {
                     await fetch(`/api/projects/${projectId}/studies/${study.id}/resolve`, {
                         method: "POST",
@@ -133,6 +129,17 @@ export default function StudyCard(props) {
                         body: JSON.stringify({ decision, stage: "TA" })
                     });
             
+                    refreshScreenings();
+                }
+
+                async function revertVote(stage) {
+                    await fetch(`/api/projects/${projectId}/studies/${study.id}/revert`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ stage })
+                    });
+
                     refreshScreenings();
                 }
   
@@ -187,6 +194,16 @@ export default function StudyCard(props) {
                                 <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "ACCEPT")}>ACCEPT</button>
                                 <button disabled={!canVoteFT} onClick={() => submitVote(study.id, "FULLTEXT", "REJECT")}>REJECT</button>
                             </>
+                        )}
+
+                        {taStatus === "PENDING" && study.screening.TA.myVote && (
+                            <button onClick={() => revertVote("TA")}>UNDO VOTE</button>
+                        )}
+                        {taStatus === "CONFLICT" && (
+                            <button onClick={() => revertVote("TA")}>UNDO VOTE</button>
+                        )}
+                        {(taStatus === "ACCEPTED" || taStatus === "REJECTED") && study.screening.TA.final && (
+                            <button onClick={() => revertVote("TA")}>UNDO</button>
                         )}
 
                         {/* FULL TEXT EXCLUSION DROPDOWN */}
