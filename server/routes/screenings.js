@@ -52,7 +52,7 @@ router.get(
                 summary[study_id].tags = tagRepo.getTagsForStudy.all(
                     study_id,
                     projectId
-                ).map(t => t.name);
+                );
             }
 
             const bucket = summary[study_id][stage];

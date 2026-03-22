@@ -176,6 +176,24 @@ export default function StudyCard(props) {
 
                     refreshScreenings();
                 }
+
+                async function removeTag(studyId, tagId) {
+                    await fetch(`/api/projects/${projectId}/studies/${studyId}/tags/${tagId}`, {
+                        method: "DELETE",
+                        credentials: "include"
+                    });
+
+                    refreshScreenings();
+                }
+
+                async function removeNote(noteId) {
+                    await fetch(`/api/projects/${projectId}/notes/${noteId}`, {
+                        method: "DELETE",
+                        credentials: "include"
+                    });
+
+                    refreshScreenings();
+                }
   
                 const isExpanded = 
                     toggleDetails.hasOwnProperty(study.id)
@@ -287,6 +305,7 @@ export default function StudyCard(props) {
                                 {study.notes.map((note) => (
                                     <li key={note.id}>
                                         <strong>{note.username}:</strong> {note.content}
+                                        <button onClick={() => removeNote(note.id)}>x</button>
                                     </li>
                                 ))}
                             </ul>
@@ -298,8 +317,9 @@ export default function StudyCard(props) {
                             <h4>Tags</h4>
                             <ul>
                                 {study.tags.map((tag) => (
-                                    <li key={tag}>
-                                        {tag}
+                                    <li key={tag.id}>
+                                        {tag.name}
+                                        <button onClick={() => removeTag(study.id, tag.id)}>x</button>
                                     </li>
                                 ))}
                             </ul>

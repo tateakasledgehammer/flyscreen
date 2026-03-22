@@ -82,4 +82,19 @@ router.delete(
         res.json({ success: true });    
 });
 
+router.delete(
+    "/projects/:projectId/studies/:studyId/tags/:tagId", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+        const tagId = Number(req.params.tagId);
+        const studyId = Number(req.params.studyId);
+
+        tagRepo.detachTag.run(studyId, tagId, projectId);
+
+        res.json({ success: true });
+    }
+)
+
 module.exports = router;

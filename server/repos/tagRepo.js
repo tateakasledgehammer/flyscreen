@@ -33,5 +33,10 @@ module.exports = {
 
     deleteTag: db.prepare(`
         DELETE FROM tags WHERE id = ? AND project_id = ?    
+    `),
+
+    detachTag: db.prepare(`
+        DELETE FROM study_tags
+        WHERE study_id = ? AND tag_id = ? AND project_id = ?
     `)
 }
