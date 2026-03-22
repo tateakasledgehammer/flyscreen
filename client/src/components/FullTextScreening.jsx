@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import StatusToggleBar from "./StatusToggleBar";
 import ScreeningFiltersBar from "./ScreeningFiltersBar";
 import PaginationBar from "./PaginationBar";
-import useScreeningFilters from "../hooks/useScreeningFilters";
+import useScreeningFilters from "../hooks/useScreeningFilters.jsx";
 import useStatusCounts from "../hooks/useStatusCounts";
 
 export default function FullTextScreening(props) {

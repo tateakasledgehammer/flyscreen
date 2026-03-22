@@ -6,7 +6,7 @@ import ScreeningFiltersBar from "./ScreeningFiltersBar";
 import PaginationBar from "./PaginationBar";
 
 import { getFTStatus } from "../utils/screeningTools";
-import useScreeningFilters from "../hooks/useScreeningFilters";
+import useScreeningFilters from "../hooks/useScreeningFilters.jsx";
 import useStatusCounts from "../hooks/useStatusCounts";
 
 export default function ExcludedScreening({

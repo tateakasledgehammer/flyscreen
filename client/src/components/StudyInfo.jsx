@@ -5,17 +5,21 @@ export default function StudyInfo(props) {
         study,
         highlightContent,
         isExpanded,
-        handleToggleDetails
+        handleToggleDetails,
+        searchFilter,
+        inclusionTerms,
+        exclusionTerms
     } = props;
 
     if (!study) return null;
 
-    const inclusionTerms = study.matchedInclusionTerms || [];
-    const exclusionTerms = study.matchedExclusionTerms || [];
-
     const safeTitle = study.title || "N/A";
     const safeAbstract = study.abstract || "N/A";
     const safeKeywords = formatKeywords(study.keywords) || "N/A";
+
+    const filteredWords = searchFilter
+        ? searchFilter.split(" ").map(w => w.trim()).filter(Boolean)
+        : [];
 
     return (
         <>
@@ -25,7 +29,7 @@ export default function StudyInfo(props) {
                     safeTitle, 
                     inclusionTerms,
                     exclusionTerms,
-                    []
+                    filteredWords
                 )}      
             </h3>
         </div>
@@ -70,7 +74,7 @@ export default function StudyInfo(props) {
                             safeKeywords, 
                             inclusionTerms, 
                             exclusionTerms, 
-                            []
+                            filteredWords
                         )}
                     </p>
                     <p className="abstract">
@@ -79,7 +83,7 @@ export default function StudyInfo(props) {
                             safeAbstract, 
                             inclusionTerms,
                             exclusionTerms,
-                            []
+                            filteredWords
                         )}
                     </p>
                 </div>

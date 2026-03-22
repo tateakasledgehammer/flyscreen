@@ -9,7 +9,7 @@ import StatusToggleBar from "./StatusToggleBar";
 import PaginationBar from "./PaginationBar";
 
 import useStatusCounts from "../hooks/useStatusCounts";
-import useScreeningFilters from "../hooks/useScreeningFilters";
+import useScreeningFilters from "../hooks/useScreeningFilters.jsx";
 
 export default function TAScreening(props) {
     const { 
@@ -75,6 +75,20 @@ export default function TAScreening(props) {
         if (projectId) fetchStudies();
     }, [projectId]);
 
+    const [inclusionTerms, setInclusionTerms] = useState([]);
+    const [exclusionTerms, setExclusionTerms] = useState([]);
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        fetch(`/api/projects/${projectId}/criteria`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                setInclusionTerms(data.inclusionCriteria.flatMap(section => section.criteria));
+                setExclusionTerms(data.exclusionCriteria.flatMap(section => section.criteria));
+            });
+    }, [projectId])
+
     const {
         filteredStudies,
         paginatedStudies,
@@ -95,7 +109,9 @@ export default function TAScreening(props) {
         setItemsPerPage,
         currentPage,
         setCurrentPage,
-        clearFilters
+        clearFilters,
+        highlightContent,
+        getScoreColour
     } = useScreeningFilters(studies)
 
     const { countByStatus, matchesStatus } = 
@@ -173,6 +189,12 @@ export default function TAScreening(props) {
                 handleAddNote={handleAddNote}
                 fullTextExclusionReasons={fullTextExclusionReasons}
                 handleFullTextExclusion={handleFullTextExclusion}
+                highlighted={highlighted}
+                searchFilter={searchFilter}
+                highlightContent={highlightContent}
+                getScoreColour={getScoreColour}
+                inclusionTerms={inclusionTerms}
+                exclusionTerms={exclusionTerms}
             />
 
             <PaginationBar 
