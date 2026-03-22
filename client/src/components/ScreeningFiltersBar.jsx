@@ -15,7 +15,8 @@ export default function ScreeningFiltersBar({
     setHighlighted,
     clearFilters,
     studies,
-    studyTags
+    studyTags,
+    setStudyTags
 }) {
     return (
         <div className="filters-bar">
@@ -33,9 +34,9 @@ export default function ScreeningFiltersBar({
                 onChange={(e) => setSortOption(e.target.value)}
             >
                 <option value="year-asc">Year (Old → New)</option>
-                <option value="year-des">Year (New → Old)</option>
+                <option value="year-desc">Year (New → Old)</option>
                 <option value="title-asc">Title (A → Z)</option>
-                <option value="title-des">Title (Z → A)</option>
+                <option value="title-desc">Title (Z → A)</option>
                 <option value="score-asc">Score (Low → High)</option>
                 <option value="score-desc">Score (High → Low)</option>
             </select>
@@ -43,21 +44,21 @@ export default function ScreeningFiltersBar({
             {/* Filters */}
             <select value={languageFilter} onChange={(e) => setLanguageFilter(e.target.value)}>
                 <option value="">All languages</option>
-                {[...new Set(studies.map(s => s.language))].map((lang, i) => (
+                {[...new Set(studies.map(s => s.language).filter(Boolean))].map((lang, i) => (
                     <option key={i} value={lang}>{lang}</option>
                 ))}
             </select>
 
             <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
                 <option value="">All types</option>
-                {[...new Set(studies.map(s => s.type))].map((type, i) => (
+                {[...new Set(studies.map(s => s.type).filter(Boolean))].map((type, i) => (
                     <option key={i} value={type}>{type}</option>
                 ))}
             </select>
 
             <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)}>
                 <option value="">All tags</option>
-                {[...new Set(studies.map(s => s.tagStatus))].map((tag, i) => (
+                {studyTags.map((tag, i) => (
                     <option key={i} value={tag}>{tag}</option>
                 ))}
             </select>

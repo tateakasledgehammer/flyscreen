@@ -23,7 +23,11 @@ export default function useScreeningFilters(studies) {
 
     function matchesSearch(study) {
         if (searchWords.length === 0) return true;
-        const text = `${study.title} ${study.abstract} ${study.keywords}`.toLowerCase();
+        const text = `
+            ${study.title ?? ""} 
+            ${study.abstract ?? ""} 
+            ${study.keywords ?? ""}
+        `.toLowerCase();
         return searchWords.every(w => text.includes(w));
     }
 
@@ -35,7 +39,10 @@ export default function useScreeningFilters(studies) {
         return typeFilter === "" || study.type === typeFilter;
     }
     function matchesTag(study) {
-        return tagFilter === "" || study.tagStatus === tagFilter;
+        if (tagFilter === "") return true;
+        if (!Array.isArray(study.tags)) return false;
+
+        return study.tags.some(t => t.name === tagFilter);
     }
 
     // sort
@@ -47,7 +54,7 @@ export default function useScreeningFilters(studies) {
         } else if (sortOption === "score-asc") {
             sorted.sort((a, b) => (a.score ?? 0) - (b.score ?? 0));
         } else if (sortOption === "year-desc") {
-            sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+            sorted.sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
         } else if (sortOption === "year-asc") {
             sorted.sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
         } else if (sortOption === "title-asc") {

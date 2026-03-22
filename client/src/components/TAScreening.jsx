@@ -143,6 +143,7 @@ export default function TAScreening(props) {
                 clearFilters={clearFilters}
                 studies={studies}
                 studyTags={studyTags}
+                setStudyTags={setStudyTags}
             />
 
             <StatusToggleBar
