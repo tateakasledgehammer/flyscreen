@@ -17,14 +17,21 @@ router.post(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const { study_id, content } = req.body;
+        const { study_id, content } = req.body;
+        const projectId = Number(req.params.projectId);
 
-    if (!study_id || !content?.trim()) {
-        return res.status(400).json({ error: "study_id and content required" });
-    }
+        if (!study_id || !content?.trim()) {
+            return res.status(400).json({ error: "study_id and content required" });
+        }
 
-    noteRepo.createNote.run(req.user.userid, study_id, project_id, content.trim());
-    res.json({ success: true });
+        noteRepo.createNote.run(
+            req.user.userid, 
+            study_id, 
+            projectId, 
+            content.trim()
+        );
+
+        res.json({ success: true });
 });
 
 router.get(
@@ -32,7 +39,7 @@ router.get(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const notes = noteRepo.getNotesForStudy.all(req.params.studyId);
+    const notes = noteRepo.getNotesForStudy.all(req.params.studyId, req.params.projectId);
     res.json(notes);
 });
 
@@ -41,8 +48,12 @@ router.delete(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    noteRepo.deleteNote.run(req.params.id, req.user.userid);
-    res.json({ success: true });
+        noteRepo.deleteNote.run(
+            req.params.id, 
+            req.user.userid,
+            req.params.projectId
+        );
+        res.json({ success: true });
 });
 
 module.exports = router;

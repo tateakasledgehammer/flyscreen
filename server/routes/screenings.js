@@ -4,10 +4,12 @@ const { db, getScreeningsForProject } = require("../db.js");
 
 const screeningRepo = require("../repos/screeningRepo");
 const auditRepo = require("../repos/auditRepo");
-const screeningStatsRepo = require("../repos/screeningStatsRepo.js");
-const projectProgressRepo = require("../repos/projectProgressRepo.js");
+const screeningStatsRepo = require("../repos/screeningStatsRepo");
+const projectProgressRepo = require("../repos/projectProgressRepo");
 
-const requireProjectAccess = require("../middleware/projectAuth.js");
+const requireProjectAccess = require("../middleware/projectAuth");
+const noteRepo = require("../repos/noteRepo");
+const tagRepo = require("../repos/tagRepo");
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -41,6 +43,16 @@ router.get(
                     TA: { votes: [], myVote: null, final: null, status: "UNSCREENED" },
                     FULLTEXT: { votes: [], myVote: null, final: null, status: "UNSCREENED" }
                 };
+
+                summary[study_id].notes = noteRepo.getNotesForStudy.all(
+                    study_id,
+                    projectId
+                );
+
+                summary[study_id].tags = tagRepo.getTagsForStudy.all(
+                    study_id,
+                    projectId
+                ).map(t => t.name);
             }
 
             const bucket = summary[study_id][stage];

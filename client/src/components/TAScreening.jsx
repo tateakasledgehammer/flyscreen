@@ -14,7 +14,6 @@ import useScreeningFilters from "../hooks/useScreeningFilters";
 export default function TAScreening(props) {
     const { 
         user,
-        studyTags,
         projectId,
         handleAssignTag,
         handleAddNote,
@@ -24,6 +23,7 @@ export default function TAScreening(props) {
 
     // general useState for screening
     const [studies, setStudies] = useState([]);
+    const [studyTags, setStudyTags] = useState([]);
     const [toggleDetails, setToggleDetails] = useState({});
     const [statusFilter, setStatusFilter] = useState("");
 
@@ -49,14 +49,27 @@ export default function TAScreening(props) {
                 screening: summary[s.id] || {
                     TA: { votes: [], myVote: null, status: "UNSCREENED" },
                     FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }
-                }
-            }))
+                },
+                tags: summary[s.id]?.tags || [],
+                notes: summary[s.id]?.notes || [],
+                fullTextExclusionStatus: summary[s.id]?.fullTextExclusionStatus || null
+            }));
                 
             setStudies(data);
         } catch (err) {
             console.error("Failed to fetch studies:", err);
         }
     }
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        fetch(`/api/projects/${projectId}/tags`, { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                setStudyTags(data.map(t => t.name));
+            });
+    }, [projectId]);
 
     useEffect(() => {
         if (projectId) fetchStudies();

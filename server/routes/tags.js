@@ -17,15 +17,15 @@ router.post(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const { name } = req.body;
+        const projectId = Number(req.params.projectId);
+        const { name } = req.body;
 
-    if (!name.trim()) {
-        return res.status(400).json({ error: "Tag name required" });
-    }
+        if (!name.trim()) {
+            return res.status(400).json({ error: "Tag name required" });
+        }
 
-    tagRepo.createTag.run(name.trim(), projectId);
-    res.json({ success: true });
+        tagRepo.createTag.run(name.trim(), projectId);
+        res.json({ success: true });
 });
 
 router.post(
@@ -33,19 +33,19 @@ router.post(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const { study_id, tag } = req.body;
+        const projectId = Number(req.params.projectId);
+        const { study_id, tag } = req.body;
 
-    if (!study_id || !tag?.trim()) {
-        return res.status(400).json({ error: "study_id and tag required" });
-    }
+        if (!study_id || !tag?.trim()) {
+            return res.status(400).json({ error: "study_id and tag required" });
+        }
 
-    tagRepo.createTag.run(tag.trim(), projectId);
+        tagRepo.createTag.run(tag.trim(), projectId);
 
-    const tagRow = tagRepo.getTagByName.get(tag.trim(), projectId);
-    tagRepo.attachTag.run(study_id, tagRow.id, projectId);
+        const tagRow = tagRepo.getTagByName.get(tag.trim(), projectId);
+        tagRepo.attachTag.run(study_id, tagRow.id, projectId);
 
-    res.json({ success: true });
+        res.json({ success: true });
 });
 
 router.get(
@@ -53,11 +53,11 @@ router.get(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const studyId = Number(req.params.studyId);
+        const projectId = Number(req.params.projectId);
+        const studyId = Number(req.params.studyId);
 
-    const tags = tagRepo.getTagsForStudy.all(studyId, projectId);
-    res.json(tags);
+        const tags = tagRepo.getTagsForStudy.all(studyId, projectId);
+        res.json(tags);
 });
 
 router.get(
@@ -65,9 +65,9 @@ router.get(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const tags = tagRepo.getAllTags.all(projectId);
-    res.json(tags);
+        const projectId = Number(req.params.projectId);
+        const tags = tagRepo.getAllTags.all(projectId);
+        res.json(tags);
 });
 
 router.delete(
@@ -75,11 +75,11 @@ router.delete(
     requireAuth, 
     requireProjectAccess,
     (req, res) => {
-    const projectId = Number(req.params.projectId);
-    const tagId = Number(req.params.tagId);
+        const projectId = Number(req.params.projectId);
+        const tagId = Number(req.params.tagId);
 
-    tagRepo.deleteTag.run(tagId, projectId);
-    res.json({ success: true });    
+        tagRepo.deleteTag.run(tagId, projectId);
+        res.json({ success: true });    
 });
 
 module.exports = router;

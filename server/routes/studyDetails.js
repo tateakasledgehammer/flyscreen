@@ -29,19 +29,20 @@ router.get(
     (req, res) => {
     try {
         const studyId = Number(req.params.id);
+        const projectId = Number(req.params.projectId);
 
         // Metadata
         const study = getStudyById.get(studyId);
         if (!study) return res.status(404).json({ error: "Study not found "});
     
         // Notes
-        const notes = noteRepo.getNotesForStudy.all(studyId);
+        const notes = noteRepo.getNotesForStudy.all(studyId, projectId);
         
         // Tags
-        const tags = tagRepo.getTagsForStudy.all(studyId);
+        const tags = tagRepo.getTagsForStudy.all(studyId, projectId);
 
         // Screening Info
-        const allScreenings = screeningRepo.getAllScreeningsForProject.all();
+        const allScreenings = screeningRepo.getAllScreeningsForProject.all(projectId);
         const summary = {
             TA: { votes: [], myVote: null, status: "UNSCREENED" },
             FULLTEXT: { votes: [], myVote: null, status: "UNSCREENED" }

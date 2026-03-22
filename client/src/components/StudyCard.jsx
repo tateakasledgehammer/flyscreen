@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { 
     getTAStatus, 
     getFTStatus, 
@@ -17,10 +18,7 @@ export default function StudyCard(props) {
         user, 
         fullTextExclusionReasons,
         searchFilter,
-        refreshScreenings,
-        handleAssignTag,
-        handleAddNote,
-        handleFullTextExclusion,
+        refreshScreenings,        
         projectId
     } = props;
 
@@ -142,6 +140,42 @@ export default function StudyCard(props) {
 
                     refreshScreenings();
                 }
+
+                async function handleAddNote(studyId) {
+                    const content = prompt("Enter your note:");
+                    if (!content) return;
+
+                    await fetch(`/api/projects/${projectId}/notes`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ study_id: studyId, content })
+                    });
+
+                    refreshScreenings();
+                }
+
+                async function handleAssignTag(studyId, tag) {
+                    await fetch(`/api/projects/${projectId}/tags/attach`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ study_id: studyId, tag })
+                    });
+
+                    refreshScreenings();
+                }
+
+                async function handleFullTextExclusion(studyId, reason) {
+                    await fetch(`/api/projects/${projectId}/studies/${studyId}/fulltext-exclusion`, {
+                        method: "POST",
+                        credentials: "include",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ reason })
+                    });
+
+                    refreshScreenings();
+                }
   
                 const isExpanded = 
                     toggleDetails.hasOwnProperty(study.id)
@@ -238,14 +272,40 @@ export default function StudyCard(props) {
                         </select>
                     </div>
 
+                    {/* Notes & Tags */}
                     {study.fullTextExclusionStatus && (
-                        <>
-                            <p>
-                                <strong>Full Text Exclusion Reason: </strong>
-                                {study.fullTextExclusionStatus}
-                            </p>
-                        </>
+                        <div>
+                            <strong>Full Text Exclusion Reason: </strong>
+                            {study.fullTextExclusionStatus}
+                        </div>
                     )}
+
+                    {Array.isArray(study.notes) && study.notes.length > 0 && (
+                        <div>
+                            <h3>Notes</h3>
+                            <ul>
+                                {study.notes.map((note) => (
+                                    <li key={note.id}>
+                                        <strong>{note.username}:</strong> {note.content}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    
+                    {Array.isArray(study.tags) && study.tags.length > 0 && (
+                        <div>
+                            <h4>Tags</h4>
+                            <ul>
+                                {study.tags.map((tag) => (
+                                    <li key={tag}>
+                                        {tag}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                 </div>
             )})}
         </div>
