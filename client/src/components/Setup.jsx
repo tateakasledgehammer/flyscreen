@@ -128,6 +128,12 @@ export default function Setup(props) {
                     reviewerSettings
                 })
             });
+
+            await fetch(`/api/projects/${projectId}`, {
+                method: "POST",
+                credentials: "include"
+            });
+
             showSavedToast();
 
         } catch (err) {

@@ -320,6 +320,46 @@ router.get(
     }
 )
 
+router.post(
+    "/projects/:projectId",
+    requireAuth,
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+
+        const studies = db.prepare(`
+            SELECT * FROM studies WHERE project_id = ?    
+        `).all(projectId);
+
+        const sections = criteriaRepo.getSections.all(projectId);
+        const fulltext = criteriaRepo.getFullText.all(projectId).map(r=>r.reason);
+
+        const inclusion = [];
+        const exclusion = [];
+
+        for (const sec of sections) {
+            const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
+            const obj = { category: sec.name, criteria: items };
+
+            if (sec.type === "inclusion") inclusion.push(obj);
+            else exclusion.push(obj);
+        }
+
+        const criteria = {
+            inclusionCriteria: inclusion,
+            exclusionCriteria: exclusion,
+            fullTextExclusionReasons: fulltext
+        };
+
+        for (const study of studies) {
+            const { score, explanation } = scoringEngine.scoreStudy(study, criteria);
+            studyScoreRepo.upsertScore.run(study.id, projectId, score, explanation);
+        }
+
+        res.json({ success: true });
+    }
+);
+
 // edits to the project details
 router.patch(
     "/projects/:projectId",
