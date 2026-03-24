@@ -2,9 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../db.js");
 const requireProjectAccess = require("../middleware/projectAuth.js");
-const scoringEngine = require("../utils/scoringEngine.js");
+
 const studyScoreRepo = require("../repos/studyScoreRepo.js");
 const criteriaRepo = require("../repos/criteriaRepo.js")
+
+const scoringEngine = require("../utils/scoringEngine.js");
+const aiScoringEngine = require("../utils/aiScoringEngine.js");
+const usingAIScoring = true;
 
 /* middleware */
 function requireAuth(req, res, next) {
@@ -324,7 +328,7 @@ router.post(
     "/projects/:projectId",
     requireAuth,
     requireProjectAccess,
-    (req, res) => {
+    async (req, res) => {
         const projectId = Number(req.params.projectId);
 
         const studies = db.prepare(`
@@ -351,9 +355,29 @@ router.post(
             fullTextExclusionReasons: fulltext
         };
 
+        const project_background = db.prepare(`
+            SELECT title, study_type FROM projects WHERE id = ?
+        `).get(projectId);
+
         for (const study of studies) {
-            const { score, explanation } = scoringEngine.scoreStudy(study, criteria);
-            studyScoreRepo.upsertScore.run(study.id, projectId, score, explanation);
+            let result;
+
+            if (usingAIScoring) {
+                result = await aiScoringEngine.scoreStudyAI(
+                    study,
+                    criteria,
+                    project_background
+                );
+            } else {
+                result = scoringEngine.scoreStudy(study, criteria)
+            }
+            
+            studyScoreRepo.upsertScore.run(
+                study.id, 
+                projectId, 
+                result.score, 
+                result.explanation
+            );
         }
 
         res.json({ success: true });

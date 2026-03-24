@@ -8,8 +8,11 @@ const cors = require("cors");
 // const crypto = require("crypto");
 
 const requireProjectAccess = require("./middleware/projectAuth.js");
-const scoringEngine = require("./utils/scoringEngine.js");
 const criteriaRepo = require("./repos/criteriaRepo.js");
+
+const scoringEngine = require("./utils/scoringEngine.js");
+const aiScoringEngine = require("./utils/aiScoringEngine.js");
+const usingAIScoring = true;
 
 const userRoutes = require("./routes/users.js");
 const projectRoutes = require("./routes/projects.js");
@@ -118,7 +121,7 @@ app.post(
     "/api/projects/:projectId/studies/bulk", 
     requireAuth, 
     requireProjectAccess, 
-    (req, res) => {      
+    async (req, res) => {      
         const studies = req.body.studies;
         const projectId = Number(req.params.projectId);
 
@@ -181,12 +184,28 @@ app.post(
                 SELECT * FROM studies WHERE id = ?    
             `);
             
+            const project_background = db.prepare(`
+                SELECT title, study_type FROM projects WHERE id = ?
+            `).get(projectId);
+
             for (const studyId of insertedIds) {
                 const study = getStudyByIdStmt.get(studyId);
                 if (!study) continue;
 
-                const { score, explanation } = scoringEngine.scoreStudy(study, criteria);
-                studyScoreRepo.upsertScore.run(studyId, projectId, score, explanation);
+                let result;
+
+                if (usingAIScoring) {
+                    result = await aiScoringEngine.scoreStudyAI(study, criteria, project_background);
+                } else {
+                    result = scoringEngine.scoreStudy(study, criteria);
+                }
+
+                studyScoreRepo.upsertScore.run(
+                    studyId, 
+                    projectId,
+                    result.score, 
+                    result.explanation
+                );
             }
 
             res.json({ 
@@ -451,7 +470,7 @@ app.use((err, req, res, next) => {
     console.error("SERVER ERROR: ", err);
 
     if (res.headersSent) return next(err);
-    
+
     res.status(500).json({ 
         success: false,
         error: "Internal Server Error",
