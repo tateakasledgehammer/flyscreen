@@ -10,6 +10,14 @@ const scoringEngine = require("../utils/scoringEngine.js");
 const aiScoringEngine = require("../utils/aiScoringEngine.js");
 const usingAIScoring = true;
 
+function chunk(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i+= size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+}
+
 /* middleware */
 function requireAuth(req, res, next) {
     if (!req.user) {
@@ -362,25 +370,48 @@ router.post(
             SELECT title, study_type, context FROM project_background WHERE project_id = ?
         `).get(projectId);
 
-        for (const study of studies) {
-            let result;
+        const getStudyByIdStmt = db.prepare(`
+            SELECT * FROM studies WHERE id = ?
+        `);
+
+        const studyIds = studies.map(s => s.id);
+        const batches = chunk(studyIds, 10);
+
+        for (const batch of batches) {
+            const studies = batch.map(id => getStudyByIdStmt.get(id))
+
+            let results = null;
 
             if (usingAIScoring) {
-                result = await aiScoringEngine.scoreStudyAI(
-                    study,
-                    criteria,
-                    project_background
-                );
-            } else {
-                result = scoringEngine.scoreStudy(study, criteria)
-            }
+                try {
+                    results = await aiScoringEngine.scoreStudiesAI(
+                        studies, 
+                        criteria, 
+                        project_background);
+                } catch (err) {
+                    console.error("AI scoring failed:", err);
+                }
+            } 
             
-            studyScoreRepo.upsertScore.run(
-                study.id, 
-                projectId, 
-                result.score, 
-                result.explanation
-            );
+            if (!results) {
+                results = studies.map(s => {
+                    const r = scoringEngine.scoreStudy(s, criteria);
+                    return {
+                        id: s.id,
+                        score: r.score,
+                        explanation: r.explanation
+                    }
+                });
+            }
+
+            for (const result of results) {
+                studyScoreRepo.upsertScore.run(
+                    result.id,
+                    projectId,
+                    result.score, 
+                    result.explanation
+                );
+            }
         }
 
         res.json({ success: true });

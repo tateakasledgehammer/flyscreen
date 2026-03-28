@@ -1,7 +1,7 @@
 const OpenAI = require("openai");
 
 module.exports = {
-    async scoreStudyAI(study, criteria, project_background) {
+    async scoreStudiesAI(studies, criteria, project_background) {
         const openai = new OpenAI({ 
             apiKey: process.env.OPENAI_API_KEY 
         });
@@ -14,15 +14,25 @@ module.exports = {
             You are assisting with ${studyType} 
             screening for the project ${projectTitle}.
 
-            Here is some information on the project, the background, context & aim:
+            Background:
             ${projectContext}
 
-            Study:
-            Title: ${study.title}
-            Abstract: ${study.abstract}
-            Keywords: ${study.keywords}
-            Year: ${study.year}
-            DOI: ${study.doi}
+            Task:
+            1. Decide if the study matches the inclusion and exclusion criteria & context
+            2. Give relevance score from 0 to 1
+            3. Give a short explanation
+
+            For each study, return:
+            [
+                {
+                    "id": <study.id>,
+                    "score": number,
+                    "explanation": string
+                }
+            ]
+            
+            Studies:
+            ${JSON.stringify(studies, null, 2)}
 
             Inclusion Criteria:
             ${JSON.stringify(criteria.inclusionCriteria, null, 2)}
@@ -30,17 +40,6 @@ module.exports = {
             Exclusion Criteria:
             ${JSON.stringify(criteria.exclusionCriteria, null, 2)}
 
-            Task:
-            1. Decide if the study matches the inclusion criteria
-            2. Decide if the study matches the exclusion criteria
-            3. Give relevance from 0 to 1
-            4. Give a short explanation
-
-            Return JSON only:
-            {
-                "score": number,
-                "explanation": string
-            }
         `;
 
         const response = await openai.chat.completions.create({
@@ -50,8 +49,6 @@ module.exports = {
 
         const json = JSON.parse(response.choices[0].message.content);
         
-        console.log("API KEY LOADED?", process.env.OPENAI_API_KEY ? "LOADED" : "MISSING");
-
         return json;
     }
 }

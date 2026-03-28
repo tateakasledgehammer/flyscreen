@@ -14,6 +14,14 @@ const scoringEngine = require("./utils/scoringEngine.js");
 const aiScoringEngine = require("./utils/aiScoringEngine.js");
 const usingAIScoring = true;
 
+function chunk(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i+= size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+}
+
 const userRoutes = require("./routes/users.js");
 const projectRoutes = require("./routes/projects.js");
 
@@ -188,24 +196,43 @@ app.post(
                 SELECT title, context, study_type FROM project_background WHERE project_id = ?
             `).get(projectId);
 
-            for (const studyId of insertedIds) {
-                const study = getStudyByIdStmt.get(studyId);
-                if (!study) continue;
+            const batches = chunk(insertedIds, 10);
 
-                let result;
+            for (const batch of batches) {
+                const studies = batch.map(id => getStudyByIdStmt.get(id))
+
+                let results = null;
 
                 if (usingAIScoring) {
-                    result = await aiScoringEngine.scoreStudyAI(study, criteria, project_background);
-                } else {
-                    result = scoringEngine.scoreStudy(study, criteria);
+                    try {
+                        results = await aiScoringEngine.scoreStudiesAI(
+                            studies, 
+                            criteria, 
+                            project_background);
+                    } catch (err) {
+                        console.error("AI scoring failed:", err);
+                    }
+                } 
+                
+                if (!results) {
+                    results = studies.map(s => {
+                        const r = scoringEngine.scoreStudy(s, criteria);
+                        return {
+                            id: s.id,
+                            score: r.score,
+                            explanation: r.explanation
+                        }
+                    });
                 }
 
-                studyScoreRepo.upsertScore.run(
-                    studyId, 
-                    projectId,
-                    result.score, 
-                    result.explanation
-                );
+                for (const result of results) {
+                    studyScoreRepo.upsertScore.run(
+                        result.id,
+                        projectId,
+                        result.score, 
+                        result.explanation
+                    );
+                }
             }
 
             res.json({ 

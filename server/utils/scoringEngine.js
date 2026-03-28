@@ -9,7 +9,7 @@ module.exports = {
         for (const section of criteria.inclusionCriteria || []) {
             for (const term of section.criteria) {
                 if (text.includes(term.toLowerCase())) {
-                    score +=1;
+                    score +=0.2;
                     explanation.push(`Matched inclusion term: ${term}`)
                 }
             }
@@ -17,7 +17,7 @@ module.exports = {
         for (const section of criteria.exclusionCriteria || []) {
             for (const term of section.criteria) {
                 if (text.includes(term.toLowerCase())) {
-                    score -=2;
+                    score -=0.3;
                     explanation.push(`Matched exclusion term: ${term}`)
                 }
             }
