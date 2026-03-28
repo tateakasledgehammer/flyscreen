@@ -129,6 +129,7 @@ router.get(
             description: projectRow.description,
 
             title: background.title,
+            context: background.context,
             study_type: background.study_type,
             question_type: background.question_type,
             research_area: background.research_area,
@@ -204,16 +205,18 @@ router.post(
                 // background
                 if (background) {
                     db.prepare(`
-                        INSERT INTO project_background (project_id, title, study_type, question_type, research_area)    
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO project_background (project_id, title, context, study_type, question_type, research_area)    
+                        VALUES (?, ?, ?, ?, ?, ?)
                         ON CONFLICT(project_id) DO UPDATE SET
                             title = excluded.title,
+                            context = excluded.context,
                             study_type = excluded.study_type,
                             question_type = excluded.question_type,
                             research_area = excluded.research_area
                     `).run(
                         projectId,
                         background.title || "",
+                        background.context || "",
                         background.study_type || "",
                         background.question_type || "",
                         background.research_area || ""
@@ -356,7 +359,7 @@ router.post(
         };
 
         const project_background = db.prepare(`
-            SELECT title, study_type FROM projects WHERE id = ?
+            SELECT title, study_type, context FROM project_background WHERE project_id = ?
         `).get(projectId);
 
         for (const study of studies) {

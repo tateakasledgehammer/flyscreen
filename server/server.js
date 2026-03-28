@@ -185,7 +185,7 @@ app.post(
             `);
             
             const project_background = db.prepare(`
-                SELECT title, study_type FROM projects WHERE id = ?
+                SELECT title, context, study_type FROM project_background WHERE project_id = ?
             `).get(projectId);
 
             for (const studyId of insertedIds) {

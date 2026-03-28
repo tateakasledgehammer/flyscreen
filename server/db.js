@@ -44,6 +44,7 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS project_background (
             project_id INTEGER PRIMARY KEY,
             title TEXT,
+            context TEXT,
             study_type TEXT,
             question_type TEXT,
             research_area TEXT,

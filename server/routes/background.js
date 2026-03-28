@@ -26,17 +26,18 @@ router.post("/projects/:projectId/background",
     requireProjectAccess, 
     (req, res) => {
     const projectId = Number(req.params.projectId);
-    const { title, study_type, question_type, research_area } = req.body;
+    const { title, context, study_type, question_type, research_area } = req.body;
 
     db.prepare(`
-        INSERT INTO project_background (project_id, title, study_type, question_type, research_area)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO project_background (project_id, title, context, study_type, question_type, research_area)
+        VALUES (?, ?, ?, ?, ?, ?)
         ON CONFLICT(project_id) DO UPDATE SET
             title = excluded.title,
+            context = excluded.context,
             study_type = excluded.study_type,
             question_type = excluded.question_type,
             research_area = excluded.research_area
-    `).run(projectId, title, study_type, question_type, research_area);
+    `).run(projectId, title, context, study_type, question_type, research_area);
 
     res.json({ success: true });
 });

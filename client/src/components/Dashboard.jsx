@@ -156,10 +156,14 @@ export default function Dashboard(props) {
                 <div 
                     key={proj.id}
                     className="homepage-section"
-                    style={{ cursor: "pointer", background: proj.id === projectId ? "lightgray" : "white" }}
+                    style={{ cursor: "pointer", border: proj.id === projectId ? "3px solid" : "1px solid" }}
                     onClick={() => handleSelectProject(proj.id)}
                 >
-                    <p>Project: <strong>{proj.name}</strong> with {" "} </p>
+                    <p>
+                        <strong>
+                            Project: {proj.name}
+                        </strong> with {" "} 
+                    </p>
                     {proj.collaborators?.length > 0 ? (
                         <ul>
                             {proj.collaborators.map(c => (
@@ -178,11 +182,14 @@ export default function Dashboard(props) {
                         "no other reviewers"
                     )}
 
-                    <p>Create: {" "}
+                    <p><strong>Created:</strong> {" "}
                         {new Date(proj.created_at).toLocaleDateString()}
                     </p>
                     <p>
-                        Status: {" "}
+                        <strong>
+                        Status: 
+                        </strong>
+                        {" "}
                         {proj.id === projectId ? (
                             <span style={{ color: "green" }}>Selected</span>
                         ) : (

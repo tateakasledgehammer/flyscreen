@@ -142,8 +142,7 @@ export default function Overview(props) {
         <Navbar />
         <div className="page-container">
             <h2>
-                <i className="fa-solid fa-house-chimney"></i>
-                Your Homepage
+                <i className="fa-solid fa-house-chimney"></i> Your Homepage
             </h2>
             
             {/* Add class and styling for the homepage cards + progress bar */}

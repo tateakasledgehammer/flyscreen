@@ -25,6 +25,7 @@ export default function Setup(props) {
     
     const [background, setBackground] = useState({
         title: "",
+        context: "",
         study_type: "",
         question_type: "",
         research_area: ""
@@ -89,6 +90,7 @@ export default function Setup(props) {
         
             setBackground({
                 title: data.title || "",
+                context: data.context || "",
                 study_type: data.study_type || "",
                 question_type: data.question_type || "",
                 research_area: data.research_area || ""
@@ -190,12 +192,6 @@ export default function Setup(props) {
         <div className="page-container">
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
-        {savedToast && (
-            <div className="saved-toast">
-                Saved!
-            </div>
-        )}
-
         <div className="homepage-section">
                 <h3>Clear</h3>
                 <button onClick={resetApp}>Reset</button>
@@ -250,6 +246,12 @@ export default function Setup(props) {
             fullTextReasons={fullTextReasons}
             setFullTextReasons={setFullTextReasons}
         />
+
+        {savedToast && (
+            <div className="saved-toast">
+                Saved!
+            </div>
+        )}
 
         <button onClick={resetApp}>
             Reset

@@ -1,13 +1,21 @@
 const OpenAI = require("openai");
-const openai = new OpenAI({ 
-    apiKey: process.env.OPENAI_API_KEY 
-});
 
 module.exports = {
     async scoreStudyAI(study, criteria, project_background) {
+        const openai = new OpenAI({ 
+            apiKey: process.env.OPENAI_API_KEY 
+        });
+
+        const studyType = project_background?.study_type || "unspecified study type";
+        const projectTitle = project_background?.title || "untitled project";
+        const projectContext = project_background?.context || "currently missing further background info"
+
         const prompt = `
-            You are assisting with ${project_background.study_type} 
-            screening for the project ${project_background.title}.
+            You are assisting with ${studyType} 
+            screening for the project ${projectTitle}.
+
+            Here is some information on the project, the background, context & aim:
+            ${projectContext}
 
             Study:
             Title: ${study.title}
