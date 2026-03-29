@@ -42,12 +42,18 @@ module.exports = {
 
         `;
 
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [{ role: "user", content: prompt }]
+        const response = await openai.responses.create({
+            model: "gpt-5.4-nano",
+            input: prompt
         });
 
-        const json = JSON.parse(response.choices[0].message.content);
+        let json;
+        try {
+            json = JSON.parse(response.output_text);
+        } catch (err) {
+            console.error("AI returned invalid JSON:", response.output_text);
+            return null;
+        }
         
         return json;
     }

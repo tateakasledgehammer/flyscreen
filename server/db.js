@@ -245,6 +245,19 @@ const initSchema = db.transaction(() => {
         )
     `).run();
 
+    // Scoring queue
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS scoring_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            study_id INTEGER NOT NULL,
+            project_id INTEGER NOT NULL,
+            status TEXT DEFAULT 'pending',
+            attempts INTEGER DEFAULT 0,
+            last_error TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `)
+
 });
 
 initSchema();

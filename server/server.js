@@ -199,14 +199,14 @@ app.post(
             const batches = chunk(insertedIds, 10);
 
             for (const batch of batches) {
-                const studies = batch.map(id => getStudyByIdStmt.get(id))
+                const batchStudies = batch.map(id => getStudyByIdStmt.get(id))
 
                 let results = null;
 
                 if (usingAIScoring) {
                     try {
                         results = await aiScoringEngine.scoreStudiesAI(
-                            studies, 
+                            batchStudies, 
                             criteria, 
                             project_background);
                     } catch (err) {
@@ -215,7 +215,7 @@ app.post(
                 } 
                 
                 if (!results) {
-                    results = studies.map(s => {
+                    results = batchStudies.map(s => {
                         const r = scoringEngine.scoreStudy(s, criteria);
                         return {
                             id: s.id,
@@ -504,7 +504,7 @@ app.use((err, req, res, next) => {
         details: process.env.NODE_ENV === "development" ? err.message : undefined
     });
 });
-  
+
 app.listen(PORT, () => {
     // console.log(`Server running at http://localhost:${PORT}`);
 });

@@ -336,7 +336,7 @@ router.get(
 )
 
 router.post(
-    "/projects/:projectId",
+    "/projects/:projectId/rescore",
     requireAuth,
     requireProjectAccess,
     async (req, res) => {
@@ -378,14 +378,14 @@ router.post(
         const batches = chunk(studyIds, 10);
 
         for (const batch of batches) {
-            const studies = batch.map(id => getStudyByIdStmt.get(id))
+            const batchStudies = batch.map(id => getStudyByIdStmt.get(id))
 
             let results = null;
 
             if (usingAIScoring) {
                 try {
                     results = await aiScoringEngine.scoreStudiesAI(
-                        studies, 
+                        batchStudies, 
                         criteria, 
                         project_background);
                 } catch (err) {
@@ -394,7 +394,7 @@ router.post(
             } 
             
             if (!results) {
-                results = studies.map(s => {
+                results = batchStudies.map(s => {
                     const r = scoringEngine.scoreStudy(s, criteria);
                     return {
                         id: s.id,

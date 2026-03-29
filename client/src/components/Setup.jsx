@@ -131,7 +131,7 @@ export default function Setup(props) {
                 })
             });
 
-            await fetch(`/api/projects/${projectId}`, {
+            await fetch(`/api/projects/${projectId}/rescore`, {
                 method: "POST",
                 credentials: "include"
             });
@@ -176,6 +176,28 @@ export default function Setup(props) {
         window.location.href = "/";
     }
 
+    const [isRescoring, setIsRescoring] = useState("");
+
+    async function handleRescore() {
+        setIsRescoring(true);
+
+        try {
+            await fetch(`/api/projects/${projectId}/rescore`, {
+                method: "POST",
+                credentials: "include"
+            })
+
+            await loadStudies();
+
+            toast.success("All studies rescored");
+        } catch (err) {
+            console.error("Rescore failed:", err);
+            toast.error("Failed to rescore studies");
+        }
+
+        setIsRescoring(false);
+    }
+
     useEffect(() => {
         if (!projectId) return;
         loadSetup();
@@ -193,9 +215,17 @@ export default function Setup(props) {
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
         <div className="homepage-section">
-                <h3>Clear</h3>
-                <button onClick={resetApp}>Reset</button>
-                <br /><br />
+            <h3>Clear</h3>
+            <button onClick={resetApp}>Reset</button>
+            <br /><br />
+            <h3>Rescore Studies</h3>
+            <button 
+                onClick={handleRescore}
+                disabled={isRescoring}
+            >
+                {isRescoring ? "Re-scoring.." : "Re-score All"}
+            </button>
+            <br /><br />
         </div>
 
         <ReviewTitleSection
