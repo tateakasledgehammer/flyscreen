@@ -12,7 +12,7 @@ const criteriaRepo = require("./repos/criteriaRepo.js");
 
 const scoringEngine = require("./utils/scoringEngine.js");
 const aiScoringEngine = require("./utils/aiScoringEngine.js");
-const usingAIScoring = true;
+const usingAIScoring = false;
 
 function chunk(array, size) {
     const chunks = [];
@@ -26,6 +26,7 @@ const userRoutes = require("./routes/users.js");
 const projectRoutes = require("./routes/projects.js");
 
 const tagRoutes = require("./routes/tags.js");
+const filterRoutes = require("./routes/filters.js");
 const criteriaRoutes = require("./routes/criteria.js");
 const backgroundRoutes = require("./routes/background.js");
 const reviewerRoutes = require("./routes/reviewers.js");
@@ -99,6 +100,7 @@ const requireAuth = (req, res, next) => {
 app.use("/api", screeningRoutes);
 app.use("/api", notesRoutes);
 app.use("/api", tagRoutes);
+app.use("/api", filterRoutes);
 app.use("/api", duplicateRoutes);
 app.use("/api", studyDetailRoutes);
 app.use("/api", projectRoutes);
@@ -212,7 +214,7 @@ app.post(
                     } catch (err) {
                         console.error("AI scoring failed:", err);
                     }
-                } 
+                }
                 
                 if (!results) {
                     results = batchStudies.map(s => {
@@ -339,6 +341,7 @@ app.delete(
                 db.prepare("DELETE FROM screenings WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM notes WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM tags WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM filter_terms WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM study_tags WHERE project_id = ?").run(projectId);
 
                 const sectionIds = db.prepare(`

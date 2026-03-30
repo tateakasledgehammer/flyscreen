@@ -218,6 +218,7 @@ export default function CriteriaSetupSection({
                 <button onClick={addFullTextReason}>Add Full Text Exclusion Reason (i.e. primary study, unavailable, incorrect population...)</button>
                 {fullTextReasons.length === 0 && <p>No criteria set.</p>}
 
+                <div className="inclusion-exclusion-criteria">
                     {(fullTextReasons.map((term, index) => (
                         <div key={index}>
                             <h4>
@@ -226,7 +227,9 @@ export default function CriteriaSetupSection({
                             </h4>
                         </div>
                     )))}
+                </ div>
                 
+                <br />
                 <button onClick={clearFullTextReasons}>Clear Full Text Criteria</button>
             </div>
 

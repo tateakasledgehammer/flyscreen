@@ -8,7 +8,7 @@ const criteriaRepo = require("../repos/criteriaRepo.js")
 
 const scoringEngine = require("../utils/scoringEngine.js");
 const aiScoringEngine = require("../utils/aiScoringEngine.js");
-const usingAIScoring = true;
+const usingAIScoring = false;
 
 function chunk(array, size) {
     const chunks = [];
@@ -99,6 +99,10 @@ router.get(
             SELECT * FROM tags WHERE project_id = ?    
         `).all(projectId);
 
+        const filters = db.prepare(`
+            SELECT * FROM filter_terms WHERE project_id = ?
+        `).all(projectId);
+
         const collaborators = db.prepare(`
             SELECT u.id, u.username, pu.role
             FROM project_users pu
@@ -145,6 +149,7 @@ router.get(
             reviewerSettings,
             collaborators,
             tags,
+            filters,
             inclusionCriteria: inclusion,
             exclusionCriteria: exclusion,
             fullTextExclusionReasons: fulltext
@@ -160,6 +165,7 @@ router.post(
         const projectId = Number(req.params.projectId);
         const {
             tags,
+            filters,
             inclusionCriteria,
             exclusionCriteria,
             fullTextExclusionReasons,
@@ -169,46 +175,61 @@ router.post(
 
         try {
             const tx = db.transaction(() => {
-                // tags
-                if (Array.isArray(tags)) {
-                    db.prepare(`DELETE FROM tags WHERE project_id = ?`).run(projectId);
-                    const insertTag = db.prepare(`
-                        INSERT INTO tags (name, project_id)
-                        VALUES (?, ?)
-                    `);
+                // // tags
+                // if (Array.isArray(tags)) {
+                //     db.prepare(`DELETE FROM tags WHERE project_id = ?`).run(projectId);
+                //     const insertTag = db.prepare(`
+                //         INSERT INTO tags (name, project_id)
+                //         VALUES (?, ?)
+                //     `);
 
-                    tags.forEach(t => {
-                        if (t?.name?.trim()) {
-                            insertTag.run(t.name.trim(), projectId);
-                        }
-                    })
-                }
+                //     tags.forEach(t => {
+                //         if (t?.name?.trim()) {
+                //             insertTag.run(t.name.trim(), projectId);
+                //         }
+                //     })
+                // }
 
-                // criteria
-                criteriaRepo.clearItems.run(projectId);
-                criteriaRepo.clearSections.run(projectId);
-                criteriaRepo.clearFullText.run(projectId);
+                // // filters
+                // if (Array.isArray(filters)) {
+                //     db.prepare(`DELETE FROM filter_terms WHERE project_id = ?`).run(projectId);
+                //     const insertFilter = db.prepare(`
+                //         INSERT INTO filter_terms (name, project_id)
+                //         VALUES (?, ?)
+                //     `);
 
-                const insertSection = criteriaRepo.insertSection;
-                const insertItem = criteriaRepo.insertItem;
+                //     filters.forEach(f => {
+                //         if (f?.name?.trim()) {
+                //             insertFilter.run(f.name.trim(), projectId);
+                //         }
+                //     })
+                // }
 
-                if (Array.isArray(inclusionCriteria)) {
-                    inclusionCriteria.forEach(sec => {
-                        const result = insertSection.run(projectId, "inclusion", sec.category);
-                        sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
-                    })
-                }
-                if (Array.isArray(exclusionCriteria)) {
-                    exclusionCriteria.forEach(sec => {
-                        const result = insertSection.run(projectId, "exclusion", sec.category);
-                        sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
-                    })
-                }
-                if (Array.isArray(fullTextExclusionReasons)) {
-                    fullTextExclusionReasons.forEach(reason => {
-                        criteriaRepo.insertFullText.run(projectId, reason);
-                    })
-                }
+                // // criteria
+                // criteriaRepo.clearItems.run(projectId);
+                // criteriaRepo.clearSections.run(projectId);
+                // criteriaRepo.clearFullText.run(projectId);
+
+                // const insertSection = criteriaRepo.insertSection;
+                // const insertItem = criteriaRepo.insertItem;
+
+                // if (Array.isArray(inclusionCriteria)) {
+                //     inclusionCriteria.forEach(sec => {
+                //         const result = insertSection.run(projectId, "inclusion", sec.category);
+                //         sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
+                //     })
+                // }
+                // if (Array.isArray(exclusionCriteria)) {
+                //     exclusionCriteria.forEach(sec => {
+                //         const result = insertSection.run(projectId, "exclusion", sec.category);
+                //         sec.criteria.forEach(c => insertItem.run(result.lastInsertRowid, c));
+                //     })
+                // }
+                // if (Array.isArray(fullTextExclusionReasons)) {
+                //     fullTextExclusionReasons.forEach(reason => {
+                //         criteriaRepo.insertFullText.run(projectId, reason);
+                //     })
+                // }
 
                 // background
                 if (background) {

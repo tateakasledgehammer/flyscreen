@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from "react";
+
 import Navbar from "./Navbar";
 
 import ReviewTitleSection from "./setup/ReviewTitleSection";
 import StudyTypeSection from "./setup/StudyTypeSection";
 import TagSetupSection from "./setup/TagSetupSection";
+import FilterTermSection from "./setup/FilterTermSection"
 import CriteriaSetupSection from "./setup/CriteriaSetupSection";
 import QuestionTypeSection from "./setup/QuestionTypeSection";
 import ResearchAreaSection from "./setup/ResearchAreaSection";
@@ -18,6 +20,9 @@ export default function Setup(props) {
 
     const [tags, setTags] = useState([])
     const [newTag, setNewTag] = useState('');
+
+    const [filters, setFilters] = useState([]);
+    const [newFilter, setNewFilter] = useState('');
 
     const [inclusionSections, setInclusionSections] = useState([]);
     const [exclusionSections, setExclusionSections] = useState([]);
@@ -37,7 +42,6 @@ export default function Setup(props) {
         extraction: 2
     });
 
-    // toast
     const [savedToast, setSavedToast] = useState(false);
     function showSavedToast() {
         setSavedToast(true);
@@ -45,6 +49,11 @@ export default function Setup(props) {
     }
 
     // Load everything
+    useEffect(() => {
+        if (!projectId) return;
+        loadSetup();
+    }, [projectId]);
+
     async function loadSetup() {
         if (!projectId) return;
 
@@ -61,6 +70,7 @@ export default function Setup(props) {
             const data = await res.json();
 
             setTags(data.tags || []);
+            setFilters(data.filters || []);
     
             const hasInclusion = Array.isArray(data.inclusionCriteria) && data.inclusionCriteria.length > 0;
             const hasExclusion = Array.isArray(data.exclusionCriteria) && data.exclusionCriteria.length > 0;
@@ -103,17 +113,13 @@ export default function Setup(props) {
             });    
 
         } catch (err) {
-            console.error("Unified setup load error:", err);
+            console.error("Setup load error:", err);
         }
     }
 
     // save
-    const saveTimeout = useRef(null);
-
-    function scheduleAutosave() {
-        if (saveTimeout.current) clearTimeout(saveTimeout.current);
-        saveTimeout.current = setTimeout(() => saveSetup(), 500);
-    }
+    const setupTimer = useRef(null);
+    const criteriaTimer = useRef(null);
 
     async function saveSetup() {
         try {
@@ -123,25 +129,52 @@ export default function Setup(props) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     tags,
-                    inclusionCriteria: inclusionSections,
-                    exclusionCriteria: exclusionSections,
-                    fullTextExclusionReasons: fullTextReasons,
+                    filters,
                     background,
                     reviewerSettings
                 })
             });
 
-            await fetch(`/api/projects/${projectId}/rescore`, {
-                method: "POST",
-                credentials: "include"
-            });
-
+            console.log("Setup auto-saved");
             showSavedToast();
 
         } catch (err) {
             console.error("Unified save failed:", err);
         }
     }
+
+    async function saveCriteria() {
+        try {
+            await fetch(`/api/projects/${projectId}/criteria`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    inclusionCriteria: inclusionSections,
+                    exclusionCriteria: exclusionSections,
+                    fullTextExclusionReasons: fullTextReasons,
+                })
+            });
+
+            console.log("Criteria auto-saved");
+            showSavedToast();
+
+        } catch (err) {
+            console.error("Failed to save criteria:", err);
+        }
+    }
+
+    function setupAutosave() {
+        if (setupTimer.current) clearTimeout(setupTimer.current);
+        setupTimer.current = setTimeout(() => saveSetup(), 500);
+    }
+    function criteriaAutosave() {
+        if (criteriaTimer.current) clearTimeout(criteriaTimer.current);
+        criteriaTimer.current = setTimeout(() => saveCriteria(), 500);
+    }
+
+    useEffect(() => setupAutosave(), [background, reviewerSettings, tags, filters]);
+    useEffect(() => criteriaAutosave(), [inclusionSections, exclusionSections, fullTextReasons]);
 
     // tags
     async function addTag() {
@@ -155,8 +188,7 @@ export default function Setup(props) {
         });
 
         const created = await res.json();
-
-        setTags(prev => [...prev, { name: newTag.trim() }]);
+        setTags(prev => [...prev, created]);
         setNewTag("");
     }
 
@@ -169,6 +201,32 @@ export default function Setup(props) {
         setTags(prev => prev.filter(t => t.id !== tagId));
     }
 
+    // filters
+    async function addFilter() {
+        if (!newFilter.trim()) return;
+
+        const res = await fetch(`/api/projects/${projectId}/filters`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newFilter.trim() })
+        });
+
+        const created = await res.json();
+        setFilters(prev => [...prev, created]);
+        setNewFilter("");
+    }
+
+    async function deleteFilter(filterId) {
+        console.log("Deleting filter with ID:", filterId);
+        const res = await fetch(`/api/projects/${projectId}/filters/${filterId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        setFilters(prev => prev.filter(f => f.id !== filterId));
+    }
+
     // Reset
     function resetApp() {
         setStudies([]);
@@ -176,37 +234,26 @@ export default function Setup(props) {
         window.location.href = "/";
     }
 
-    const [isRescoring, setIsRescoring] = useState("");
+    // Rescoring
+    const [isRescoring, setIsRescoring] = useState(false);
 
     async function handleRescore() {
         setIsRescoring(true);
 
         try {
-            await fetch(`/api/projects/${projectId}/rescore`, {
+            const res = await fetch(`/api/projects/${projectId}/rescore`, {
                 method: "POST",
                 credentials: "include"
-            })
+            });
 
-            await loadStudies();
+            if (!res.ok) throw new Error("Rescore failed");
 
-            toast.success("All studies rescored");
         } catch (err) {
             console.error("Rescore failed:", err);
-            toast.error("Failed to rescore studies");
         }
 
         setIsRescoring(false);
     }
-
-    useEffect(() => {
-        if (!projectId) return;
-        loadSetup();
-    }, [projectId]);
-
-    useEffect(() => scheduleAutosave(), [background]);
-    useEffect(() => scheduleAutosave(), [reviewerSettings]);
-    useEffect(() => scheduleAutosave(), [tags]);
-    useEffect(() => scheduleAutosave(), [inclusionSections, exclusionSections, fullTextReasons]);
 
     return (
         <>
@@ -262,6 +309,17 @@ export default function Setup(props) {
             setNewTag={setNewTag}
             addTag={addTag}
             deleteTag={deleteTag}
+        />
+
+        <br />
+        <hr />
+
+        <FilterTermSection
+            filters={filters}
+            newFilter={newFilter}
+            setNewFilter={setNewFilter}
+            addFilter={addFilter}
+            deleteFilter={deleteFilter}
         />
 
         <br />

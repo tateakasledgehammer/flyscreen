@@ -33,7 +33,7 @@ router.get("/projects/:projectId/criteria", requireAuth, requireProjectAccess, (
     res.json({
         inclusionCriteria: inclusion,
         exclusionCriteria: exclusion,
-        fullTextExclusionReasons: fulltext.map(f => f.reason)
+        fullTextExclusionReasons: fulltext
     });
 });
 

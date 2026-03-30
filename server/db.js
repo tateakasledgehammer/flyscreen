@@ -232,6 +232,18 @@ const initSchema = db.transaction(() => {
         )
     `).run();
 
+    // Filter terms
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS filter_terms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            project_id INTEGER NOT NULL,
+
+            UNIQUE(name, project_id),
+            FOREIGN KEY (project_id) REFERENCES projects(id)
+        )
+    `).run();
+
     // Probability
     db.prepare(`
         CREATE TABLE IF NOT EXISTS study_scores (
