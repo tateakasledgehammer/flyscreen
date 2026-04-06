@@ -17,8 +17,7 @@ export default function TAScreening(props) {
         projectId,
         handleAssignTag,
         handleAddNote,
-        handleFullTextExclusion,
-        fullTextExclusionReasons
+        handleFullTextExclusion
     } = props;
 
     // general useState for screening
@@ -26,16 +25,6 @@ export default function TAScreening(props) {
     const [studyTags, setStudyTags] = useState([]);
     const [toggleDetails, setToggleDetails] = useState({});
     const [statusFilter, setStatusFilter] = useState("");
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetch(`/api/projects/${projectId}/studies-with-scores`, { credentials: "include" })
-                .then(res => res.json())
-                .then(data => setStudies(data));
-        }, 3000);
-
-        return () => clearInterval(interval);
-    }, [projectId]);
 
     async function fetchScreeningSummary() {
         const res = await fetch(`/api/projects/${projectId}/screenings/summary`, {
@@ -87,6 +76,7 @@ export default function TAScreening(props) {
 
     const [inclusionTerms, setInclusionTerms] = useState([]);
     const [exclusionTerms, setExclusionTerms] = useState([]);
+    const [fullTextExclusionReasons, setFullTextExclusionReasons] = useState([]);
 
     useEffect(() => {
         if (!projectId) return;
@@ -96,8 +86,9 @@ export default function TAScreening(props) {
             .then(data => {
                 setInclusionTerms(data.inclusionCriteria.flatMap(section => section.criteria));
                 setExclusionTerms(data.exclusionCriteria.flatMap(section => section.criteria));
+                setFullTextExclusionReasons(data.fullTextExclusionReasons ?? []);
             });
-    }, [projectId])
+    }, [projectId]);
 
     const {
         filteredStudies,
@@ -187,7 +178,8 @@ export default function TAScreening(props) {
             </div>
 
             {/* Output section */}
-            <StudyCard 
+            <StudyCard
+                stage="TA"
                 studies={paginatedFinal} 
                 toggleDetails={toggleDetails}
                 setToggleDetails={setToggleDetails}

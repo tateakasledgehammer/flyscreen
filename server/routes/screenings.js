@@ -31,41 +31,37 @@ router.get(
     (req, res) => {
     try {
         const projectId = Number(req.params.projectId);
-        const rows = getScreeningsForProject.all(projectId);
+
+        const allStudies = db.prepare(`
+            SELECT id FROM studies WHERE project_id = ?
+        `).all(projectId);
+
         const summary = {};
 
+        for (const s of allStudies) {
+            summary[s.id] = {
+                TA: { votes: [], myVote: null, final: null, status: "UNSCREENED" },
+                FULLTEXT: { votes: [], myVote: null, final: null, status: "UNSCREENED" },
+                notes: noteRepo.getNotesForStudy.all(s.id, projectId),
+                tags: tagRepo.getTagsForStudy.all(s.id, projectId)
+            };
+        }
+
+        const rows = getScreeningsForProject.all(projectId);
+
         for (const row of rows) {
-            const { study_id, stage, vote, user_id, is_final } = row;
-
-            // Study + Stage structure
-            if (!summary[study_id]) {
-                summary[study_id] = {
-                    TA: { votes: [], myVote: null, final: null, status: "UNSCREENED" },
-                    FULLTEXT: { votes: [], myVote: null, final: null, status: "UNSCREENED" }
-                };
-
-                summary[study_id].notes = noteRepo.getNotesForStudy.all(
-                    study_id,
-                    projectId
-                );
-
-                summary[study_id].tags = tagRepo.getTagsForStudy.all(
-                    study_id,
-                    projectId
-                );
-            }
-
+            const { study_id, stage, vote, reason, user_id, is_final } = row;
             const bucket = summary[study_id][stage];
 
             if (is_final === 1) {
-                bucket.final = { user_id, vote };
+                bucket.final = { user_id, vote, reason };
                 continue;
             } 
 
             if (user_id === req.user.userid) {
-                bucket.myVote = { user_id, vote }
+                bucket.myVote = { user_id, vote, reason }
             } else {
-                bucket.votes.push({ user_id, vote });
+                bucket.votes.push({ user_id, vote, reason });
             }
         }
 
@@ -73,14 +69,10 @@ router.get(
             for (const stage of ["TA", "FULLTEXT"]) {
                 const stageData = summary[studyId][stage];
 
-                const final = rows.filter(
-                    r => r.study_id === Number(studyId) &&
-                    r.stage === stage &&
-                    r.is_final === 1
-                );
-
-                if (final.length > 0) {
-                    stageData.status = final[0].vote === "ACCEPT" ? "ACCEPTED" : "REJECTED";
+                if (stageData.final) {
+                    stageData.status = stageData.final.vote === "ACCEPT"
+                        ? "ACCEPTED"
+                        : "REJECTED";
                     continue;
                 }
 
@@ -90,18 +82,26 @@ router.get(
                 ];
 
                 const accepts = allVotes.filter(v => v.vote === "ACCEPT").length;
-                const rejects = allVotes.filter(v => v.vote === "REJECT").length;
+                const rejects = allVotes.filter(v => v.vote !== "ACCEPT").length;
                 
                 let status = "UNSCREENED";
                 if (allVotes.length === 1) status = "PENDING";
                 if (accepts >= 2) status = "ACCEPTED";
-                if (rejects >= 2) status = "REJECTED";
+                if (rejects >= 2) {
+                    const reasons = allVotes.map(v => v.reason ?? v.vote);
+                    const uniqueReasons = [...new Set(reasons)];
+
+                    if (uniqueReasons.length === 1) {
+                        status = "REJECTED";
+                    } else {
+                        status = "CONFLICT"
+                    }
+                }
                 if (accepts === 1 && rejects === 1) status = "CONFLICT";
 
                 stageData.status = status;
             }
         }
-        // console.log("SUMMARY BUILDER OUTPUT:", JSON.stringify(summary, null, 2));
 
         res.json(summary);
 

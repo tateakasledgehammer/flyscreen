@@ -50,8 +50,8 @@ export function handleSortByOrder(studies, sortBy) {
 }
 
 /* CAN USERS VOTE */
-export function canUserVoteTA(screening, currentUserId) {
-    if (!screening || !screening.TA || !currentUserId) return false;
+export function canUserVoteTA(screening) {
+    if (!screening || !screening.TA) return false;
 
     const { votes = [], myVote = null } = screening.TA;
 
@@ -60,10 +60,10 @@ export function canUserVoteTA(screening, currentUserId) {
 
     return true;
 }
-export function canUserVoteFT(screening, currentUserId) {
-    if (!screening || !screening.FULLTEXT || !currentUserId) return false;
+export function canUserVoteFT(screening) {
+    if (!screening || !screening.FULLTEXT) return false;
 
-    const { votes = [], myVote = null } = screening.TA;
+    const { votes = [], myVote = null } = screening.FULLTEXT;
 
     if (myVote !== null) return false;
     if (votes.length >= 2) return false;
