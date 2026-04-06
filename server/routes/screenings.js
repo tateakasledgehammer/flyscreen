@@ -216,15 +216,36 @@ router.post(
         `).run(req.params.studyId, stage);
 
         try {
-            db.prepare(`
-                INSERT INTO screenings (study_id, project_id, stage, vote, is_final, user_id)
-                VALUES (?, ?, ?, ?, 1, ?)    
-            `).run(
-                req.params.studyId, 
-                req.params.projectId, 
-                stage, 
-                decision,
-                req.user.userid);
+            if (stage === "FULLTEXT") {
+                const vote = decision === "ACCEPT" ? "ACCEPT" : "REJECT";
+                const reason = decision === "ACCEPT" ? null : decision;
+
+                db.prepare(`
+                    INSERT INTO screenings (study_id, project_id, stage, vote, reason, is_final, user_id)
+                    VALUES (?, ?, ?, ?, ?, 1, ?)    
+                `).run(
+                    req.params.studyId, 
+                    req.params.projectId, 
+                    stage, 
+                    vote,
+                    reason,
+                    req.user.userid
+                );
+            }
+
+            if (stage === "TA") {
+                db.prepare(`
+                    INSERT INTO screenings (study_id, project_id, stage, vote, is_final, user_id)
+                    VALUES (?, ?, ?, ?, 1, ?)    
+                `).run(
+                    req.params.studyId, 
+                    req.params.projectId, 
+                    stage, 
+                    decision,
+                    req.user.userid
+                );
+            }
+
         } catch (err) {
             console.error("RESOLVE ERROR:", err);
             return res.status(500).json({ error: err.message });

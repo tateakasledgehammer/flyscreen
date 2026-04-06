@@ -227,7 +227,18 @@ export default function StudyCard(props) {
                         )}      
 
                         {/* FULL TEXT */}
-                        {stage === "FULLTEXT" && (
+                        {stage === "FULLTEXT" && study.screening.FULLTEXT.final && (
+                            <div>
+                                <h4>Final Decision</h4>
+                                <p>
+                                    {study.screening.FULLTEXT.final.vote === "ACCEPT"
+                                        ? "ACCEPTED"
+                                        : `REJECTED (${study.screening.FULLTEXT.final.reason})`}
+                                </p>
+                            </div>
+                        )}
+
+                        {stage === "FULLTEXT" && !study.screening.FULLTEXT.final && (
                             <>
                             {/* VOTE BREAKDOWN */}
                             {(() => {
