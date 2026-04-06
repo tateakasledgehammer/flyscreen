@@ -27,6 +27,16 @@ export default function TAScreening(props) {
     const [toggleDetails, setToggleDetails] = useState({});
     const [statusFilter, setStatusFilter] = useState("");
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetch(`/api/projects/${projectId}/studies-with-scores`, { credentials: "include" })
+                .then(res => res.json())
+                .then(data => setStudies(data));
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [projectId]);
+
     async function fetchScreeningSummary() {
         const res = await fetch(`/api/projects/${projectId}/screenings/summary`, {
             credentials: "include"

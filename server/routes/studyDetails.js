@@ -16,10 +16,15 @@ function requireAuth(req, res, next) {
 }
 
 const getDuplicatesForStudy = db.prepare(`
-    SELECT id, duplicate_payload, detected_at
-    FROM duplicates
-    WHERE original_study_id = ?
-    ORDER BY detected_at DESC
+    SELECT 
+        d.id, 
+        d.duplicate_payload, 
+        d.detected_at,
+        d.upload_id
+    FROM duplicates d
+    WHERE d.original_study_id = ?
+    AND d.project_id = ?
+    ORDER BY d.detected_at DESC
 `);
 
 router.get(
@@ -76,7 +81,7 @@ router.get(
         }
 
         // Duplicates
-        const duplicates = getDuplicatesForStudy.all(studyId);
+        const duplicates = getDuplicatesForStudy.all(studyId, projectId);
 
         res.json({
             study,

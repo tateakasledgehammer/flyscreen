@@ -34,6 +34,7 @@ const initSchema = db.transaction(() => {
             description TEXT,
             created_by INTEGER NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            scoring_mode TEXT DEFAULT 'keyword',
             status TEXT DEFAULT 'active',
             
             FOREIGN KEY (created_by) REFERENCES users(id)
@@ -98,7 +99,6 @@ const initSchema = db.transaction(() => {
             language TEXT,
 
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            is_duplicate INTEGER DEFAULT 0,
 
             project_id INTEGER NOT NULL,
             upload_id INTEGER NOT NULL,
@@ -128,9 +128,11 @@ const initSchema = db.transaction(() => {
             detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
             project_id INTEGER NOT NULL,
+            upload_id INTEGER NOT NULL,
             
             FOREIGN KEY (original_study_id) REFERENCES studies(id) ON DELETE CASCADE,
-            FOREIGN KEY (project_id) REFERENCES projects(id)
+            FOREIGN KEY (project_id) REFERENCES projects(id),
+            FOREIGN KEY (upload_id) REFERENCES uploads(id)
         )
     `).run();
 
@@ -249,8 +251,9 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS study_scores (
             study_id INTEGER PRIMARY KEY,
             project_id INTEGER NOT NULL,
-            score REAL NOT NULL,
+            score REAL DEFAULT NULL,
             explanation TEXT,
+            score_status TEXT DEFAULT 'pending',
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (study_id) REFERENCES studies(id) ON DELETE CASCADE,
             FOREIGN KEY (project_id) REFERENCES projects(id)
@@ -310,36 +313,65 @@ const insertManyStudies = db.transaction((cleanStudies) => {
         )
     `);
 
-    const findByDOI = db.prepare(`SELECT id FROM studies WHERE doi = ?`);
-
-    const logDuplicate = db.prepare(`
-        INSERT INTO duplicates (original_study_id, duplicate_payload, project_id)
-        VALUES (?, ?, ?)
+    const findByTitleYear = db.prepare(`
+        SELECT id FROM studies
+        WHERE LOWER(title) = LOWER(?) 
+        AND year = ? 
+        AND project_id = ?    
     `);
 
-    const markDuplicate = db.prepare(`
-        UPDATE studies SET is_duplicate = 1 WHERE id = ?    
+    const findByDOI = db.prepare(`
+        SELECT id FROM studies 
+        WHERE doi = ? AND project_id = ?`
+    );
+
+    const logDuplicate = db.prepare(`
+        INSERT INTO duplicates (
+            original_study_id, 
+            duplicate_payload, 
+            project_id,
+            upload_id
+        ) VALUES (?, ?, ?, ?)
     `);
 
     const insertedIds = [];
 
     for (const study of cleanStudies) {
-        try {
-            const result = insert.run(study);
-            insertedIds.push(result.lastInsertRowid);
-
-        } catch (err) {
-            if (err.code === "SQLITE_CONSTRAINT_UNIQUE") {
-                const existing = findByDOI.get(study.doi);
-                if (existing) {
-                    logDuplicate.run(existing.id, JSON.stringify(study), study.project_id);
-                    markDuplicate.run(existing.id);
-                }
-
-                continue; // skip duplicate
-            }
-            throw err;
+        if (!study.doi || study.doi.trim() === "") {
+            study.doi = null;
         }
+
+        if (study.doi) {
+            const existing = findByDOI.get(study.doi, study.project_id);
+            if (existing) {
+                logDuplicate.run(
+                    existing.id,
+                    JSON.stringify(study),
+                    study.project_id,
+                    study.upload_id
+                );
+                continue;
+            }
+        }
+
+        const existingByTitleYear = findByTitleYear.get(
+            study.title,
+            study.year,
+            study.project_id
+        );
+
+        if (existingByTitleYear) {
+            logDuplicate.run(
+                existingByTitleYear.id,
+                JSON.stringify(study),
+                study.project_id,
+                study.upload_id
+            );
+            continue;
+        }
+
+        const result = insert.run(study);
+        insertedIds.push(result.lastInsertRowid);
     }
     
     return insertedIds;

@@ -48,10 +48,30 @@ export default function Setup(props) {
         setTimeout(() => setSavedToast(false), 1500);
     }
 
+    const [scoringMode, setScoringMode] = useState("keyword");
+
     // Load everything
     useEffect(() => {
         if (!projectId) return;
         loadSetup();
+    }, [projectId]);
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        async function fetchScoringMode() {
+            try {
+                const res = await fetch(`/api/projects/${projectId}`, {
+                    credentials: "include",
+                });
+                const data = await res.json();
+                setScoringMode(data.scoring_mode || "keyword");
+            } catch (err) {
+                console.error("Failed to fetch scoring mode", err);
+            }
+        }
+
+        fetchScoringMode();
     }, [projectId]);
 
     async function loadSetup() {
@@ -253,6 +273,34 @@ export default function Setup(props) {
         }
 
         setIsRescoring(false);
+        console.log("Rescore complete");
+    }
+
+    // Toggle AI
+    async function handleToggleAI() {
+        const mode = scoringMode === "ai" ? "keyword" : "ai";
+
+        if (mode === "ai") {
+            const confirm = window.confirm(
+                "AI scoring may take longer and use API credits.\nEnable AI scoring?"
+            );
+            if (!confirm) return;
+        } else {
+            const confirm = window.confirm(
+                "AI scores aren't saved, returning to keyword scores will require all studies to be re-scored by AI later if you want this option.\nDisable AI scoring?"
+            )
+            if (!confirm) return;
+        }
+
+        const res = await fetch(`/api/projects/${projectId}/scoring-mode`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ mode })
+        });
+
+        const data = await res.json();
+        setScoringMode(data.scoring_mode);
     }
 
     return (
@@ -264,7 +312,7 @@ export default function Setup(props) {
         <div className="homepage-section">
             <h3>Clear</h3>
             <button onClick={resetApp}>Reset</button>
-            <br /><br />
+            <br />
             <h3>Rescore Studies</h3>
             <button 
                 onClick={handleRescore}
@@ -272,7 +320,24 @@ export default function Setup(props) {
             >
                 {isRescoring ? "Re-scoring.." : "Re-score All"}
             </button>
-            <br /><br />
+            <br />
+            <h3>Use AI Scoring</h3>
+            <p>
+                <strong>
+                    Keep this off until your project background and 
+                    criteria are complete, and until all your studies 
+                    have been uploaded. </strong>
+                Once AI scoring has been selected and you have 
+                pressed the re-score button, you can move to the 
+                screening page and the studies will begin showing 
+                their scores.
+            </p>
+            <input
+                type="checkbox"
+                checked={scoringMode === "ai"}
+                onChange={handleToggleAI}
+            />
+            <br />
         </div>
 
         <ReviewTitleSection

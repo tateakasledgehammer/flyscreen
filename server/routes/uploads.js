@@ -25,11 +25,18 @@ router.get(
                 u.id AS upload_id,
                 u.file_name,
                 u.created_at,
-                COUNT(s.id) AS study_count
+                (
+                    SELECT COUNT(*)
+                    FROM studies s
+                    WHERE s.upload_id = u.id
+                ) AS study_count,
+                (
+                    SELECT COUNT(*)
+                    FROM duplicates d
+                    WHERE d.upload_id = u.id
+                ) AS duplicate_count
             FROM uploads u
-            LEFT JOIN studies s ON s.upload_id = u.id
             WHERE u.project_id = ?
-            GROUP BY u.id
             ORDER BY u.created_at DESC
         `).all(projectId);
 
@@ -41,6 +48,7 @@ router.get(
     }
 });
 
+// single upload delete
 router.delete(
     "/projects/:projectId/uploads/:uploadId", 
     requireAuth, 
@@ -50,6 +58,11 @@ router.delete(
     const uploadId = Number(req.params.uploadId);
 
     try {
+        db.prepare(`
+            DELETE FROM duplicates
+            WHERE project_id = ? AND upload_id = ?
+        `).run(projectId, uploadId);
+
         db.prepare(`
             DELETE FROM studies
             WHERE project_id = ? AND upload_id = ?
@@ -67,5 +80,33 @@ router.delete(
         res.status(500).json({ error: "Failed to delete uploads" });
     }
 });
+
+// clear all uploads
+router.delete(
+    "/projects/:projectId/uploads", 
+    requireAuth, 
+    requireProjectAccess,
+    (req, res) => {
+        const projectId = Number(req.params.projectId);
+
+        try {
+            db.prepare(`
+                DELETE FROM studies
+                WHERE project_id = ?
+            `).run(projectId);
+            
+            db.prepare(`
+                DELETE FROM uploads
+                WHERE project_id = ?
+            `).run(projectId);
+    
+            res.json({ success: true });
+    
+        } catch (err) {
+            console.error("Failed to clear uploads:", err);
+            res.status(500).json({ error: "Failed to clear uploads" });
+        }
+    }
+)
 
 module.exports = router;

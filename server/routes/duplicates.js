@@ -20,6 +20,7 @@ const getDuplicates = db.prepare(`
         d.detected_at
     FROM duplicates d
     JOIN studies s ON s.id = d.original_study_id
+    WHERE d.project_id = ?
     ORDER BY d.detected_at DESC    
 `);
 
@@ -28,6 +29,7 @@ const getDuplicateSummary = db.prepare(`
         original_study_id,
         COUNT(*) AS duplicate_count
     FROM duplicates
+    WHERE project_id = ?
     GROUP BY original_study_id
     ORDER BY duplicate_count DESC
 `);
@@ -38,7 +40,8 @@ router.get(
     requireProjectAccess,
     (req, res) => {
     try {
-        const rows = getDuplicates.all();
+        const projectId = Number(req.params.projectId);
+        const rows = getDuplicates.all(projectId);
         res.json(rows);
     } catch (err) {
         console.error("Error fetching duplicates", err);
@@ -52,7 +55,8 @@ router.get(
     requireProjectAccess,
     (req, res) => {
     try {
-        const rows = getDuplicateSummary.all();
+        const projectId = Number(req.params.projectId);
+        const rows = getDuplicateSummary.all(projectId);
         res.json(rows);
     } catch (err) {
         console.error("Error fetching duplicate summary", err);

@@ -30,6 +30,7 @@ export function parseRIS(text) {
                 pushCurrent();
                 current.type = value;
                 break;
+            case "TI":
             case "T1":
                 current.title = value;
                 break;

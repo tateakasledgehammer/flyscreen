@@ -12,7 +12,7 @@ const criteriaRepo = require("./repos/criteriaRepo.js");
 
 const scoringEngine = require("./utils/scoringEngine.js");
 const aiScoringEngine = require("./utils/aiScoringEngine.js");
-const usingAIScoring = false;
+const aiScorePendingStudies = require("./utils/aiScorePendingStudies.js");
 
 function chunk(array, size) {
     const chunks = [];
@@ -119,7 +119,13 @@ app.get(
     requireProjectAccess,
     (req, res) => {
     try {
-        const studies = getAllStudies.all();
+        const studies = db.prepare(`
+            SELECT s.*, ss.score, ss.score_status, ss.explanation
+            FROM studies s
+            LEFT JOIN study_scores ss ON ss.study_id = s.id
+            WHERE s.project_id = ?    
+        `).all(projectId);
+
         res.json(studies);
     } catch (err) {
         console.error("Error getting all studies", err);
@@ -132,6 +138,8 @@ app.post(
     requireAuth, 
     requireProjectAccess, 
     async (req, res) => {      
+        console.log("/studies/bulk hit for project", req.params.projectId);
+
         const studies = req.body.studies;
         const projectId = Number(req.params.projectId);
 
@@ -167,75 +175,95 @@ app.post(
                 project_id: projectId,
                 upload_id: uploadId
             }));
-            
-            const insertedIds = insertManyStudies(cleanStudies);
 
-            const sections = criteriaRepo.getSections.all(projectId);
-            const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
+            const insertTx = db.transaction((cleanStudies) => {
+                const ids = insertManyStudies(cleanStudies);
 
-            const inclusion = [];
-            const exclusion = [];
-
-            for (const sec of sections) {
-                const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
-                const obj = { category: sec.name, criteria: items }
-
-                if (sec.type === "inclusion") inclusion.push(obj);
-                else exclusion.push(obj)
-            }
-
-            const criteria = {
-                inclusionCriteria: inclusion,
-                exclusionCriteria: exclusion,
-                fullTextExclusionReasons: fulltext,
-            }
-            
-            const getStudyByIdStmt = db.prepare(`
-                SELECT * FROM studies WHERE id = ?    
-            `);
-            
-            const project_background = db.prepare(`
-                SELECT title, context, study_type FROM project_background WHERE project_id = ?
-            `).get(projectId);
-
-            const batches = chunk(insertedIds, 10);
-
-            for (const batch of batches) {
-                const batchStudies = batch.map(id => getStudyByIdStmt.get(id))
-
-                let results = null;
-
-                if (usingAIScoring) {
-                    try {
-                        results = await aiScoringEngine.scoreStudiesAI(
-                            batchStudies, 
-                            criteria, 
-                            project_background);
-                    } catch (err) {
-                        console.error("AI scoring failed:", err);
-                    }
-                }
-                
-                if (!results) {
-                    results = batchStudies.map(s => {
-                        const r = scoringEngine.scoreStudy(s, criteria);
-                        return {
-                            id: s.id,
-                            score: r.score,
-                            explanation: r.explanation
-                        }
-                    });
-                }
-
-                for (const result of results) {
+                for (const id of ids) {
                     studyScoreRepo.upsertScore.run(
-                        result.id,
+                        id,
                         projectId,
-                        result.score, 
-                        result.explanation
+                        null,
+                        null,
+                        "pending"
                     );
                 }
-            }
+
+                return ids;
+            });
+
+            const insertedIds = insertTx(cleanStudies);
+            console.log("Inserted study IDs:", insertedIds);
+
+            aiScorePendingStudies(projectId);
+
+            // const sections = criteriaRepo.getSections.all(projectId);
+            // const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
+
+            // const inclusion = [];
+            // const exclusion = [];
+
+            // for (const sec of sections) {
+            //     const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
+            //     const obj = { category: sec.name, criteria: items }
+
+            //     if (sec.type === "inclusion") inclusion.push(obj);
+            //     else exclusion.push(obj)
+            // }
+
+            // const criteria = {
+            //     inclusionCriteria: inclusion,
+            //     exclusionCriteria: exclusion,
+            //     fullTextExclusionReasons: fulltext,
+            // }
+            
+            // const getStudyByIdStmt = db.prepare(`
+            //     SELECT * FROM studies WHERE id = ?    
+            // `);
+            
+            // const project_background = db.prepare(`
+            //     SELECT title, context, study_type FROM project_background WHERE project_id = ?
+            // `).get(projectId);
+
+            // const batches = chunk(insertedIds, 10);
+
+            // for (const batch of batches) {
+            //     const batchStudies = batch.map(id => getStudyByIdStmt.get(id))
+
+            //     let results = null;
+
+            //     if (usingAIScoring) {
+            //         try {
+            //             results = await aiScoringEngine.scoreStudiesAI(
+            //                 batchStudies, 
+            //                 criteria, 
+            //                 project_background);
+            //         } catch (err) {
+            //             console.error("AI scoring failed:", err);
+            //         }
+            //     }
+                
+            //     if (!results) {
+            //         results = batchStudies.map(s => {
+            //             const r = scoringEngine.scoreStudy(s, criteria);
+            //             return {
+            //                 id: s.id,
+            //                 score: r.score,
+            //                 explanation: r.explanation
+            //             }
+            //         });
+            //     }
+
+            //     for (const result of results) {
+            //         studyScoreRepo.upsertScore.run(
+            //             result.id,
+            //             projectId,
+            //             result.score, 
+            //             result.explanation,
+            //             result.score_status
+            //         );
+            //     }
+            // }
 
             res.json({ 
                 success: true, 

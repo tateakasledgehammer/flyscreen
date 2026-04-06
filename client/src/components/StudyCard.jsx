@@ -155,10 +155,24 @@ export default function StudyCard(props) {
                 return (
                 <div key={study.id} className="study-card">
                     {/* Score Badge */}
-                    <div className={`score-badge ${scoreColour}`}>
-                        {study.score?.toFixed(2) ?? "N/A"}
-                        <span className="tooltip">{study.explanation}</span>
+                    {(study.score_status === "pending") && (
+                        <div className={`score-badge score-grey`}>LOADING...</div>
+                    )}
+                    {(study.score_status === "scoring") && (
+                        <div className={`score-badge score-grey`}>SCORING...</div>
+                    )}
+                    {(study.score_status === "done" && study.explanation !== "") && (
+                        <div className={`score-badge ${scoreColour}`}>
+                            {study.score?.toFixed(2) ?? "N/A"}
+                            <span className="tooltip">{study.explanation}</span>
+                        </div>
+                    )}
+                    {(study.score_status === "done" && study.explanation === "") && (
+                        <div className={`score-badge ${scoreColour}`}>
+                            {study.score?.toFixed(2) ?? "N/A"}
+                        <span className="tooltip">N/A - no criteria set or no matches</span>
                     </div>
+                    )}
 
                     {/* Study information */}
                     <StudyInfo
