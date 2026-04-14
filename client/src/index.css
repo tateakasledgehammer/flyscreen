@@ -391,21 +391,20 @@ button:focus-visible {
   margin-bottom: 0.5rem;
 }
 
-/* VOTE BADGE */
-.vote-badge {
-  margin-left: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+/* DECISION BADGE */
+.final-decision-badge {
   border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-weight: 600;
+  font-size: 1.2rem;
 }
 
-.vote-badge.accept {
+.final-decision-badge.accept {
   background: #e6f6ec;
   color: #1a7f37;
 }
 
-.vote-badge.reject {
+.final-decision-badge.reject {
   background: #fdeaea;
   color: #b42318;
 }
@@ -518,4 +517,3 @@ button:focus-visible {
   .score-grey {
     background-color: #757575; /* neutral grey */
   }
-  

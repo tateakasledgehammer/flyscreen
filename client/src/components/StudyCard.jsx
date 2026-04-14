@@ -230,7 +230,7 @@ export default function StudyCard(props) {
                         {stage === "FULLTEXT" && study.screening.FULLTEXT.final && (
                             <div>
                                 <h4>Final Decision</h4>
-                                <p>
+                                <p className={"final-decision-badge " + (study.screening.FULLTEXT.final.vote === "ACCEPT" ? "accept" : "reject")}>
                                     {study.screening.FULLTEXT.final.vote === "ACCEPT"
                                         ? "ACCEPTED"
                                         : `REJECTED (${study.screening.FULLTEXT.final.reason})`}
@@ -333,6 +333,38 @@ export default function StudyCard(props) {
                             )}
                             </>
                         )}
+
+                        {stage === "FULLTEXT" && study.screening.FULLTEXT.final && (
+                            <>
+                            {/* VOTE BREAKDOWN */}
+                            {(() => {
+                                const allVotes = [
+                                    ...study.screening.FULLTEXT.votes,
+                                    ...(study.screening.FULLTEXT.myVote ? [study.screening.FULLTEXT.myVote] : [])
+                                ];
+
+                                if (allVotes.length > 0) {
+                                    return (
+                                        <div>
+                                            <h4>Final Votes</h4>
+                                            <ul>
+                                                {allVotes.map((v, index) => (
+                                                    <li key={index}>
+                                                        Reviewer {v.user_id}: {v.vote} {v.reason}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )
+                                }
+                            })()}
+
+                            {study.screening.FULLTEXT.myVote && (
+                                <button onClick={() => revertVote(study.id, "FULLTEXT")}>UNDO</button>
+                            )}
+                            </>
+                        )}
+
         
                         {/* NOTE */}
                         <button onClick={(e) => (handleAddNote(study.id))}>ADD NOTE</button>
@@ -351,9 +383,10 @@ export default function StudyCard(props) {
                         </select>
                     </div>
 
+                    <div className="actions">
                     {Array.isArray(study.notes) && study.notes.length > 0 && (
                         <div>
-                            <h3>Notes</h3>
+                            <h4>Notes</h4>
                             <ul>
                                 {study.notes.map((note) => (
                                     <li key={note.id}>
@@ -378,6 +411,7 @@ export default function StudyCard(props) {
                             </ul>
                         </div>
                     )}
+                    </div>
 
                 </div>
             )})}

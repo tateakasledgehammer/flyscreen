@@ -144,6 +144,7 @@ export default function IncludedScreening({
                 />
 
                 <StudyCard
+                    stage="FULLTEXT"
                     studies={paginatedStudies}
                     toggleDetails={toggleDetails}
                     setToggleDetails={setToggleDetails}
@@ -158,6 +159,7 @@ export default function IncludedScreening({
                     getScoreColour={getScoreColour}
                     inclusionTerms={inclusionTerms}
                     exclusionTerms={exclusionTerms}
+                    fullTextExclusionReasons={fullTextExclusionReasons}
                 />
 
                 <PaginationBar

@@ -33,9 +33,9 @@ export default function Navbar() {
                     <button>Included</button>
                 </Link>
 
-                <Link to="/excluded">
+                {/* <Link to="/excluded">
                     <button>Excluded</button>
-                </Link>
+                </Link> */}
             </div>
         </>
     )

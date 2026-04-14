@@ -84,22 +84,48 @@ router.get(
                 const accepts = allVotes.filter(v => v.vote === "ACCEPT").length;
                 const rejects = allVotes.filter(v => v.vote !== "ACCEPT").length;
                 
-                let status = "UNSCREENED";
-                if (allVotes.length === 1) status = "PENDING";
-                if (accepts >= 2) status = "ACCEPTED";
+                if (allVotes.length === 0) {
+                    stageData.status = "UNSCREENED";
+                    continue;
+                }
+
+                if (allVotes.length === 1) {
+                    stageData.status = "PENDING";
+                    continue;
+                }
+
+                if (accepts >= 2) {
+                    stageData.status = "ACCEPTED";
+                    stageData.final = {
+                        user_id: null,
+                        vote: "ACCEPT",
+                        reason: null
+                    };
+                    continue;
+                }
+
                 if (rejects >= 2) {
                     const reasons = allVotes.map(v => v.reason ?? v.vote);
                     const uniqueReasons = [...new Set(reasons)];
 
                     if (uniqueReasons.length === 1) {
-                        status = "REJECTED";
+                        stageData.status = "REJECTED";
+                        stageData.final = {
+                            user_id: null,
+                            vote: "REJECT",
+                            reason: uniqueReasons[0]
+                        };
+                        continue;
                     } else {
-                        status = "CONFLICT"
+                        stageData.status = "CONFLICT"
+                        continue;
                     }
                 }
-                if (accepts === 1 && rejects === 1) status = "CONFLICT";
 
-                stageData.status = status;
+                else if (accepts === 1 && rejects === 1) {
+                    stageData.status = "CONFLICT";
+                    continue;
+                }
             }
         }
 

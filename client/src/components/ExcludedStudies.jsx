@@ -9,6 +9,8 @@ import { getFTStatus } from "../utils/screeningTools";
 import useScreeningFilters from "../hooks/useScreeningFilters.jsx";
 import useStatusCounts from "../hooks/useStatusCounts";
 
+// THIS IS NO LONGER BEING CALLED - ACCESSED IN FULL TEXT PAGE
+
 export default function ExcludedScreening({
     user,
     studyTags,
