@@ -107,6 +107,17 @@ function App() {
   return (
     <Router>
       <Routes>
+          {/* Public Routes */}
+          <Route path="/" 
+            element={
+              <Landing
+                isAuthenticated={isAuthenticated}
+                setIsAuthenticated={setIsAuthenticated}
+                setUser={setUser}
+              />
+              } 
+            />
+
           <Route 
             element={
               <Layout 
@@ -117,16 +128,6 @@ function App() {
               />
             }
           >
-            {/* Public Routes */}
-            <Route path="/" 
-            element={
-              <Landing
-                isAuthenticated={isAuthenticated}
-                setIsAuthenticated={setIsAuthenticated}
-                setUser={setUser}
-              />
-              } 
-            />
 
             {/* Protected Routes */}
             {/* Create Project component */}
@@ -136,6 +137,7 @@ function App() {
                 <Dashboard 
                   projectId={projectId}
                   setProjectId={setProjectId}
+                  user={user}
                 />
               </PrivateRoute>
             } />

@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 // const bodyParser = require('body-parser');
 // const crypto = require("crypto");
 
@@ -39,6 +40,12 @@ const uploadRoutes = require("./routes/uploads.js");
 
 console.log("server.js loaded successfully");
 
+const loginLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 mins
+    max: 10,
+    message: { success: false, errors: ["Too many login attempts. Try again in 10 minutes."] }
+})
+
 const app = express();
 const PORT = 5005;
 
@@ -54,7 +61,7 @@ const studyScoreRepo = require("./repos/studyScoreRepo.js");
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: false, // change later - process.env.NODE_ENV === "production",
+    secure: true, // changed from false - process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
     maxAge: 1000 * 60 * 60 * 24
@@ -93,8 +100,19 @@ app.use((req, res, next) => {
 })
 
 const requireAuth = (req, res, next) => {
-    if (!req.user) return res.status(401).json({ error: "Not authenticated" });
-    next();
+    const token = req.cookies.flyscreenCookie;
+    if (!token) return res.status(401).json({ error: "Not authenticated" });
+
+    const isInvalidated = db.prepare("SELECT 1 FROM invalidated_tokens WHERE token = ?").get(token);
+    if (isInvalidated) return res.status(401).json({ error: "Session expired. Token invalidated" });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWTSECRET);
+        req.user = decoded;
+        next();
+    } catch {
+        return res.status(401).json({ error: "Invalid token" });
+    }
 };
 
 app.use("/api", screeningRoutes);
@@ -109,6 +127,16 @@ app.use("/api", uploadRoutes);
 app.use("/api", criteriaRoutes);
 app.use("/api", backgroundRoutes);
 app.use("/api", reviewerRoutes);
+
+// denylist cleanup set
+db.prepare("DELETE FROM invalidated_tokens WHERE expires_at < ?")
+.run(Math.floor(Date.now() / 1000));
+
+// Then every hour
+setInterval(() => {
+    db.prepare("DELETE FROM invalidated_tokens WHERE expires_at < ?")
+    .run(Math.floor(Date.now() / 1000));
+}, 60 * 60 * 1000); // hourly
 
 // ---- STUDIES ----
 
@@ -196,74 +224,6 @@ app.post(
             console.log("Inserted study IDs:", insertedIds);
 
             aiScorePendingStudies(projectId);
-
-            // const sections = criteriaRepo.getSections.all(projectId);
-            // const fulltext = criteriaRepo.getFullText.all(projectId).map(r => r.reason);
-
-            // const inclusion = [];
-            // const exclusion = [];
-
-            // for (const sec of sections) {
-            //     const items = criteriaRepo.getItemsForSection.all(sec.id).map(i => i.text);
-            //     const obj = { category: sec.name, criteria: items }
-
-            //     if (sec.type === "inclusion") inclusion.push(obj);
-            //     else exclusion.push(obj)
-            // }
-
-            // const criteria = {
-            //     inclusionCriteria: inclusion,
-            //     exclusionCriteria: exclusion,
-            //     fullTextExclusionReasons: fulltext,
-            // }
-            
-            // const getStudyByIdStmt = db.prepare(`
-            //     SELECT * FROM studies WHERE id = ?    
-            // `);
-            
-            // const project_background = db.prepare(`
-            //     SELECT title, context, study_type FROM project_background WHERE project_id = ?
-            // `).get(projectId);
-
-            // const batches = chunk(insertedIds, 10);
-
-            // for (const batch of batches) {
-            //     const batchStudies = batch.map(id => getStudyByIdStmt.get(id))
-
-            //     let results = null;
-
-            //     if (usingAIScoring) {
-            //         try {
-            //             results = await aiScoringEngine.scoreStudiesAI(
-            //                 batchStudies, 
-            //                 criteria, 
-            //                 project_background);
-            //         } catch (err) {
-            //             console.error("AI scoring failed:", err);
-            //         }
-            //     }
-                
-            //     if (!results) {
-            //         results = batchStudies.map(s => {
-            //             const r = scoringEngine.scoreStudy(s, criteria);
-            //             return {
-            //                 id: s.id,
-            //                 score: r.score,
-            //                 explanation: r.explanation
-            //             }
-            //         });
-            //     }
-
-            //     for (const result of results) {
-            //         studyScoreRepo.upsertScore.run(
-            //             result.id,
-            //             projectId,
-            //             result.score, 
-            //             result.explanation,
-            //             result.score_status
-            //         );
-            //     }
-            // }
 
             res.json({ 
                 success: true, 
@@ -420,13 +380,21 @@ app.get("/api/auth/whoami", requireAuth, (req, res) => {
 });
 
 app.post("/api/auth/logout", (req, res) => {
-    res.clearCookie("flyscreenCookie", {
-        ...COOKIE_OPTIONS,
-    }),
-    res.json({ success: true, message: "Logged out." })
+    const token = req.cookies.flyscreenCookie;
+
+    if (token) {
+        const decoded = jwt.decode(token);
+        if (decoded) {
+            db.prepare("INSERT OR IGNORE INTO invalidated_tokens VALUES (?, ?)")
+                .run(token, decoded.exp);    
+        }
+    }
+
+    res.clearCookie("flyscreenCookie", { ...COOKIE_OPTIONS });
+    res.json({ success: true, message: "Logged out." });
 })
 
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/auth/login", loginLimiter, async (req, res) => {
     const { username, password } = req.body;
     let errors = [];
 
@@ -470,7 +438,8 @@ app.post("/api/auth/register", async (req, res) => {
     let errors = [];
 
     if (typeof username !== "string" || typeof password !== "string") {
-        errors.push("Invalid data request. Inputs are not strings")
+        errors.push("Invalid data request. Inputs are not strings");
+        return;
     }
 
     const trimmedUsername = username.trim();
@@ -488,6 +457,11 @@ app.post("/api/auth/register", async (req, res) => {
     const usernameCheck = usernameStatement.get(trimmedUsername);
     if (usernameCheck) errors.push("Username has been taken")
 
+    const email = req.body.email ? req.body.email.trim().toLowerCase() : null;
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push("Invalid email address");
+    }
+
     if (errors.length > 0) {
         return res.json({ success: false, errors });
     }
@@ -496,10 +470,10 @@ app.post("/api/auth/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(trimmedPassword, salt)
 
-    const insertStatement = db.prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+    const insertStatement = db.prepare("INSERT INTO users (username, password, email) VALUES (?, ?, ?)")
 
     try {
-        const result = insertStatement.run(trimmedUsername, hashedPassword);
+        const result = insertStatement.run(trimmedUsername, hashedPassword, email);
         const lookupStatement = db.prepare("SELECT * FROM users WHERE id = ?");
         const selectedUser = lookupStatement.get(result.lastInsertRowid)
 

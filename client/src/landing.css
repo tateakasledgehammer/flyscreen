@@ -1,0 +1,529 @@
+/* ============================================================
+   FLYSCREEN ACADEMICS — LANDING PAGE
+   Urban Climb aesthetic: centred sticky wordmark, cream/ink,
+   massive display type, ruled column grids
+   ============================================================ */
+
+   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+   /* ── TOKENS ─────────────────────────────────────────────── */
+   :root {
+     --cream:   rgb(250, 241, 211);
+     --ink:     #000;
+     --accent:  #fff047;
+     --muted:   #6B7A8D;
+     --surface: #EDEAE2;
+     --border:  rgba(26, 37, 53, 0.13);
+     --font-display: 'Bebas Neue', 'Impact', sans-serif;
+     --font-body:    'DM Sans', system-ui, sans-serif;
+   }
+   
+   /* ── RESET ───────────────────────────────────────────────── */
+   .landing-page *, .landing-page *::before, .landing-page *::after {
+     box-sizing: border-box;
+   }
+   
+   .landing-page {
+     background: var(--cream);
+     color: var(--ink);
+     font-family: var(--font-body);
+     min-height: 100vh;
+     overflow-x: hidden;
+     margin: 0;
+     padding: 0;
+     width: 100%;
+   }
+   
+   /* ── STICKY CENTRED HEADER ───────────────────────────────── */
+   /* Matches Urban Climb: centred bold wordmark, full-width bar */
+   .landing-header {
+     position: sticky;
+     top: 0;
+     z-index: 200;
+     width: 100%;
+     background: var(--cream);
+     border-bottom: 1px solid var(--border);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     height: 60px;
+   }
+   
+   .landing-header-inner {
+     font-family: var(--font-display);
+     font-size: 3rem;
+     color: var(--ink);
+     display: flex;
+     align-items: center;
+     gap: 12px;
+   }
+   
+   .landing-header-inner i {
+     font-size: 2rem;
+     color: var(--ink);
+   }
+   
+   /* Hamburger placeholder (right side) */
+   .landing-header-menu {
+     position: absolute;
+     right: 28px;
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+     cursor: pointer;
+   }
+   .landing-header-menu span {
+     display: block;
+     width: 26px;
+     height: 2px;
+     background: var(--ink);
+   }
+   
+   /* ── THREE-COLUMN INFO SECTION ───────────────────────────── */
+   /* Matches Urban Climb's ruled column grid below the hero */
+   .info-grid {
+     display: grid;
+     align-items: start;
+     grid-template-columns: 1fr 1fr 1fr;
+     padding: 24px 72px;
+     gap: 16px;
+     /* border-top: 1px solid var(--border); */
+   }
+   
+   .info-col {
+     padding: 48px 36px;
+     /* border-right: 1px solid var(--border); */
+   }
+   
+   .info-col:last-child {
+     border-right: none;
+   }
+   
+   .info-col-label {
+     font-family: var(--font-display);
+     font-size: 2rem;
+     letter-spacing: 0.01em;
+     text-transform: uppercase;
+     margin-bottom: 20px;
+     display: block;
+   }
+   
+   /* Acknowledgement text */
+   .info-col p {
+     font-size: 0.88rem;
+     font-weight: 900;
+     color: var(--ink);
+     line-height: 1.75;
+     margin: 0;
+   }
+   
+   /* Pricing tiers */
+   .pricing-tier {
+     display: flex;
+     flex-direction: column;
+     gap: 0;
+     border: 5px solid var(--ink);
+     border-radius: 3px;
+     overflow: hidden;
+   }
+   
+   .pricing-row {
+     display: flex;
+     align-items: flex-start;
+     justify-content: space-between;
+     padding: 16px 18px;
+     border-bottom: 3px solid var(--ink);
+     gap: 12px;
+     transition: background 0.15s;
+   }
+   .pricing-row:last-child { border-bottom: none; }
+   .pricing-row:hover { background: var(--accent) }
+
+   .pricing-name {
+     font-family: var(--font-display);
+     font-size: 1.9rem;
+     letter-spacing: 0.001em;
+     text-transform: uppercase;
+     line-height: 1.1;
+   }
+   
+   .pricing-desc {
+     font-size: 0.75rem;
+     font-weight: 300;
+     margin-top: 3px;
+   }
+   
+   .pricing-price {
+     font-family: var(--font-display);
+     font-size: 1.5rem;
+     letter-spacing: 0.03em;
+     white-space: nowrap;
+     line-height: 1;
+   }
+   
+   .pricing-price small {
+     font-family: var(--font-body);
+     font-size: 0.7rem;
+     font-weight: 300;
+     display: block;
+     text-align: right;
+     letter-spacing: 0.04em;
+   }
+   
+   /* Feature list in col 3 */
+   .feature-list {
+     display: flex;
+     flex-direction: column;
+     gap: 14px;
+   }
+   
+   .feature-item {
+     display: flex;
+     align-items: flex-start;
+     gap: 12px;
+     font-size: 0.85rem;
+     font-weight: 300;
+     color: var(--ink);
+     line-height: 1.5;
+   }
+   
+   .feature-item i {
+     font-size: 0.8rem;
+     color: var(--accent);
+     margin-top: 3px;
+     flex-shrink: 0;
+   }
+   
+   /* ── PROCESS MAP ─────────────────────────────────────────── */
+   .process-section {
+     background: var(--ink);
+     width: 100%;
+   }
+   
+   .process-section-inner {
+     max-width: 100%;
+     border-top: 1px solid rgba(255,255,255,0.08);
+   }
+   
+   .process-eyebrow {
+     font-family: var(--font-display);
+     font-size: 0.7rem;
+     letter-spacing: 0.22em;
+     text-transform: uppercase;
+     color: var(--accent);
+     padding: 40px 40px 0;
+     display: block;
+   }
+   
+   .process-heading {
+     font-family: var(--font-display);
+     font-size: clamp(3rem, 7vw, 7rem);
+     line-height: 0.9;
+     color: var(--cream);
+     text-transform: uppercase;
+     margin: 8px 0 0;
+     padding: 0 40px 40px;
+     letter-spacing: 0.01em;
+   }
+   
+   .process-map {
+     display: grid;
+     grid-template-columns: repeat(5, 1fr);
+     border-top: 1px solid rgba(255,255,255,0.08);
+   }
+   
+   .process-step {
+     padding: 36px 28px;
+     border-right: 1px solid rgba(255,255,255,0.08);
+     transition: background 0.2s;
+   }
+   
+   .process-step:last-child { border-right: none; }
+   .process-step:hover { background: rgba(255,255,255,0.03); }
+   
+   .step-number {
+     font-family: var(--font-display);
+     font-size: 3rem;
+     color: var(--accent);
+     opacity: 0.35;
+     line-height: 1;
+     margin-bottom: 14px;
+   }
+   
+   .step-title {
+     font-family: var(--font-display);
+     font-size: 1.25rem;
+     letter-spacing: 0.05em;
+     color: var(--cream);
+     text-transform: uppercase;
+     margin-bottom: 10px;
+   }
+   
+   .step-desc {
+     font-size: 0.8rem;
+     font-weight: 300;
+     color: rgba(245,240,232,0.45);
+     line-height: 1.6;
+   }
+   
+   /* ── DOWNLOAD + VIDEO ROW ────────────────────────────────── */
+   /* Two-column ruled row: PDF download left, video right */
+   .media-row {
+     display: grid;
+     grid-template-columns: 1fr 1fr;
+     border-top: 1px solid var(--border);
+     border-bottom: 1px solid var(--border);
+   }
+   
+   .media-col {
+     padding: 56px 40px;
+     border-right: 1px solid var(--border);
+     display: flex;
+     flex-direction: column;
+     gap: 20px;
+   }
+   
+   .media-col:last-child { border-right: none; }
+   
+   .media-col-label {
+     font-family: var(--font-display);
+     font-size: 0.7rem;
+     letter-spacing: 0.22em;
+     text-transform: uppercase;
+     color: var(--muted);
+   }
+   
+   .media-col-heading {
+     font-family: var(--font-display);
+     font-size: clamp(8rem, 4vw, 3.5rem);
+     line-height: 0.92;
+     letter-spacing: 0.001em;
+     color: var(--ink);
+     text-transform: uppercase;
+     text-align: center;
+     margin: 0;
+   }
+   
+   .media-col p {
+     font-size: 2.6rem;
+     font-family: var(--font-display);
+     color: var(--ink);
+     line-height: 1.7;
+     margin: 0;
+     text-transform: uppercase;
+     text-align: center;
+   }
+   
+   .big-stat {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 14vw, 12rem);
+    font-weight: 900;
+    line-height: 0.85;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── SOCIAL LINKS ── */
+    .social-links { display: flex; flex-direction: column; }
+    
+    .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 8px;
+    border-radius: 4px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--FD);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.15s;
+    }
+    .social-link:last-child { border-bottom: none; }
+    .social-link:hover { color: var(--cream); background: var(--ink) }
+  
+   /* PDF download button */
+   .download-btn {
+     display: inline-flex;
+     align-self: center;
+     justify-content: center;
+     gap: 10px;
+     background: var(--ink);
+     color: var(--cream);
+     font-family: var(--font-display);
+     font-size: 1.3rem;
+     font-weight: 400;
+     letter-spacing: 0.01em;
+     text-transform: uppercase;
+     border: none;
+     padding: 14px 24px;
+     cursor: pointer;
+     border-radius: 2px;
+     transition: background 0.2s;
+     text-decoration: none;
+     width: 100%;
+     border: 4px solid var(--ink)
+   }
+   .download-btn:hover { background: var(--accent); color: var(--ink) }
+   .download-btn i { font-size: 1.6rem; }
+   
+   /* Video placeholder */
+   .video-wrapper {
+     aspect-ratio: 16 / 9;
+     background: var(--ink);
+     border-radius: 2px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     position: relative;
+     overflow: hidden;
+     border: 1px solid var(--border);
+     width: 100%;
+   }
+   
+   .video-placeholder {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 12px;
+     color: rgba(245,240,232,0.3);
+   }
+   
+   .video-placeholder i { font-size: 3rem; }
+   
+   .video-placeholder p {
+     font-family: var(--font-display);
+     letter-spacing: 0.14em;
+     font-size: 0.8rem;
+     text-transform: uppercase;
+     margin: 0;
+   }
+   
+   .video-wrapper iframe {
+     position: absolute;
+     inset: 0;
+     width: 100%;
+     height: 100%;
+     border: none;
+   }
+   
+   /* ── AUTH SECTION ────────────────────────────────────────── */
+   .landing-auth-section {
+     padding: 80px 40px;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     background: var(--cream);
+     border-top: 1px solid var(--border);
+   }
+   
+   .landing-auth-eyebrow {
+     font-family: var(--font-display);
+     font-size: 0.7rem;
+     letter-spacing: 0.22em;
+     text-transform: uppercase;
+     color: var(--muted);
+     margin-bottom: 10px;
+     text-align: center;
+   }
+   
+   .landing-auth-heading {
+     font-family: var(--font-display);
+     font-size: clamp(3rem, 7vw, 6rem);
+     line-height: 0.9;
+     letter-spacing: 0.01em;
+     color: var(--ink);
+     text-transform: uppercase;
+     margin: 0 0 48px;
+     text-align: center;
+   }
+   
+   /* ── FOOTER ──────────────────────────────────────────────── */
+   .landing-footer {
+     background: var(--ink);
+     padding: 28px 40px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     flex-wrap: wrap;
+     gap: 12px;
+     border-top: 3px solid var(--accent);
+   }
+   
+   .footer-brand {
+     font-family: var(--font-display);
+     font-size: 1.1rem;
+     letter-spacing: 0.18em;
+     color: var(--cream);
+     opacity: 0.55;
+   }
+   
+   .footer-copy {
+     font-size: 0.72rem;
+     color: rgba(245,240,232,0.3);
+     letter-spacing: 0.05em;
+   }
+   
+   .footer-copy a {
+     color: rgba(245,240,232,0.5);
+     text-decoration: none;
+   }
+   .footer-copy a:hover { color: var(--accent); }
+   
+   /* ── RESPONSIVE ──────────────────────────────────────────── */
+   @media (max-width: 900px) {
+     .info-grid {
+       grid-template-columns: 1fr;
+     }
+   
+     .info-col {
+       border-right: none;
+       border-bottom: 1px solid var(--border);
+       padding: 36px 24px;
+     }
+     .info-col:last-child { border-bottom: none; }
+   
+     .process-map {
+       grid-template-columns: 1fr 1fr;
+     }
+   
+     .media-row {
+       grid-template-columns: 1fr;
+     }
+   
+     .media-col {
+       border-right: none;
+       border-bottom: 1px solid var(--border);
+     }
+     .media-col:last-child { border-bottom: none; }
+   
+     .process-heading,
+     .process-eyebrow {
+       padding-left: 24px;
+       padding-right: 24px;
+     }
+   }
+   
+   @media (max-width: 600px) {
+     .hero-display {
+       font-size: 20vw;
+     }
+   
+     .process-map {
+       grid-template-columns: 1fr;
+     }
+   
+     .process-step {
+       border-right: none;
+       border-bottom: 1px solid rgba(255,255,255,0.08);
+     }
+   
+     .landing-auth-section {
+       padding: 56px 24px;
+     }
+   
+     .landing-footer {
+       padding: 24px;
+     }
+   }

@@ -237,7 +237,6 @@ export default function Import(props) {
 
     return (
         <>
-        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-upload"></i> Import Your Studies</h2>
             <p style={{ color: "red" }}>

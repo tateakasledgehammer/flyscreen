@@ -247,11 +247,10 @@ export default function Setup(props) {
         setFilters(prev => prev.filter(f => f.id !== filterId));
     }
 
-    // Reset
+    // Reset - NEEDS FIXING
     function resetApp() {
         setStudies([]);
         localStorage.clear();
-        window.location.href = "/";
     }
 
     // Rescoring
@@ -305,13 +304,12 @@ export default function Setup(props) {
 
     return (
         <>
-        <Navbar />
         <div className="page-container">
         <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
 
         <div className="homepage-section">
-            <h3>Clear</h3>
-            <button onClick={resetApp}>Reset</button>
+            {/* <h3>Clear</h3>
+            <button onClick={resetApp}>Reset</button> */}
             <br />
             <h3>Rescore Studies</h3>
             <button 
@@ -321,10 +319,11 @@ export default function Setup(props) {
                 {isRescoring ? "Re-scoring.." : "Re-score All"}
             </button>
             <br />
+            <br />
             <h3>Use AI Scoring</h3>
             <p>
                 <strong>
-                    Keep this off until your project background and 
+                    Keep this OFF until your project background and 
                     criteria are complete, and until all your studies 
                     have been uploaded. </strong>
                 Once AI scoring has been selected and you have 

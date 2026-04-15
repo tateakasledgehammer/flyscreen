@@ -5,7 +5,8 @@ import CreateProject from "./CreateProject";
 export default function Dashboard(props) {
     const { 
         projectId, 
-        setProjectId 
+        setProjectId,
+        user
     } = props;
 
     const [projects, setProjects] = useState([]);
@@ -140,9 +141,16 @@ export default function Dashboard(props) {
     
     return (
         <>
-        <Navbar />
         <div className="page-container">
             <h2><i className="fa-solid fa-grip"></i> Dashboard</h2>
+            <h3>Your information:</h3>
+            <p>Username: {user.username}</p>
+            <p>Email: {user.email}</p>
+            <p>Account made on: {user.created_at}</p>
+
+            <br />
+            <br />
+            
             <h3>Your projects:</h3>
 
             {loading && <p>Loading projects...</p>}
@@ -239,6 +247,9 @@ export default function Dashboard(props) {
                 </div>
             ))}
 
+            <br />
+            <br />
+            
             <CreateProject 
                 projectTitle={projectTitle}
                 setProjectTitle={setProjectTitle}

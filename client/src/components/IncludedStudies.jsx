@@ -116,8 +116,6 @@ export default function IncludedScreening({
 
     return (
         <>
-            <Navbar />
-
             <div className="page-container">
                 <h2>
                     <i className="fa-solid fa-circle-check"></i> Final Included Studies

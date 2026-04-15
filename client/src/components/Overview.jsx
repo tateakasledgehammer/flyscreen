@@ -99,7 +99,6 @@ export default function Overview(props) {
     if (!projectId) {
         return (
             <>
-            <Navbar />
             <div className="page-container">
                 <h2><i className="fa-solid fa-house-chimney"></i> Your Homepage</h2>
                 
@@ -116,7 +115,6 @@ export default function Overview(props) {
     if (!project || !progress) {
         return (
             <>
-            <Navbar />
             <div className="page-container">
                 <h2>Loading overview...</h2>
                 <p>(you may need to upload some studies)</p>
@@ -139,7 +137,6 @@ export default function Overview(props) {
     
     return (
         <>
-        <Navbar />
         <div className="page-container">
             <h2>
                 <i className="fa-solid fa-house-chimney"></i> Your Homepage

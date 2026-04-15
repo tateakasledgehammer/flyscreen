@@ -134,9 +134,7 @@ export default function TAScreening(props) {
     const finalTotalPages = Math.ceil(finalFiltered.length / itemsPerPage);
 
     return (
-        <>
-        <Navbar />
-        
+        <>        
         <div className="page-container">
             <h2>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening

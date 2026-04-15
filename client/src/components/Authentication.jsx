@@ -5,12 +5,13 @@ export default function Authentication(props) {
     const { isAuthenticated, setIsAuthenticated, setUser } = props
     const navigate = useNavigate();
 
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
-    const [message, setMessage] = useState("")
-    const [errors, setErrors] = useState([])
-
-    const [loginNotSignUp, setLoginNotSignUp] = useState(true)
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
+    const [errors, setErrors] = useState([]);
+    const [loginNotSignUp, setLoginNotSignUp] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     function handleSetLogIn() {
         setLoginNotSignUp(true)
@@ -21,6 +22,7 @@ export default function Authentication(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         setErrors([]);
         setMessage("")
 
@@ -31,13 +33,14 @@ export default function Authentication(props) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, email })
             });
             
             const data = await res.json()
 
             if (!data.success) {
                 setErrors(data.errors || ["Something went wrong"]);
+                setPassword("");
                 return;
             } 
             
@@ -57,80 +60,74 @@ export default function Authentication(props) {
 
             navigate("/overview")
 
-        }   catch (err) {
+        } catch (err) {
             console.error(err)
             setErrors(["Failed to connect"]);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         (!isAuthenticated && (
-        <div className="page-container">
+        <div className="auth-card">
             <br />
             <hr />
 
             <h2><i className="fa-solid fa-right-to-bracket"></i> Authentication</h2>
             
-            <button onClick={handleSetLogIn}>
-                Log in
-            </button>
-            <button onClick={handleSetSignUp}>
-                Sign up
-            </button>
+            <div className="auth-tabs">
+                <button className={`auth-tab ${loginNotSignUp ? "active" : ""}`} onClick={handleSetLogIn}>
+                    Log in
+                </button>
+                <button className={`auth-tab ${loginNotSignUp ? "active" : ""}`} onClick={handleSetSignUp}>
+                    Sign up
+                </button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+                <legend><strong>
+                    {loginNotSignUp ? "Log in to your account" : "Create an account"}
+                </strong></legend>
+                <label className="auth-label" htmlFor="username">Username</label>
+                <input 
+                    value={username}
+                    className="auth-input"
+                    onChange={(e) => setUsername(e.target.value)}
+                    type="text" 
+                    placeholder="enter your username..."
+                    autoComplete="on"
+                />
 
-            {!loginNotSignUp && (
-                <form id="loginorsignup" onSubmit={handleSubmit}>
-                    <fieldset className="log-in">
-                        <legend><strong>Create an account</strong></legend>
-                        <label htmlFor="username">Username</label>
-                        <input 
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            type="text" 
-                            placeholder="enter your username..."
-                            autoComplete="off"
-                        />
-                        <label htmlFor="password">Password</label>
-                        <input 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            type="password" 
-                            placeholder="enter your password..."
-                            autoComplete="off" 
-                        />
-                        <br />
-                        <button type="submit">Sign up</button>
-                    </fieldset>
-                </form>
-            )}
+                {!loginNotSignUp && (
+                    <>
+                    <label className="auth-label" htmlFor="email">Email (optional)</label>
+                    <input
+                        value={email}
+                        className="auth-input"
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                        placeholder="you@email.edu"
+                        autoComplete="email"
+                    />
+                    </>
+                )}
+                
+                <label className="auth-label" htmlFor="password">Password</label>
+                <input 
+                    value={password}
+                    className="auth-input"
+                    onChange={(e) => setPassword(e.target.value)}
+                    type="password"
+                    placeholder="enter your password..."
+                    autoComplete="on" 
+                />
 
-            {loginNotSignUp && (
-                <form id="loginorsignup" onSubmit={handleSubmit}>
-                    <fieldset className="log-in">
-                        <legend><strong>Log in to your account</strong></legend>
-                        <label htmlFor="username">Username</label>
-                        <input 
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            type="text" 
-                            placeholder="enter your username..."
-                            autoComplete="off"
-                        />
-                        
-                        <label htmlFor="password">Password</label>
-                        <input 
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            type="password"
-                            placeholder="enter your password..."
-                            autoComplete="off" 
-                        />
-
-                        <br />
-                        <button type="submit">Log in</button>
-                    </fieldset>
-                </form>
-            )}
+                <br />
+                <button className="auth-submit" disabled={loading} type="submit">
+                    {loginNotSignUp ? "Log in" : "Sign up"}
+                </button>
+            </form>
 
             {errors.length > 0 && (
                 <ul style={{ color: "red" }}>

@@ -22,7 +22,14 @@ const initSchema = db.transaction(() => {
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            email TEXT UNIQUE,
+            email_verified INTEGER DEFAULT 0,
+            totp_secret TEXT,
+            totp_enabled INTEGER DEFAULT 0,
+            plan TEXT DEFAULT 'free',
+            stripe_customer_id TEXT UNIQUE,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `).run();
 
@@ -271,7 +278,14 @@ const initSchema = db.transaction(() => {
             last_error TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    `)
+    `).run();
+
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS invalidated_tokens (
+            token TEXT PRIMARY KEY,
+            expires_at INTEGER
+        )
+    `).run();
 
 });
 
