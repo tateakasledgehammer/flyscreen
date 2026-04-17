@@ -42,7 +42,6 @@
      z-index: 200;
      width: 100%;
      background: var(--cream);
-     border-bottom: 1px solid var(--border);
      display: flex;
      align-items: center;
      justify-content: center;
@@ -135,6 +134,7 @@
      border-bottom: 3px solid var(--ink);
      gap: 12px;
      transition: background 0.15s;
+     background-color: #fff;
    }
    .pricing-row:last-child { border-bottom: none; }
    .pricing-row:hover { background: var(--accent) }
@@ -196,7 +196,7 @@
    
    /* ── PROCESS MAP ─────────────────────────────────────────── */
    .process-section {
-     background: var(--ink);
+     background: #fff;
      width: 100%;
    }
    
@@ -207,10 +207,10 @@
    
    .process-eyebrow {
      font-family: var(--font-display);
-     font-size: 0.7rem;
-     letter-spacing: 0.22em;
+     font-size: 1.5rem;
+     letter-spacing: 0.01em;
      text-transform: uppercase;
-     color: var(--accent);
+     color: var(--ink);
      padding: 40px 40px 0;
      display: block;
    }
@@ -219,7 +219,7 @@
      font-family: var(--font-display);
      font-size: clamp(3rem, 7vw, 7rem);
      line-height: 0.9;
-     color: var(--cream);
+     color: var(--ink);
      text-transform: uppercase;
      margin: 8px 0 0;
      padding: 0 40px 40px;
@@ -229,13 +229,13 @@
    .process-map {
      display: grid;
      grid-template-columns: repeat(5, 1fr);
-     border-top: 1px solid rgba(255,255,255,0.08);
    }
    
    .process-step {
      padding: 36px 28px;
-     border-right: 1px solid rgba(255,255,255,0.08);
      transition: background 0.2s;
+     border: 4px solid var(--ink);
+     margin-right: 12px;
    }
    
    .process-step:last-child { border-right: none; }
@@ -244,25 +244,24 @@
    .step-number {
      font-family: var(--font-display);
      font-size: 3rem;
-     color: var(--accent);
-     opacity: 0.35;
+     color: var(--ink);
      line-height: 1;
-     margin-bottom: 14px;
+     margin-bottom: 4px;
    }
    
    .step-title {
      font-family: var(--font-display);
-     font-size: 1.25rem;
-     letter-spacing: 0.05em;
-     color: var(--cream);
+     font-size: 1.5rem;
+     letter-spacing: 0.001em;
+     color: var(--ink);
      text-transform: uppercase;
-     margin-bottom: 10px;
+     margin-bottom: 4px;
    }
    
    .step-desc {
      font-size: 0.8rem;
      font-weight: 300;
-     color: rgba(245,240,232,0.45);
+     color: var(--ink);
      line-height: 1.6;
    }
    
@@ -295,7 +294,7 @@
    
    .media-col-heading {
      font-family: var(--font-display);
-     font-size: clamp(8rem, 4vw, 3.5rem);
+     font-size: clamp(10rem, 4vw, 3.5rem);
      line-height: 0.92;
      letter-spacing: 0.001em;
      color: var(--ink);
@@ -323,7 +322,11 @@
   }
 
   /* ── SOCIAL LINKS ── */
-    .social-links { display: flex; flex-direction: column; }
+    .social-links { 
+        display: flex; 
+        flex-direction: column; 
+        background: var(--ink);
+    }
     
     .social-link {
     display: flex;
@@ -336,7 +339,7 @@
     font-size: 1.1rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: #fff;
     text-decoration: none;
     transition: color 0.15s;
     }
@@ -419,11 +422,10 @@
    }
    
    .landing-auth-eyebrow {
-     font-family: var(--font-display);
-     font-size: 0.7rem;
-     letter-spacing: 0.22em;
+     font-family: var(--font-ink);
+     font-size: 1.2rem;
+     letter-spacing: 0.01em;
      text-transform: uppercase;
-     color: var(--muted);
      margin-bottom: 10px;
      text-align: center;
    }

@@ -11,9 +11,9 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     FLYSCREEN ACADEMICS.
                     <i className="fa-regular fa-paper-plane" />
                 </div>
-                <div className="landing-header-menu">
+                {/* <div className="landing-header-menu">
                     <span /><span /><span />
-                </div>
+                </div> */}
             </div>
 
             {/* Video */}
@@ -34,8 +34,8 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         </div>
                     </div>
                     <p>
-                    AI-powered systematic review screening for research teams.
-                    Cut months of work down to weeks.
+                    AI-powered systematic review screening for research teams to
+                    cut months of work down to weeks.
                     </p>
                 </div>
 
@@ -44,7 +44,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
 
                 {/* Col 1 — Acknowledgement of country */}
                 <div className="info-col">
-                    <span className="info-col-label">ACKNOWLEDGEMENT</span>
+                    {/* <span className="info-col-label">ACKNOWLEDGEMENT</span> */}
                     <p>
                         We acknowledge the Traditional Owners of the lands on which
                         we work and live. We pay our respects to Elders past and
@@ -53,37 +53,24 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         Flyscreen Academics was built to support rigorous, open
                         research for the benefit of all communities.
                     </p>
-                </div>
-                
-                <div className="info-col">
-                    <div className="big-stat">
-                        80<span className="big-stat-unit">%</span>
-                    </div>                    
-                    <span className="info-col-label">TIME SAVING</span>
-                    <p className="big-stat-cap"> 
-                        Systematic reviews average 12-18 months and most of that 
-                        is sifting through studies that never make it. Flyscreen
-                        gives you predictive scores to speed up this process so
-                        you can spend more time on real analysis.
-                    </p>
-                </div>
 
-                <div className="info-col">
-                    <h3 className="media-col-heading">User guide.</h3>
-                    {/* Replace href with real PDF path when ready */}
-                    <a className="download-btn" href="#" onClick={e => e.preventDefault()}>
-                        <i className="fa-solid fa-file-pdf" />
-                        Download PDF guide
-                    </a>
-                    <p>
-                        Download the full PDF guide covering project setup, AI scoring,
-                        screening workflows, and export options. Suitable for sharing
-                        with your team or institution ethics board.
-                    </p>
-                </div>
+                    <br />
 
-                <div className="info-col">
-                    <span className="info-col-label">SOCIAL MEDIA</span>
+                    <span className="info-col-label">HAVE QUESTIONS?</span>
+                    <h3>Email us: </h3>
+                        <p>hello@flyscreenacademics.com.au</p>
+                    <h3>Call us: </h3>
+                        <p>0438 496 326</p>
+                    <h3>Join our contact list:</h3>
+                        <input placeholder="your email.."/>
+                        <input placeholder="your organisation.." />
+                        <button style={{ "color": "#fff", "background": "black"}}>SUBMIT</button>
+
+                    <br />
+                    <br />
+                    <br />
+
+                    <span className="info-col-label">SOCIAL MEDIA.</span>
 
                     <div className="social-links">
                         <a className="social-link" href="https://github.com/tateakasledgehammer" target="_blank" rel="noreferrer">
@@ -97,10 +84,48 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         </a>
                     </div>
                     
+                    <br />
+                    <br />
+                    <br />
+
                 </div>
 
                 <div className="info-col">
-                    <span className="info-col-label">PRICING</span>
+                    <span className="info-col-label">ATTEND AN INFO SESH.</span>
+                    <h3>
+                        Join a group call to discuss your processes and how we can help
+                    </h3>
+
+                    <br />
+                    <br />
+
+                    <span className="info-col-label">AI SCORING.</span>
+                        <h3>Studies get ranked before you read a word.</h3>
+                    <p>
+                        Every study receives a <strong>relevance score</strong> against your
+                        criteria before screening begins. High scorers surface first.
+                        Obvious rejects are batched away automatically.
+                    </p>
+
+                    <br />
+                    <br />
+                    <br />
+                    
+                    <h3 className="media-col-heading">USER GUIDE.</h3>
+                    {/* Replace href with real PDF path when ready */}
+                    <a className="download-btn" href="#" onClick={e => e.preventDefault()}>
+                        <i className="fa-solid fa-file-pdf" />
+                        Download PDF guide
+                    </a>
+                    <p>
+                        Download the full PDF guide covering project setup, AI scoring,
+                        screening workflows, and export options. Suitable for sharing
+                        with your team or institution ethics board.
+                    </p>
+                </div>
+
+                <div className="info-col">
+                    <span className="info-col-label">PRICING.</span>
                     <div className="pricing-tier">
                         <div className="pricing-row">
                             <div>
@@ -109,7 +134,6 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                             </div>
                             <div className="pricing-price">
                                 $0
-                                <small>forever</small>
                             </div>
                         </div>
                         <div className="pricing-row">
@@ -128,20 +152,24 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                                 <div className="pricing-desc">Unlimited seats, priority support</div>
                             </div>
                             <div className="pricing-price">
-                                POA
-                                <small>contact us</small>
+                                CONTACT US!
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="info-col">
-                    <span className="info-col-label">AI SCORING</span>
-                        <h3>Studies get ranked before you read a word.</h3>
-                    <p>
-                        Every study receives a <strong>relevance score</strong> against your
-                        criteria before screening begins. High scorers surface first.
-                        Obvious rejects are batched away automatically.
+                    <br />
+                    <br />
+                    <br />
+
+                    <div className="big-stat">
+                        80<span className="big-stat-unit">%</span>
+                    </div>                    
+                    <span className="info-col-label">TIME SAVING.</span>
+                    <p className="big-stat-cap"> 
+                        Systematic reviews average 12-18 months and most of that 
+                        is sifting through studies that never make it. Flyscreen
+                        gives you predictive scores to speed up this process so
+                        you can spend more time on real analysis.
                     </p>
                 </div>
 
@@ -150,33 +178,49 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             {/* ── PROCESS MAP ── */}
             <section className="process-section">
                 <div className="process-section-inner">
-                    <span className="process-eyebrow">The workflow</span>
+                    <span className="process-eyebrow">A-Z</span>
                     <h2 className="process-heading">How it works.</h2>
                     <div className="process-map">
                         <div className="process-step">
                             <div className="step-number">01</div>
                             <div className="step-title">Create project</div>
-                            <p className="step-desc">Define your PICO criteria and paste in your inclusion and exclusion rules.</p>
+                            <p className="step-desc">
+                                Define your criteria and drop in your inclusion and exclusion rules. 
+                                Our system picks up your background information and uses it to review
+                                every study.
+                            </p>
                         </div>
                         <div className="process-step">
                             <div className="step-number">02</div>
                             <div className="step-title">Import studies</div>
-                            <p className="step-desc">Upload from PubMed, Scopus, or any RIS export. Duplicates detected automatically.</p>
+                            <p className="step-desc">
+                                Upload a RIS file from any database: PubMed, Scopus, you name it.
+                                Duplicates detected automatically.
+                            </p>
                         </div>
                         <div className="process-step">
                             <div className="step-number">03</div>
                             <div className="step-title">AI scoring</div>
-                            <p className="step-desc">Each study gets a relevance score. Focus on the borderline cases — skip the obvious ones.</p>
+                            <p className="step-desc">
+                                We give you a relevance score for <strong>every</strong>study, so you can
+                                skip the obvious and move into the studies that matter to you. No time wasting.
+                            </p>
                         </div>
                         <div className="process-step">
                             <div className="step-number">04</div>
                             <div className="step-title">Screen & filter</div>
-                            <p className="step-desc">Title/abstract screening with live keyword highlighting and conflict resolution.</p>
+                            <p className="step-desc">
+                                We are still equipped with all the classic tools to push your screening along.
+                                Filters, tags, notes, highlights, and vote tracking all help your team to be efficient
+                                and keep tabs on edge cases.
+                            </p>
                         </div>
                         <div className="process-step">
                             <div className="step-number">05</div>
                             <div className="step-title">Full-text review</div>
-                            <p className="step-desc">Move accepted studies forward. Track decisions, export your final list.</p>
+                            <p className="step-desc">
+                                Move accepted studies forward. Export your final list and get down to business.
+                            </p>
                         </div>
                     </div>
                 </div>
