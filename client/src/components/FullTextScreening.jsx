@@ -136,7 +136,7 @@ export default function FullTextScreening(props) {
     return (
         <>
         <div className="page-container">
-            <h2><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h2>
+            <h1><i className="fa-solid fa-book-open-reader"></i> Full Text Review</h1>
 
             <ScreeningFiltersBar 
                 searchFilter={searchFilter}

@@ -305,7 +305,7 @@ export default function Setup(props) {
     return (
         <>
         <div className="page-container">
-        <h2><i className="fa-solid fa-circle-info"></i> Setup Your Review</h2>
+        <h1><i className="fa-solid fa-circle-info"></i> Setup Your Review</h1>
 
         <div className="homepage-section">
             {/* <h3>Clear</h3>
@@ -318,8 +318,10 @@ export default function Setup(props) {
             >
                 {isRescoring ? "Re-scoring.." : "Re-score All"}
             </button>
+
             <br />
             <br />
+
             <h3>Use AI Scoring</h3>
             <p>
                 <strong>
@@ -358,6 +360,7 @@ export default function Setup(props) {
         
         <br />
         <hr />
+        <br />
 
         <ReviewerSettingsSection
             reviewerSettings={reviewerSettings}
@@ -366,6 +369,7 @@ export default function Setup(props) {
 
         <br />
         <hr />
+        <br />
 
         <TagSetupSection
             tags={tags}
@@ -377,6 +381,7 @@ export default function Setup(props) {
 
         <br />
         <hr />
+        <br />
 
         <FilterTermSection
             filters={filters}
@@ -388,6 +393,7 @@ export default function Setup(props) {
 
         <br />
         <hr />
+        <br />
 
         <CriteriaSetupSection
             // Inclusion

@@ -133,6 +133,7 @@ export default function CriteriaSetupSection({
 
             {/* INCLUSION */}
             <div>
+                <br />
                 <h3>Inclusion Criteria</h3>
                 <button onClick={addInclusionSection}>Add Inclusion Section (i.e. Population, Intervention...)</button>
                 {inclusionSections.length === 0 && <p>No inclusion sections set.</p>}
@@ -168,6 +169,10 @@ export default function CriteriaSetupSection({
                 )}
                 
                 <button onClick={clearInclusion}>Clear Inclusion Criteria</button>
+
+            <br />
+            <br />
+
             </div>
             {/* EXCLUSION */}
             <div>
@@ -211,11 +216,16 @@ export default function CriteriaSetupSection({
 
         <br />
         <hr />
+        <br />
 
             {/* FULL TEXT */}
             <div>
                 <h3>Full Text Exclusion Criteria</h3>
                 <button onClick={addFullTextReason}>Add Full Text Exclusion Reason (i.e. primary study, unavailable, incorrect population...)</button>
+                
+                <br />
+                <br />
+
                 {fullTextReasons.length === 0 && <p>No criteria set.</p>}
 
                 <div className="inclusion-exclusion-criteria">
@@ -232,6 +242,8 @@ export default function CriteriaSetupSection({
                 <br />
                 <button onClick={clearFullTextReasons}>Clear Full Text Criteria</button>
             </div>
+        
+        <br />
 
             <hr />
         </>

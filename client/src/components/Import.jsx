@@ -238,14 +238,18 @@ export default function Import(props) {
     return (
         <>
         <div className="page-container">
-            <h2><i className="fa-solid fa-upload"></i> Import Your Studies</h2>
-            <p style={{ color: "red" }}>
+            <h1><i className="fa-solid fa-upload"></i> Import Your Studies</h1>
+            <h3 style={{ "color": "red" }}>NOTE:</h3>
+            <p>
                 Ensure that AI scoring is disabled before uploading your files. 
                 Otherwise the upload will not work.
             </p>
-            <p style={{ color: "red" }}>
+            <p>
                 Flyscreen Academics currently only accepts .ris files.
             </p>
+
+            <br />
+            
             <input type="file" accept=".ris" onChange={handleFileUpload} />
             
             {error && (<p style={{ color: "red" }}>{error}</p>)}
@@ -262,6 +266,9 @@ export default function Import(props) {
                     }} />
                 </div>   
             )}
+
+            <br />
+            <br />
 
             <h3>Uploaded Files</h3>
 
@@ -297,6 +304,10 @@ export default function Import(props) {
                 </tbody>
                 </table>
             )}
+
+            <br />
+            <br />
+            <br />
 
             <button onClick={handleClear}>Clear studies</button>
         </div>

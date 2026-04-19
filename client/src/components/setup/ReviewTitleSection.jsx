@@ -15,6 +15,9 @@ export default function ReviewTitleSection({
                 }
             />
 
+            <br />
+            <br />
+
             <h3>Background Information</h3>
             <p>
                 Provide a few paragraphs of background information to
@@ -22,6 +25,7 @@ export default function ReviewTitleSection({
                 Give us some information on the background, the aim, the 
                 inclusion/exclusion criteria and the research context
             </p>
+            <br />
             <textarea
                 value={background.context}
                 placeholder="The aim of this review is to ..."
@@ -43,6 +47,8 @@ export default function ReviewTitleSection({
                     boxSizing: "border-box"
                 }}
             />
+            <br />
+            <br />
         </div>
     )
 }

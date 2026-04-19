@@ -136,9 +136,9 @@ export default function TAScreening(props) {
     return (
         <>        
         <div className="page-container">
-            <h2>
+            <h1>
                 <i className="fa-solid fa-magnifying-glass"></i> Title & Abstract Screening
-            </h2>
+            </h1>
 
             <ScreeningFiltersBar 
                 searchFilter={searchFilter}

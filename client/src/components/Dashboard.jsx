@@ -142,7 +142,7 @@ export default function Dashboard(props) {
     return (
         <>
         <div className="page-container">
-            <h2><i className="fa-solid fa-grip"></i> Dashboard</h2>
+            <h1><i className="fa-solid fa-grip"></i> Dashboard</h1>
             <h3>Your information:</h3>
             <p>Username: {user.username}</p>
             <p>Email: {user.email}</p>
@@ -199,7 +199,7 @@ export default function Dashboard(props) {
                         </strong>
                         {" "}
                         {proj.id === projectId ? (
-                            <span style={{ color: "green" }}>Selected</span>
+                            <span>Selected</span>
                         ) : (
                             "Click to select"
                         )}
@@ -249,7 +249,7 @@ export default function Dashboard(props) {
 
             <br />
             <br />
-            
+
             <CreateProject 
                 projectTitle={projectTitle}
                 setProjectTitle={setProjectTitle}

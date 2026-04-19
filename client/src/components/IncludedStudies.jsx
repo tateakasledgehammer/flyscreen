@@ -117,9 +117,9 @@ export default function IncludedScreening({
     return (
         <>
             <div className="page-container">
-                <h2>
+                <h1>
                     <i className="fa-solid fa-circle-check"></i> Final Included Studies
-                </h2>
+                </h1>
 
                 <ScreeningFiltersBar
                     searchFilter={searchFilter}
