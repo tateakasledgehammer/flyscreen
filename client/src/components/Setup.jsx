@@ -335,6 +335,7 @@ export default function Setup(props) {
             </p>
             <input
                 type="checkbox"
+                className="checkbox"
                 checked={scoringMode === "ai"}
                 onChange={handleToggleAI}
             />

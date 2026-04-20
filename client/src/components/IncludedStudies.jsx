@@ -16,7 +16,7 @@ export default function IncludedScreening({
     const [studies, setStudies] = useState([]);
     const [studyTags, setStudyTags] = useState([]);
     const [toggleDetails, setToggleDetails] = useState({});
-    const [statusFilter, setStatusFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("UNSCREENED");
 
     async function fetchScreeningSummary() {
         const res = await fetch(`/api/projects/${projectId}/screenings/summary`, {

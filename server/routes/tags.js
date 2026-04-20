@@ -25,7 +25,10 @@ router.post(
         }
 
         tagRepo.createTag.run(name.trim(), projectId);
-        res.json({ success: true });
+
+        const tagRow = tagRepo.getTagByName.get(name.trim(), projectId);
+
+        res.json(tagRow);
 });
 
 router.post(

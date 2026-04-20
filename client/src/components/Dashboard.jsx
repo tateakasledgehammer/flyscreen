@@ -143,109 +143,118 @@ export default function Dashboard(props) {
         <>
         <div className="page-container">
             <h1><i className="fa-solid fa-grip"></i> Dashboard</h1>
-            <h3>Your information:</h3>
-            <p>Username: {user.username}</p>
-            <p>Email: {user.email}</p>
-            <p>Account made on: {user.created_at}</p>
+            <div className="homepage-section">
+                <h3>Your information:</h3>
+                <p>Username: {user.username}</p>
+                <p>Email: {user.email}</p>
+                <p>Account made on: {user.created_at}</p>
+            </div>
 
-            <br />
             <br />
             
-            <h3>Your projects:</h3>
+            <div className="homepage-section">
+                <h3>Your projects:</h3>
 
-            {loading && <p>Loading projects...</p>}
-            {error && <p style={{ color: "red" }}>{error}</p>}
+                {loading && <p>Loading projects...</p>}
+                {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {!loading && projects.length === 0 && (
-                <p>You have no projects yet. Create one below.</p>
-            )}
+                {!loading && projects.length === 0 && (
+                    <p>You have no projects yet. Create one below.</p>
+                )}
 
-            {projects.map((proj) => (
-                <div 
-                    key={proj.id}
-                    className="homepage-section"
-                    style={{ cursor: "pointer", border: proj.id === projectId ? "3px solid" : "1px solid" }}
-                    onClick={() => handleSelectProject(proj.id)}
-                >
-                    <p>
-                        <strong>
-                            Project: {proj.name}
-                        </strong> with {" "} 
-                    </p>
-                    {proj.collaborators?.length > 0 ? (
-                        <ul>
-                            {proj.collaborators.map(c => (
-                                <li key={c.id}>
-                                    {c.username} ({c.role})
-                                    <button onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveCollaborator(proj.id, c.id);
-                                    }}>
-                                        Remove
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        "no other reviewers"
-                    )}
-
-                    <p><strong>Created:</strong> {" "}
-                        {new Date(proj.created_at).toLocaleDateString()}
-                    </p>
-                    <p>
-                        <strong>
-                        Status: 
-                        </strong>
-                        {" "}
-                        {proj.id === projectId ? (
-                            <span>Selected</span>
+                {projects.map((proj) => (
+                    <div 
+                        key={proj.id}
+                        className="homepage-section"
+                        style={{ 
+                            cursor: "pointer", 
+                            border: proj.id === projectId ? "3px solid" : "1px solid var(--border)",
+                            // background: proj.id === projectId ? "var(--ink)" : "transparent",
+                            // color: proj.id === projectId ? "var(--cream" : "var(--ink)"
+                        
+                        }}
+                        onClick={() => handleSelectProject(proj.id)}
+                    >
+                        <p>
+                            <strong>
+                                Project: {proj.name}
+                            </strong> with {" "} 
+                        </p>
+                        {proj.collaborators?.length > 0 ? (
+                            <ul>
+                                {proj.collaborators.map(c => (
+                                    <li key={c.id}>
+                                        {c.username} ({c.role})
+                                        <button onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRemoveCollaborator(proj.id, c.id);
+                                        }}>
+                                            Remove
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
                         ) : (
-                            "Click to select"
+                            "no other reviewers"
                         )}
-                    </p>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation(); handleAddReviewer(proj);
-                        }}
-                        style={{
-                            margin: "12px 24px"
-                        }}
-                    >
-                        Add reviewer
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation(); handleRenameProject(proj);
-                        }}
-                        style={{
-                            margin: "12px 24px"
-                        }}
-                    >
-                        Rename
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation(); handleArchiveProject(proj.id);
-                        }}
-                        style={{
-                            margin: "12px 24px"
-                        }}
-                    >
-                        Archive
-                    </button>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation(); handleDeleteProject(proj.id);
-                        }}
-                        style={{
-                            margin: "12px 24px"
-                        }}
-                    >
-                        Delete
-                    </button>
-                </div>
-            ))}
+
+                        <p><strong>Created:</strong> {" "}
+                            {new Date(proj.created_at).toLocaleDateString()}
+                        </p>
+                        <p>
+                            <strong>
+                            Status: 
+                            </strong>
+                            {" "}
+                            {proj.id === projectId ? (
+                                <span>Selected</span>
+                            ) : (
+                                "Click to select"
+                            )}
+                        </p>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); handleAddReviewer(proj);
+                            }}
+                            style={{
+                                margin: "12px 24px"
+                            }}
+                        >
+                            Add reviewer
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); handleRenameProject(proj);
+                            }}
+                            style={{
+                                margin: "12px 24px"
+                            }}
+                        >
+                            Rename
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); handleArchiveProject(proj.id);
+                            }}
+                            style={{
+                                margin: "12px 24px"
+                            }}
+                        >
+                            Archive
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); handleDeleteProject(proj.id);
+                            }}
+                            style={{
+                                margin: "12px 24px"
+                            }}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                ))}
+            </div>
 
             <br />
             <br />

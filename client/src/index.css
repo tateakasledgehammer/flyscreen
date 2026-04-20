@@ -137,9 +137,13 @@ p {
   background: var(--ink);
   padding: 20px 28px;
   font-size: 0.75rem;
-  color: rgba(245, 240, 232, 0.35);
   text-align: center;
-  letter-spacing: 0.04em;
+  color: #fff;
+  margin-top: auto;
+}
+
+.app-footer a {
+  color: var(--cream);
 }
 
 /* ── PAGE CONTAINER (inner content pages) ───────────────── */
@@ -248,10 +252,14 @@ p {
 .percentile-card:hover .percentile-contents { display: block; }
 
 .study-info {
-  width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   justify-content: center;
   border-radius: 5px;
+}
+
+.study-info a {
+  word-break: break-all;
 }
 
 /* ── ACTIONS (study card buttons) ───────────────────────── */
@@ -266,6 +274,20 @@ p {
 
 .accept-btn { background-color: rgb(173, 239, 173); }
 .reject-btn { background-color: rgb(237, 159, 159); }
+
+/* - IMPORTS - */
+.import-input {
+  padding: 6px;
+  max-width: 40vw;
+}
+
+.import-table th {
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
 
 /* ── FORMS & INPUTS ─────────────────────────────────────── */
 button {
@@ -307,6 +329,10 @@ input:focus, select:focus {
   outline-offset: 1px;
 }
 
+input[type="checkbox"] {
+  accent-color: var(--ink);
+}
+
 /* ── HIGHLIGHTING ────────────────────────────────────────── */
 .highlight-include {
   background-color: rgba(121, 255, 121, 0.4);
@@ -339,11 +365,16 @@ input:focus, select:focus {
 .criteria-section { padding: 20px 0; }
 
 .inclusion-exclusion-criteria {
-  padding-left: 20px;
+  padding: 20px;
   margin-top: 10px;
   border: 1px solid transparent;
   border-radius: 5px;
   background-color: var(--surface);
+}
+
+.inclusion-exclusion-criteria button,
+.criteria-subheading {
+  margin: 6px 16px;
 }
 
 /* ── SCREENING NAV ───────────────────────────────────────── */
@@ -390,7 +421,13 @@ input:focus, select:focus {
 }
 .screening-nav button:hover { background: #2a3a50; }
 
-.toggle-status { padding-top: 20px; }
+.toggle-status { 
+  padding-top: 20px; 
+}
+
+.toggle-status button { 
+  margin-right: 8px; 
+}
 
 /* ── AUTH FORM (within landing) ─────────────────────────── */
 .auth-card {

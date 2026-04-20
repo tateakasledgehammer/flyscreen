@@ -144,10 +144,10 @@ export default function CriteriaSetupSection({
                             <div key={index}>
                                 <h4>
                                     {section.category}
-                                    <button onClick={() => deleteInclusionSection(index)}>X</button>
+                                    <button className="criteria-subheading" onClick={() => deleteInclusionSection(index)}>X</button>
                                 </h4>
 
-                                <button onClick={() => addInclusionCriteria(index)}>Add Term</button>
+                                <button className="criteria-subheading" onClick={() => addInclusionCriteria(index)}>Add Term</button>
                                 
                                 {section.criteria.length === 0 && (
                                     <p>No terms for inclusion added.</p>
@@ -186,10 +186,10 @@ export default function CriteriaSetupSection({
                             <div key={index}>
                                 <h4>
                                     {section.category}
-                                    <button onClick={() => deleteExclusionSection(index)}>X</button>
+                                    <button className="criteria-subheading" onClick={() => deleteExclusionSection(index)}>X</button>
                                 </h4>
 
-                                <button onClick={() => addExclusionCriteria(index)}>Add Term</button>
+                                <button className="criteria-subheading" onClick={() => addExclusionCriteria(index)}>Add Term</button>
                                 
                                 {section.criteria.length === 0 && (
                                     <p>No terms for Exclusion added.</p>

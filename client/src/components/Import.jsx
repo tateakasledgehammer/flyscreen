@@ -250,7 +250,7 @@ export default function Import(props) {
 
             <br />
             
-            <input type="file" accept=".ris" onChange={handleFileUpload} />
+            <input className="import-input" type="file" accept=".ris" onChange={handleFileUpload} />
             
             {error && (<p style={{ color: "red" }}>{error}</p>)}
             {isLoading && <p>Importing file...</p>}
@@ -271,13 +271,13 @@ export default function Import(props) {
             <br />
 
             <h3>Uploaded Files</h3>
-
+            <br />
             {uploadHistory.length === 0 ? (
                 <p>No uploads yet.</p>
             ) : (
-                <table>
+                <table className="import-table">
                 <thead>
-                    <tr style={{ background: "#f0f0f0" }}>
+                    <tr>
                         <th>File Name</th>
                         <th>Studies</th>
                         <th>Duplicates</th>
@@ -309,7 +309,7 @@ export default function Import(props) {
             <br />
             <br />
 
-            <button onClick={handleClear}>Clear studies</button>
+            <button onClick={handleClear}>Clear imports & studies</button>
         </div>
         </>
     )

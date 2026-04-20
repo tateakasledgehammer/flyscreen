@@ -37,11 +37,11 @@ export default function StudyInfo(props) {
         <div className="study-info">
             <p><strong>Authors: </strong>{formatAuthors(study.authors)}</p>
             <p><strong>Year: </strong>{study.year}</p>
-            <p className="disappear-when-reduced"><strong>Type: </strong>{study.type}</p>
-            <p className="disappear-when-reduced"><strong>Language: </strong>{study.language}</p>
-            <p className="disappear-when-reduced"><strong>Journal: </strong>{study.journal}</p>
-            <p className="disappear-when-reduced"><strong>Volume: </strong>{study.volume}</p>
-            <p className="disappear-when-reduced"><strong>Issue: </strong>{study.issue}</p>
+            <p className="disappear-when-reduced"><strong>Type: </strong>{study.type || "N/A"}</p>
+            <p className="disappear-when-reduced"><strong>Language: </strong>{study.language || "N/A"}</p>
+            <p className="disappear-when-reduced"><strong>Journal: </strong>{study.journal || "N/A"}</p>
+            {/* <p className="disappear-when-reduced"><strong>Volume: </strong>{study.volume}</p> */}
+            {/* <p className="disappear-when-reduced"><strong>Issue: </strong>{study.issue}</p> */}
             
             <p>
                 <strong>DOI: </strong>

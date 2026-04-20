@@ -130,6 +130,7 @@ export default function Overview(props) {
     const ftFinished = progress.ft.accepted + progress.ft.rejected + progress.ft.conflict;
     const ftAwaiting = progress.ft.pending;
     const ftUnscreened = progress.ft.unscreened;
+    const ftTotal = ftAwaiting + ftUnscreened + ftFinished;
 
     function handlePrismaDiagram() {
         alert("This function has not been set up")
@@ -209,6 +210,28 @@ export default function Overview(props) {
                     </ul>
             </div>
 
+            <div className="homepage-section">
+                <h3>Title & Abstract Screening</h3>
+                <ul>
+                    <li>Unscreened: {progress.ta.unscreened}</li>
+                    <li>One Vote: {progress.ta.pending}</li>
+                    <li>Approved: {progress.ta.accepted}</li>
+                    <li>Conflicts: {progress.ta.conflict}</li>
+                    <li>Rejected: {progress.ta.rejected}</li>
+                </ul>
+            </div>
+            <div className="homepage-section">    
+                <h3>Full Text Screening</h3>
+                {/* ? copy above rather than double up */}
+                <ul>
+                    <li>Unscreened: {progress.ft.unscreened}</li>
+                    <li>One Vote: {progress.ft.pending}</li>
+                    <li>Approved: {progress.ft.accepted}</li>
+                    <li>Conflicts: {progress.ft.conflict}</li>
+                    <li>Rejected: {progress.ft.rejected}</li>
+                </ul>
+            </div>
+
             <br />
             <br />
             
@@ -232,34 +255,35 @@ export default function Overview(props) {
                 color="#22c55e"
             />
 
+            <br />
+
+            <h3>Full Text Screening Progress</h3>
+            <ProgressBar
+                label="Unscreened"
+                completed={ftUnscreened}
+                total={ftTotal}
+                color="#9ca3af"
+            />
+            <ProgressBar
+                label="Awaiting Second Vote"
+                completed={ftAwaiting}
+                total={ftTotal}
+                color="#fb923c"
+            />
+            <ProgressBar
+                label="Finished"
+                completed={ftFinished}
+                total={ftTotal}
+                color="#22c55e"
+            />
+
             <button onClick={handlePrismaDiagram}>
                 See PRISMA Flow Diagram
             </button>
 
             <br />
             <br />
-
-            <div className="homepage-section">
-                <h3>Title & Abstract Screening</h3>
-                <ul>
-                    <li>Unscreened: {progress.ta.unscreened}</li>
-                    <li>One Vote: {progress.ta.pending}</li>
-                    <li>Approved: {progress.ta.accepted}</li>
-                    <li>Conflicts: {progress.ta.conflict}</li>
-                    <li>Rejected: {progress.ta.rejected}</li>
-                </ul>
-            </div>
-            <div className="homepage-section">    
-                <h3>Full Text Screening</h3>
-                {/* ? copy above rather than double up */}
-                <ul>
-                    <li>Unscreened: {progress.ft.unscreened}</li>
-                    <li>One Vote: {progress.ft.pending}</li>
-                    <li>Approved: {progress.ft.accepted}</li>
-                    <li>Conflicts: {progress.ft.conflict}</li>
-                    <li>Rejected: {progress.ft.rejected}</li>
-                </ul>
-            </div>
+            
             <div className="homepage-section">
                 <h3>Your Screening Stats</h3>
                 <ul>

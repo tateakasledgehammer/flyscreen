@@ -391,32 +391,41 @@ router.get(
             const ftVotes = perStudy[studyId].FULLTEXT;
 
             // TA
+            let taStatus;
             if (taVotes.length === 0) {
+                taStatus === "UNSCREENED";
                 taUnscreened++;
             } else if 
                 (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) {
+                    taStatus === "CONFLICT";
                     taConflict++;
             } else if
                 (taVotes.every(v => v === "ACCEPT") && taVotes.length >= 2) {
+                    taStatus === "ACCEPTED";
                     taAccepted++;
             } else if
                 (taVotes.every(v => v === "REJECT") && taVotes.length >= 2) {
+                    taStatus === "REJECTED";
                     taRejected++;
             } else {
+                taStatus === "PENDING"
                 taPending++;
             }
 
-            // FT
-            if (ftVotes.length === 0) {
-                ftUnscreened++;
-            } else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) {
-                ftConflict++;
-            } else if (ftVotes.every(v => v === "ACCEPT") && ftVotes.length >= 2) {
-                ftAccepted++;
-            } else if (ftVotes.every(v => v === "REJECT") && ftVotes.length >= 2) {
-                ftRejected++;
-            } else {
-                ftPending++;
+
+            if (taStatus === "ACCEPTED") {
+                // FT
+                if (ftVotes.length === 0) {
+                    ftUnscreened++;
+                } else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) {
+                    ftConflict++;
+                } else if (ftVotes.every(v => v === "ACCEPT") && ftVotes.length >= 2) {
+                    ftAccepted++;
+                } else if (ftVotes.every(v => v === "REJECT") && ftVotes.length >= 2) {
+                    ftRejected++;
+                } else {
+                    ftPending++;
+                }
             }
         }
 

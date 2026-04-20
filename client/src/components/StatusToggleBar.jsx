@@ -21,9 +21,8 @@ export default function StatusToggleBar({
                     key={key}
                     onClick={() => setStatusFilter(key)}
                     style={ statusFilter === key ? { 
-                        fontWeight: "700", 
-                        backgroundColor: "#213547", 
-                        color: "white" 
+                        backgroundColor: "var(--cream)", 
+                        color: "var(--ink)",
                         } : {}
                     }
                 >
