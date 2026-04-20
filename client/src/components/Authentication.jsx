@@ -58,7 +58,7 @@ export default function Authentication(props) {
 
             setMessage(data.message || "Success")
 
-            navigate("/overview")
+            navigate("/dashboard")
 
         } catch (err) {
             console.error(err)

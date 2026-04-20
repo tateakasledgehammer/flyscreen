@@ -421,11 +421,14 @@ input[type="checkbox"] {
 }
 .screening-nav button:hover { background: #2a3a50; }
 
+/* --- FILTERS --- */
+
 .toggle-status { 
   padding-top: 20px; 
 }
 
-.toggle-status button { 
+.toggle-status button,
+.filters-bar button { 
   margin-right: 8px; 
 }
 

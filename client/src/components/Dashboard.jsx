@@ -185,7 +185,9 @@ export default function Dashboard(props) {
                                 {proj.collaborators.map(c => (
                                     <li key={c.id}>
                                         {c.username} ({c.role})
-                                        <button onClick={(e) => {
+                                        <button 
+                                        className="criteria-subheading"
+                                        onClick={(e) => {
                                             e.stopPropagation();
                                             handleRemoveCollaborator(proj.id, c.id);
                                         }}>

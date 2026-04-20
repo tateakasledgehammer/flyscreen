@@ -1,7 +1,43 @@
 import Authentication from "./Authentication";
+import { useState } from "react";
 import "../landing.css";
 
 export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }) {
+    const [contactEmail, setContactEmail] = useState("");
+    const [contactOrg, setContactOrg] = useState("");
+    const [contactMsg, setContactMsg] = useState("");
+    const [footerEmail, setFooterEmail] = useState("");
+    const [footerMsg, setFooterMsg] = useState("");
+
+    async function handleContactSubmit(e) {
+        e.preventDefault();
+        const res = await fetch("/api/auth/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: contactEmail,
+                organisation: contactOrg,
+                source: "contact_form"
+            })
+        });
+        const data = await res.json();
+        setContactMsg(data.success ? "Thanks! We'll be in touch." : "Something went wrong..");
+    }
+
+    async function handleFooterSubscribe(e) {
+        e.preventDefault();
+        const res = await fetch("/api/auth/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: footerEmail,
+                source: "footer"
+            })
+        });
+        const data = await res.json();
+        setContactMsg(data.success ? "Subscribed!" : "Something went wrong..");
+    }
+
     return (
         <div className="landing-page">
 
@@ -85,16 +121,31 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
 
                     <br />
 
-                    <span className="info-col-label">HAVE QUESTIONS?</span>
+                    <span id="contact-us" className="info-col-label">HAVE QUESTIONS?</span>
                     <h3>Email us: </h3>
                         <p>hello@flyscreenacademics.com.au</p>
                     <br />
                     {/* <h3>Call us: </h3>
                         <p>0412 345 678</p> */}
                     <h3>Join our contact list:</h3>
-                        <input placeholder="your email.."/>
-                        <input placeholder="your organisation.." />
-                        <button style={{ "color": "#fff", "background": "black"}}>SUBMIT</button>
+                        <input 
+                            placeholder="your email.."
+                            value={contactEmail}
+                            onChange={e => setContactEmail(e.target.value)}
+                            type="email"
+                        />
+                        <input 
+                            placeholder="your organisation.." 
+                            value={contactOrg}
+                            onChange={e => setContactOrg(e.target.value)}
+                        />
+                        <button 
+                            style={{ "color": "#fff", "background": "black"}}
+                            onClick={handleContactSubmit}
+                        >
+                            SUBMIT
+                        </button>
+                        {contactMsg && <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{contactMsg}</p>}
 
                     <br />
                     <br />
@@ -121,7 +172,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 </div>
 
                 <div className="info-col">
-                    <div className="event-section">
+                    <div id="info-sessions" className="event-section">
                     <span className="event-label">ATTEND AN INFO SESH.</span>
                     <p className="event-info">Join a group call to discuss how we can help you</p>
                     <div className="event-tier">
@@ -147,7 +198,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     <br />
 
                     <div className="shaded-section">
-                        <span className="info-col-label">AI SCORING.</span>
+                        <span id="scoring-info" className="info-col-label">AI SCORING.</span>
                             <h3>We rank studies before you read a word.</h3>
                         <p>
                             Every study receives a <strong>relevance score</strong> against your
@@ -160,7 +211,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     <br />
                     <br />
                     
-                    <h3 className="user-guide-heading">USER GUIDE.</h3>
+                    <h3 id="user-guide" className="user-guide-heading">USER GUIDE.</h3>
                     {/* Replace href with real PDF path when ready */}
                     <a className="download-btn" href="#" onClick={e => e.preventDefault()}>
                         <i className="fa-solid fa-file-pdf" />
@@ -178,7 +229,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 </div>
 
                 <div className="info-col">
-                    <span className="info-col-label">PRICING.</span>
+                    <span id="pricing-info" className="info-col-label">PRICING.</span>
                     <div className="pricing-tier">
                         <div className="pricing-row">
                             <div>
@@ -232,7 +283,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     <br /> 
                     
                     <div className="shaded-section">
-                    <span className="info-col-label">PRISMA READY.</span>
+                    <span id="prisma-info" className="info-col-label">PRISMA READY.</span>
                     <p> 
                         Tracks your uploads, duplicates and votes for clarity in a PRISMA flow diagram.
                         Put your crtieria and files in and we will handle the rest.
@@ -245,7 +296,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
 
             {/* ── PROCESS MAP ── */}
             <section className="process-section">
-                <div className="process-section-inner">
+                <div id="how-it-works" className="process-section-inner">
                     <span className="process-eyebrow">A to Z | IMPORT TO ANALYSIS</span>
                     <h2 className="process-heading">How it works.</h2>
                     <div className="process-map">
@@ -311,16 +362,16 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             <div className="footer-grid">
                 <div className="footer-col">
                     <span className="footer-col-head">Product</span>
-                    <a href="#" onClick={e => e.preventDefault()}>How it works</a>
-                    <a href="#" onClick={e => e.preventDefault()}>Pricing</a>
-                    <a href="#" onClick={e => e.preventDefault()}>AI Scoring</a>
-                    <a href="#" onClick={e => e.preventDefault()}>PRISMA export</a>
+                    <a href="#how-it-works">How it works</a>
+                    <a href="#pricing-info">Pricing</a>
+                    <a href="#scoring-info">AI Scoring</a>
+                    <a href="#prisma-info">PRISMA export</a>
                 </div>
                 <div className="footer-col">
                     <span className="footer-col-head">Resources</span>
-                    <a href="#" onClick={e => e.preventDefault()}>User guide (PDF)</a>
-                    <a href="#" onClick={e => e.preventDefault()}>Info sessions</a>
-                    <a href="#" onClick={e => e.preventDefault()}>Contact us</a>
+                    <a href="#user-guide">User guide (PDF)</a>
+                    <a href="#info-sessions">Info sessions</a>
+                    <a href="#contact-us">Contact us</a>
                 </div>
                 <div className="footer-col">
                     <span className="footer-col-head">Connect</span>
@@ -332,8 +383,15 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 {/* Sign up box */}
                 <div className="footer-signup">
                     <span className="footer-col-head">Stay in the loop</span>
-                    <input className="footer-input" type="email" placeholder="your@email.edu" />
-                    <button className="footer-subscribe-btn">Subscribe</button>
+                    <input 
+                        className="footer-input" 
+                        type="email" 
+                        placeholder="your@email.edu"
+                        value={footerEmail}
+                        onChange={e => setFooterEmail(e.target.value)}
+                    />
+                    <button onClick={handleFooterSubscribe} className="footer-subscribe-btn">Subscribe</button>
+                    {footerMsg && <p style={{ color: "var(--accent)", fontSize: "0.8rem", marginTop: 4 }}>{footerMsg}</p>}
                 </div>
             </div>
 
@@ -341,9 +399,27 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             <div className="footer-bottom">
                 <span className="footer-brand">FLYSCREEN ACADEMICS.</span>
                 <div className="footer-legal">
-                    <a href="#" onClick={e => e.preventDefault()}>Privacy Policy</a>
-                    <a href="#" onClick={e => e.preventDefault()}>Terms of Use</a>
-                    <a href="#" onClick={e => e.preventDefault()}>Data & Security</a>
+                    <a href="#" onClick={e => {
+                        e.preventDefault();
+                        alert("For information about our policy, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
+                    }}
+                    >
+                        Privacy Policy
+                    </a>
+                    <a href="#" onClick={e => {
+                        e.preventDefault();
+                        alert("For information about our terms, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
+                    }}
+                    >
+                        Terms of Use
+                    </a>
+                    <a href="#" onClick={e => {
+                        e.preventDefault();
+                        alert("Your data is stored on Australian servers. Study titles and abstracts sent for AI scoring are not retained after scoring is complete. Contact hello@flyscreenacademics.com.au for a full data handling statement which is in preparation.");
+                    }}
+                    >
+                        Data & Security
+                    </a>
                     <span>© {new Date().getFullYear()} Flyscreen Academics</span>
                 </div>
             </div>

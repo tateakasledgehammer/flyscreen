@@ -333,6 +333,7 @@ export default function Setup(props) {
                 screening page and the studies will begin showing 
                 their scores.
             </p>
+            <br />
             <input
                 type="checkbox"
                 className="checkbox"
@@ -341,6 +342,8 @@ export default function Setup(props) {
             />
             <br />
         </div>
+
+        <br />
 
         <ReviewTitleSection
             background={background}

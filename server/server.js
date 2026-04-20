@@ -56,6 +56,7 @@ const {
     getStudyById,
     deleteStudy,
     insertManyStudies,
+    insertEmailList
 } = require("./db");
 const studyScoreRepo = require("./repos/studyScoreRepo.js");
 
@@ -377,6 +378,25 @@ app.get("/api/auth/whoami", requireAuth, (req, res) => {
             username: req.user.username
         }
     });
+});
+
+app.post("/api/auth/subscribe", (req, res) => {
+    const { email, organisation, source } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: "Email required" });
+
+    try {
+        insertEmailList.run({
+            email,
+            organisation: organisation || null,
+            source: source || "landing"
+        });
+        res.json({ success: true });
+    } catch (err) {
+        if (err.message.includes("UNIQUE")) {
+            return res.json({ success: true, message: "Already subscribed" });
+        }
+        res.status(500).json({ success: false });
+    }
 });
 
 app.post("/api/auth/logout", (req, res) => {

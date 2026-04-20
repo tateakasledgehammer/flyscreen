@@ -121,6 +121,11 @@ export default function IncludedScreening({
                     <i className="fa-solid fa-circle-check"></i> Final Included Studies
                 </h1>
 
+                <button onClick={() => alert("Function not yet finalised")}>EXPORT FINAL STUDIES</button>
+
+                <br />
+                <br />
+
                 <ScreeningFiltersBar
                     searchFilter={searchFilter}
                     setSearchFilter={setSearchFilter}

@@ -16,6 +16,16 @@ db.pragma("foreign_keys = ON");
 
 // Create tables
 const initSchema = db.transaction(() => {
+    // Email list
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS email_list (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL UNIQUE,
+            organisation TEXT,
+            source TEXT DEFAULT 'landing',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `).run();
 
     // Users
     db.prepare(`
@@ -392,7 +402,6 @@ const insertManyStudies = db.transaction((cleanStudies) => {
 });
 
 // SCREENING HELPERS
-
  const getScreeningsForProject = db.prepare(`
     SELECT s.study_id, s.stage, s.vote, s.reason, s.user_id, s.is_final
     FROM screenings s
@@ -411,12 +420,19 @@ const insertManyStudies = db.transaction((cleanStudies) => {
      updated_at = CURRENT_TIMESTAMP
  `);
 
-// EXPORTING
 
+// EMAIL LIST
+ const insertEmailList = db.prepare(`
+    INSERT OR IGNORE INTO email_list (email, organisation, source)
+    VALUES (@email, @organisation, @source)
+ `);
+
+// EXPORTING
 module.exports = {
     db,
     upsertScreening,
     getScreeningsForProject,
+    insertEmailList,
 
     // studies
     createStudy: db.prepare(`
