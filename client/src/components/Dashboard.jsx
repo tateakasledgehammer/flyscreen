@@ -191,9 +191,8 @@ export default function Dashboard(props) {
             <div className="homepage-section">
                 <h3>Your information:</h3>
                 <p>Username: {user?.username}</p>
-                <p>Email: {user?.email}</p>
+                <p>Email: {user?.email || "Not set"}</p>
                 <p>Account made on: {joinedDate}</p>
-
 
             <br />
 
@@ -357,7 +356,7 @@ export default function Dashboard(props) {
 
             <br />
             <br />
-            
+
         </div>
         </>
         

@@ -371,20 +371,21 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/auth/whoami", requireAuth, (req, res) => {
+    const userRecord = db.prepare("SELECT id, username, email, created_at FROM users WHERE id = ?").get(req.user.userid);
     res.json({
         isAuthenticated: true,
         user: { 
-            id: req.user.userid, 
-            username: req.user.username,
-            email: req.user.email,
-            created_at: req.user.created_at
+            id: userRecord.id, 
+            username: userRecord.username,
+            email: userRecord.email,
+            created_at: userRecord.created_at
         }
     });
 });
 
 app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
     const { email } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.userid;
 
     const cleanEmail = email ? email.trim().toLowerCase() : null;
     if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
@@ -402,7 +403,7 @@ app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
     }
 });
 
-app.path("/api/auth/change-password", requireAuth, async (req, res) => {
+app.patch("/api/auth/change-password", requireAuth, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const userId = req.user.userid;
 
