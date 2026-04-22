@@ -22,6 +22,8 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
         });
         const data = await res.json();
         setContactMsg(data.success ? "Thanks! We'll be in touch." : "Something went wrong..");
+        setContactEmail("");
+        setContactOrg("");
     }
 
     async function handleFooterSubscribe(e) {
@@ -35,7 +37,8 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             })
         });
         const data = await res.json();
-        setContactMsg(data.success ? "Subscribed!" : "Something went wrong..");
+        setFooterMsg(data.success ? "Subscribed!" : "Something went wrong..");
+        setFooterEmail("");
     }
 
     return (

@@ -375,9 +375,53 @@ app.get("/api/auth/whoami", requireAuth, (req, res) => {
         isAuthenticated: true,
         user: { 
             id: req.user.userid, 
-            username: req.user.username
+            username: req.user.username,
+            email: req.user.email,
+            created_at: req.user.created_at
         }
     });
+});
+
+app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
+    const { email } = req.body;
+    const userId = req.user.userId;
+
+    const cleanEmail = email ? email.trim().toLowerCase() : null;
+    if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return res.json({ success: false, errors: ["Invalid email address"] });
+    }
+
+    try {
+        db.prepare("UPDATE users SET email = ? WHERE id = ?").run(cleanEmail, userId);
+        res.json({ success: true, message: "Profile updated" });
+    } catch (err) {
+        if (err.message.includes("UNIQUE")) {
+            return res.json({ success: false, errors: ["Email already in use!"] });
+        }
+        res.status(500).json({ success: false, errors: ["Could not update profile"] });
+    }
+});
+
+app.path("/api/auth/change-password", requireAuth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userid;
+
+    if (!currentPassword || !newPassword) {
+        return res.json({ success: false, errors: ["Both fields required"] });
+    }
+    if (newPassword.length < 6 || newPassword.length > 32) {
+        return res.json({ success: false, errors: ["Password must be 6-32 characters"] });
+    }
+
+    const userRecord = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+    const valid = await bcrypt.compare(currentPassword, userRecord.password);
+    if (!valid) {
+        return res.json({ success: false, errors: ["Current password is incorrect"] });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+    db.prepare("UPDATE users SET password = ? WHERE id = ?").run(hashed, userId);
+    res.json({ success: true, message: "Password updated" });
 });
 
 app.post("/api/auth/subscribe", (req, res) => {

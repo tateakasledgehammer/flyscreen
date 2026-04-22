@@ -6,8 +6,16 @@ export default function Dashboard(props) {
     const { 
         projectId, 
         setProjectId,
-        user
+        user,
+        setUser
     } = props;
+
+    const [email, setEmail] = useState(user?.email || "");
+    const [profileMsg, setProfileMsg] = useState("");
+
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [passwordMsg, setPasswordMsg] = useState("");
 
     const [projects, setProjects] = useState([]);
     const [projectTitle, setProjectTitle] = useState("");
@@ -38,6 +46,43 @@ export default function Dashboard(props) {
     useEffect(() => {
         fetchProjects();
     }, []);
+
+    async function handleUpdateProfile(e) {
+        e.preventDefault();
+        const res = await fetch("/api/auth/update-profile", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setProfileMsg("Profile updated.");
+            setUser(prev => ({ ...prev, email }));
+        } else {
+            setProfileMsg(data.errors?.[0] || "Something went wrong.");
+        }
+    }
+
+    async function handleChangePassword(e) {
+        e.preventDefault();
+        const res = await fetch("/api/auth/change-password", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        setPasswordMsg(data.success ? "Password updated." : (data.errors?.[0] || "Something went wrong."));
+        if (data.success) {
+            setCurrentPassword("");
+            setNewPassword("");
+        }
+    }
+
+    const joinedDate = user?.created_at
+        ? new Date(user.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
+        : "Unknown";
 
     function handleSelectProject(id) {
         setProjectId(id);
@@ -145,9 +190,52 @@ export default function Dashboard(props) {
             <h1><i className="fa-solid fa-grip"></i> Dashboard</h1>
             <div className="homepage-section">
                 <h3>Your information:</h3>
-                <p>Username: {user.username}</p>
-                <p>Email: {user.email}</p>
-                <p>Account made on: {user.created_at}</p>
+                <p>Username: {user?.username}</p>
+                <p>Email: {user?.email}</p>
+                <p>Account made on: {joinedDate}</p>
+
+
+            <br />
+
+            <h3>Update email:</h3>
+            <label className="auth-label">Email</label>
+            <input
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@email.edu"
+            />
+            <button onClick={handleUpdateProfile}>Save Email</button>
+            {profileMsg && <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{profileMsg}</p>}
+
+            <br />
+            <br />
+
+            <h3>Update password:</h3>
+            <label className="auth-label">Current Password</label>
+            <input
+                className="auth-input"
+                type="password"
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="********"
+            />
+
+            <label className="auth-label">New Password</label>
+            <input
+                className="auth-input"
+                type="password"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="********"
+            />
+            <button onClick={handleChangePassword}>Update Password</button>
+            {passwordMsg && <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{profileMsg}</p>}
+            
+            <br />
+            <br />
+
             </div>
 
             <br />
@@ -266,6 +354,10 @@ export default function Dashboard(props) {
                 setProjectTitle={setProjectTitle}
                 setProjectId={setProjectId}
             />
+
+            <br />
+            <br />
+            
         </div>
         </>
         

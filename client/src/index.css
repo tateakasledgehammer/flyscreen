@@ -349,7 +349,7 @@ input[type="checkbox"] {
 }
 
 /* ── UTILITY ─────────────────────────────────────────────── */
-.filter-notice, .toggle-status {
+.filter-notice, .toggle-status, .filter-status {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -428,8 +428,19 @@ input[type="checkbox"] {
 }
 
 .toggle-status button,
-.filters-bar button { 
+.filters-bar button,
+.filter-status button { 
   margin-right: 8px; 
+}
+
+.filters-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.4rem;
+  align-items: center;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 6px;
 }
 
 /* ── AUTH FORM (within landing) ─────────────────────────── */
@@ -490,7 +501,6 @@ input[type="checkbox"] {
   border-radius: 4px;
   font-family: var(--font-body);
   font-size: 0.9rem;
-  background: var(--cream);
   color: var(--ink);
   margin-bottom: 16px;
 }

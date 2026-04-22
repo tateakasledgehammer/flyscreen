@@ -19,6 +19,7 @@ import CreateProject from './components/CreateProject'
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // PROJECT ID
@@ -138,6 +139,7 @@ function App() {
                   projectId={projectId}
                   setProjectId={setProjectId}
                   user={user}
+                  setUser={setUser}
                 />
               </PrivateRoute>
             } />

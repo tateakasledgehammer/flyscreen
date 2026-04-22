@@ -80,7 +80,7 @@ export default function Authentication(props) {
                 <button className={`auth-tab ${loginNotSignUp ? "active" : ""}`} onClick={handleSetLogIn}>
                     Log in
                 </button>
-                <button className={`auth-tab ${loginNotSignUp ? "active" : ""}`} onClick={handleSetSignUp}>
+                <button className={`auth-tab ${!loginNotSignUp ? "active" : ""}`} onClick={handleSetSignUp}>
                     Sign up
                 </button>
             </div>
