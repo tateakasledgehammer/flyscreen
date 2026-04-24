@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# SQLite
+*.db
+*.db-wal
+*.db-shm
+
+# Build output
+dist/
+build/
+
+# OS
+.DS_Store
+
+# Vite
+*.local
