@@ -15,6 +15,7 @@ import FullTextScreening from './components/FullTextScreening'
 import IncludedStudies from './components/IncludedStudies'
 import ExcludedStudies from './components/ExcludedStudies'
 import CreateProject from './components/CreateProject'
+import Privacy from './components/Privacy'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -117,6 +118,10 @@ function App() {
                 setUser={setUser}
               />
               } 
+            />
+
+          <Route path="/privacy" 
+            element={ <Privacy/> } 
             />
 
           <Route 

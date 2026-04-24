@@ -75,10 +75,27 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         <h2>DEMO COMING SOON</h2>
                     </div>
                 </div>
+
                 <p>
-                AI-powered systematic review screening for research teams to
-                cut months of work down to weeks.
+                    AI-powered systematic review screening for research teams to
+                    cut months of work down to weeks.
                 </p>
+
+                <div style={{ textAlign: "center", margin: "16px" }}>
+                    <a href="#contact-us" style={{
+                        display: "inline-block",
+                        background: "var(--ink)",
+                        color: "var(--cream)",
+                        fontFamily: "var(--font-display)",
+                        fontSize: "1rem",
+                        padding: "10px 24px",
+                        textDecoration: "none",
+                        letterSpacing: "0.06em",
+                    }}>
+                        BOOK AN INFO SESH →
+                    </a>
+                </div>
+
             </div>
 
             {/* ── THREE-COLUMN INFO GRID ── */}
@@ -166,7 +183,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 <div className="info-col">
                     <div id="info-sessions" className="event-section">
                     <span className="event-label">ATTEND AN INFO SESH.</span>
-                    <p className="event-info">Join a group call to discuss how we can help you</p>
+                    <p className="event-info">Email to join a group call to discuss how we can help you</p>
                     <div className="event-tier">
                         <div className="event-row">
                             <div>
@@ -180,7 +197,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         <div className="event-row">
                             <div>
                                 <div className="event-name">Team demo</div>
-                                <div className="event-desc">EMAIL US</div>
+                                <div className="event-desc">CONTACT US</div>
                             </div>
                         </div>
                     </div>
@@ -264,6 +281,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                         80<span className="big-stat-unit">%</span>
                     </div>                    
                     <span className="info-col-label">TIME SAVING.</span>
+                    <h4>^ Estimation based on a review where 97% of imports were irrelevant</h4>
                     <p className="big-stat-cap"> 
                         Systematic reviews average 12-18 months. Most of that 
                         is spent sifting through studies that never make it. Flyscreen
@@ -391,23 +409,23 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             <div className="footer-bottom">
                 <span className="footer-brand">FLYSCREEN ACADEMICS.</span>
                 <div className="footer-legal">
-                    <a href="#" onClick={e => {
-                        e.preventDefault();
-                        alert("For information about our policy, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
+                    <a href="/privacy" onClick={e => {
+                        // e.preventDefault();
+                        // alert("For information about our policy, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
                     }}
                     >
                         Privacy Policy
                     </a>
-                    <a href="#" onClick={e => {
-                        e.preventDefault();
-                        alert("For information about our terms, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
+                    <a href="/privacy" onClick={e => {
+                        // e.preventDefault();
+                        // alert("For information about our terms, please contact us at hello@flyscreenacademics.com.au. A full policy document is in preparation");
                     }}
                     >
                         Terms of Use
                     </a>
-                    <a href="#" onClick={e => {
-                        e.preventDefault();
-                        alert("Your data is stored on Australian servers. Study titles and abstracts sent for AI scoring are not retained after scoring is complete. Contact hello@flyscreenacademics.com.au for a full data handling statement which is in preparation.");
+                    <a href="/privacy" onClick={e => {
+                        // e.preventDefault();
+                        // alert("Your data is stored on Australian servers. Study titles and abstracts sent for AI scoring are not retained after scoring is complete. Contact hello@flyscreenacademics.com.au for a full data handling statement which is in preparation.");
                     }}
                     >
                         Data & Security
