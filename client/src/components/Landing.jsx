@@ -14,6 +14,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
         const res = await fetch("/api/auth/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 email: contactEmail,
                 organisation: contactOrg,
@@ -31,6 +32,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
         const res = await fetch("/api/auth/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include",
             body: JSON.stringify({
                 email: footerEmail,
                 source: "footer"
@@ -96,29 +98,16 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
 
                     <br />
 
-                    <span className="info-col-label">WHO WHAT WHEN WHERE WHY.</span>
-                    <h3>Stop wasting time on studies that never stood a chance. Get to the nitty-gritty fast.</h3>
-                    <p>
-                        In doing a systematic review as part of my honours course, last year,
-                        my team of in-demand academics found it difficult to navigate
-                        the demands of a role in the university with the grind of screening
-                        studies. 
-                    </p>
+                    <span className="info-col-label">WHY FLYSCREEN WAS BUILT.</span>
+                    <h3>
+                        You didn't do a PhD to read headings and scan abstracts.
+                    </h3>
                     <br />
                     <p>
-                        Speaking to other students, it became clear that traditional processes around
-                        secondary research are a drag that detracts from the real work and is stopping
-                        many from going further into research. Our system puts all the key info front
-                        and centre, so that your team can quickly identify what meets your criteria and
-                        what does not. We have two models: a keyword-based system that searches
-                        for words in your criteria to score imports, and an AI-based system that scans
-                        content and gives you feedback for every article. Either way you will have more
-                        time doing the valuable work
-                    </p>
-                    <br />
-                    <p>
-                        We want to make it easier for staff and students to do meaningful work
-                        instead of wasting time wading through studies that never stood a chance.
+                        Last year, in doing a systematic review for a thesis, 
+                        our team of senior academics spent evenings screening studies that a filter
+                        could have flagged as irrelevant. Flyscreen is the solution so the next team
+                        doesn't have to do the same.
                     </p>
                     <br />
 
@@ -157,9 +146,9 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     <span className="info-col-label social-media">SOCIAL MEDIA.</span>
 
                     <div className="social-links">
-                        <a className="social-link" href="https://github.com/tateakasledgehammer" target="_blank" rel="noreferrer">
+                        {/* <a className="social-link" href="https://github.com/tateakasledgehammer" target="_blank" rel="noreferrer">
                             GitHub <i className="fa-brands fa-github" />
-                        </a>
+                        </a> */}
                         <a className="social-link" href="#" onClick={e => e.preventDefault()}>
                             Instagram <i className="fa-brands fa-instagram" />
                         </a>
@@ -186,7 +175,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                                 <div className="event-desc">THURSDAYS 8AM</div>
                                 <div className="event-desc">FRIDAYS 3PM</div>
                             </div>
-                            <div className="event-price">→</div>
+                            {/* <div className="event-price">→</div> */}
                         </div>
                         <div className="event-row">
                             <div>
@@ -202,11 +191,11 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
 
                     <div className="shaded-section">
                         <span id="scoring-info" className="info-col-label">AI SCORING.</span>
-                            <h3>We rank studies before you read a word.</h3>
+                            <h3>Every study ranked before you read a word.</h3>
                         <p>
-                            Every study receives a <strong>relevance score</strong> against your
+                            Every study receives a relevance score against your
                             criteria before screening begins. High scorers surface first.
-                            Obvious rejects are marked automatically.
+                            Obvious rejects are flagged automatically.
                         </p>
                     </div>
 
@@ -276,11 +265,11 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     </div>                    
                     <span className="info-col-label">TIME SAVING.</span>
                     <p className="big-stat-cap"> 
-                        Systematic reviews average 12-18 months and most of that 
-                        is sifting through studies that never make it. Flyscreen
-                        gives you predictive scores to speed up this process so
-                        you can spend more time on real analysis.
+                        Systematic reviews average 12-18 months. Most of that 
+                        is spent sifting through studies that never make it. Flyscreen
+                        gives you predictive scores to get to the studies that matter faster.
                     </p>
+                    <br />
 
                     <br />  
                     <br /> 
@@ -289,7 +278,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     <span id="prisma-info" className="info-col-label">PRISMA READY.</span>
                     <p> 
                         Tracks your uploads, duplicates and votes for clarity in a PRISMA flow diagram.
-                        Put your crtieria and files in and we will handle the rest.
+                        Put your criteria and files in and we will handle the rest.
                     </p>
                     </div>
                    
@@ -378,7 +367,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 </div>
                 <div className="footer-col">
                     <span className="footer-col-head">Connect</span>
-                    <a href="https://github.com/tateakasledgehammer" target="_blank" rel="noreferrer">GitHub</a>
+                    {/* <a href="https://github.com/tateakasledgehammer" target="_blank" rel="noreferrer">GitHub</a> */}
                     <a href="#" onClick={e => e.preventDefault()}>Instagram</a>
                     <a href="#" onClick={e => e.preventDefault()}>LinkedIn</a>
                 </div>

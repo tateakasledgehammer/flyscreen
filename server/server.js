@@ -40,11 +40,19 @@ const uploadRoutes = require("./routes/uploads.js");
 
 console.log("server.js loaded successfully");
 
-const loginLimiter = rateLimit({
+const authLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 mins
     max: 10,
-    message: { success: false, errors: ["Too many login attempts. Try again in 10 minutes."] }
-})
+    message: { success: false, errors: ["Too many login attempts. Try again in 10 minutes."] },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const subscribeLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 mins
+    max: 10,
+    message: { success: false, errors: ["Too many submissions."] },
+});
 
 const app = express();
 const PORT = 5005;
@@ -153,7 +161,7 @@ app.get(
             FROM studies s
             LEFT JOIN study_scores ss ON ss.study_id = s.id
             WHERE s.project_id = ?    
-        `).all(projectId);
+        `).all(req.params.projectId);
 
         res.json(studies);
     } catch (err) {
@@ -311,8 +319,8 @@ app.delete(
     requireProjectAccess,
     async (req, res) => {
     try {
-        const stmt = db.prepare("DELETE FROM studies");
-        stmt.run();
+        const stmt = db.prepare("DELETE FROM studies WHERE project_id = ?");
+        stmt.run(req.params.projectId);
         res.status(200).json({ message: "All studies deleted" })
     } catch (error) {
         console.error(error);
@@ -322,7 +330,7 @@ app.delete(
 
 // clear projects
 app.delete(
-    '/api/projects/:id', (req, res) => {
+    '/api/projects/:id', requireAuth, requireProjectAccess, (req, res) => {
         const projectId = Number(req.params.id);
 
         try {
@@ -345,10 +353,10 @@ app.delete(
                 db.prepare("DELETE FROM fulltext_exclusion_reasons WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM project_background WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM reviewer_settings WHERE project_id = ?").run(projectId);
-                db.prepare("DELETE FROM study_scores WHERE id = ?").run(projectId);
-                db.prepare("DELETE FROM duplicates WHERE id = ?").run(projectId);
-                db.prepare("DELETE FROM uploads WHERE id = ?").run(projectId);
-                db.prepare("DELETE FROM studies WHERE id = ?").run(projectId);
+                db.prepare("DELETE FROM study_scores WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM duplicates WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM uploads WHERE project_id = ?").run(projectId);
+                db.prepare("DELETE FROM studies WHERE project_id = ?").run(projectId);
                 db.prepare("DELETE FROM projects WHERE id = ?").run(projectId);
             });
 
@@ -371,16 +379,22 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/auth/whoami", requireAuth, (req, res) => {
-    const userRecord = db.prepare("SELECT id, username, email, created_at FROM users WHERE id = ?").get(req.user.userid);
-    res.json({
-        isAuthenticated: true,
-        user: { 
-            id: userRecord.id, 
-            username: userRecord.username,
-            email: userRecord.email,
-            created_at: userRecord.created_at
-        }
-    });
+    try {
+        const userRecord = db.prepare("SELECT id, username, email, created_at FROM users WHERE id = ?").get(req.user.userid);
+        if (!userRecord) return res.status(404).json({ error: "User not found" });
+        res.json({
+            isAuthenticated: true,
+            user: { 
+                id: userRecord.id, 
+                username: userRecord.username,
+                email: userRecord.email,
+                created_at: userRecord.created_at
+            }
+        });
+    } catch (err) {
+        console.error("whoami error:", err);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
 app.patch("/api/auth/update-profile", requireAuth, async (req, res) => {
@@ -414,18 +428,23 @@ app.patch("/api/auth/change-password", requireAuth, async (req, res) => {
         return res.json({ success: false, errors: ["Password must be 6-32 characters"] });
     }
 
-    const userRecord = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
-    const valid = await bcrypt.compare(currentPassword, userRecord.password);
-    if (!valid) {
-        return res.json({ success: false, errors: ["Current password is incorrect"] });
-    }
+    try {
+        const userRecord = db.prepare("SELECT * FROM users WHERE id = ?").get(userId);
+        const valid = await bcrypt.compare(currentPassword, userRecord.password);
+        if (!valid) {
+            return res.json({ success: false, errors: ["Current password is incorrect"] });
+        }
 
-    const hashed = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
-    db.prepare("UPDATE users SET password = ? WHERE id = ?").run(hashed, userId);
-    res.json({ success: true, message: "Password updated" });
+        const hashed = await bcrypt.hash(newPassword, await bcrypt.genSalt(10));
+        db.prepare("UPDATE users SET password = ? WHERE id = ?").run(hashed, userId);
+        res.json({ success: true, message: "Password updated" });
+    } catch (err) {
+        console.error("Change password error:", err);
+        res.status(500).json({ success: false, errors: ["Server error"] });
+    }
 });
 
-app.post("/api/auth/subscribe", (req, res) => {
+app.post("/api/auth/subscribe", subscribeLimiter, (req, res) => {
     const { email, organisation, source } = req.body;
     if (!email) return res.status(400).json({ success: false, message: "Email required" });
 
@@ -459,7 +478,7 @@ app.post("/api/auth/logout", (req, res) => {
     res.json({ success: true, message: "Logged out." });
 })
 
-app.post("/api/auth/login", loginLimiter, async (req, res) => {
+app.post("/api/auth/login", authLimiter, async (req, res) => {
     const { username, password } = req.body;
     let errors = [];
 
@@ -498,13 +517,12 @@ app.post("/api/auth/login", loginLimiter, async (req, res) => {
     res.json({ success: true, message: "Logged in" })
 })
 
-app.post("/api/auth/register", async (req, res) => {
+app.post("/api/auth/register", authLimiter, async (req, res) => {
     const { username, password } = req.body;
     let errors = [];
 
     if (typeof username !== "string" || typeof password !== "string") {
-        errors.push("Invalid data request. Inputs are not strings");
-        return;
+        return res.status(400).json({ success: false, errors: ["Invalid input"] });
     }
 
     const trimmedUsername = username.trim();
@@ -561,6 +579,19 @@ app.post("/api/auth/register", async (req, res) => {
         return res.json({ success: false, errors: ["Could not save user"] })
     }
 });
+
+// password reset
+app.post("/api/auth/reset-password-request", async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false });
+
+    const user = db.prepare("SELECT * FROM users WHERE email = ?").get(email.trim().toLowerCase);
+    if (!user) return res.json({ success: true, message: "If the email exists, a link will be sent to reset password." });
+
+    console.log(`Password reset requested for user: ${user.username} (${user.email})`);
+
+    res.json({ success: true, message: "If that email exists, a link has been sent to reset password." });
+})
 
 // ERROR 
 app.use((err, req, res, next) => {

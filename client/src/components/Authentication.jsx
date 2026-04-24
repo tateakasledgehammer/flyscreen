@@ -138,6 +138,15 @@ export default function Authentication(props) {
             )}
 
             {message && <p style={{ color: "green" }}>{message}</p>}
+
+            <br />
+
+            {loginNotSignUp && (
+                <>
+                <p>Forgot password?</p>
+                <p>Email hello@flyscreenacademics.com.au for help</p>
+                </>
+            )}
         </div>
         )
     ));
