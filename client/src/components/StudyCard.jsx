@@ -247,7 +247,7 @@ export default function StudyCard(props) {
                                     ...(study.screening.FULLTEXT.myVote ? [study.screening.FULLTEXT.myVote] : [])
                                 ];
 
-                                if (allVotes.length > 0) {
+                                if (allVotes.length > 1) {
                                     return (
                                         <div>
                                             <h4>Votes</h4>

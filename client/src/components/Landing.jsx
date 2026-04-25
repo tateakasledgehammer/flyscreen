@@ -222,19 +222,21 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                     
                     <h3 id="user-guide" className="user-guide-heading">USER GUIDE.</h3>
                     {/* Replace href with real PDF path when ready */}
-                    <a className="download-btn" href="#" onClick={e => e.preventDefault()}>
-                        <i className="fa-solid fa-file-pdf" />
-                        Download PDF guide
+                    <a className="download-btn" href="#how-it-works">
+                        {/* <i className="fa-solid fa-file-pdf" />
+                        Download PDF guide */}
+                        <i class="fa-solid fa-diagram-next" />
+                        See our process
                     </a>
 
                     <br />
                     <br />
 
-                    <p>
+                    {/* <p>
                         Download the full PDF guide covering project setup, AI scoring,
                         screening workflows, and export options. Suitable for sharing
                         with your team or institution ethics board.
-                    </p>
+                    </p> */}
                 </div>
 
                 <div className="info-col">
@@ -323,7 +325,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                             <div className="step-number">02</div>
                             <div className="step-title">Import studies</div>
                             <p className="step-desc">
-                                Upload a RIS file from any database: PubMed, Scopus, you name it.
+                                Upload RIS files from any database: PubMed, Scopus, you name it.
                                 Duplicates detected automatically.
                             </p>
                         </div>
@@ -339,7 +341,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                             <div className="step-number">04</div>
                             <div className="step-title">Screen & filter</div>
                             <p className="step-desc">
-                                We are still equipped with all the classic tools to push your screening along.
+                                Flyscreen still has the classic tools to push your screening along.
                                 Filters, tags, notes, highlights, and vote tracking all help your team to be efficient
                                 and keep tabs on edge cases.
                             </p>

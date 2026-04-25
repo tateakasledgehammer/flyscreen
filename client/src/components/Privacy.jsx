@@ -57,7 +57,7 @@ export default function Privacy() {
                 <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.88rem", maxWidth: 560, lineHeight: 1.7 }}>
                     This document explains what data Flyscreen Academics collects, how it is used,
                     where it is stored, and how you can contact us with questions or requests.
-                    Last updated: April 2025.
+                    Last updated: April 2026.
                 </p>
             </div>
 

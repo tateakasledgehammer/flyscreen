@@ -393,22 +393,22 @@ router.get(
             // TA
             let taStatus;
             if (taVotes.length === 0) {
-                taStatus === "UNSCREENED";
+                taStatus = "UNSCREENED";
                 taUnscreened++;
             } else if 
                 (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) {
-                    taStatus === "CONFLICT";
+                    taStatus = "CONFLICT";
                     taConflict++;
             } else if
                 (taVotes.every(v => v === "ACCEPT") && taVotes.length >= 2) {
-                    taStatus === "ACCEPTED";
+                    taStatus = "ACCEPTED";
                     taAccepted++;
             } else if
                 (taVotes.every(v => v === "REJECT") && taVotes.length >= 2) {
-                    taStatus === "REJECTED";
+                    taStatus = "REJECTED";
                     taRejected++;
             } else {
-                taStatus === "PENDING"
+                taStatus = "PENDING"
                 taPending++;
             }
 

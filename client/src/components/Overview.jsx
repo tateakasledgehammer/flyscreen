@@ -1,6 +1,7 @@
 import { capitaliseFirstLetter } from "../utils/screeningTools"
 import Navbar from "./Navbar"
 import { useState, useEffect } from "react"
+import Prisma from "./Prisma";
 
 function ProgressBar({ label, completed, total, color }) {
     const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
@@ -35,6 +36,7 @@ export default function Overview(props) {
     const [studiesCount, setStudiesCount] = useState(0);
     const [progress, setProgress] = useState(null);
     const [myStats, setMyStats] = useState(null);
+    const [showPrisma, setShowPrisma] = useState(false);
 
     async function fetchProject() {
         try {
@@ -127,13 +129,13 @@ export default function Overview(props) {
     const taAwaiting = progress.ta.pending;
     const taUnscreened = progress.ta.unscreened;
 
-    const ftFinished = progress.ft.accepted + progress.ft.rejected + progress.ft.conflict;
-    const ftAwaiting = progress.ft.pending;
+    const ftFinished = progress.ft.accepted + progress.ft.rejected;
+    const ftAwaiting = progress.ft.pending + progress.ft.conflict;
     const ftUnscreened = progress.ft.unscreened;
-    const ftTotal = ftAwaiting + ftUnscreened + ftFinished;
-
+    const ftTotal = progress.ta.accepted;
+    
     function handlePrismaDiagram() {
-        alert("This function has not been set up")
+        setShowPrisma(true);
     }
     
     return (
@@ -280,6 +282,13 @@ export default function Overview(props) {
             <button onClick={handlePrismaDiagram}>
                 See PRISMA Flow Diagram
             </button>
+
+            {showPrisma && (
+                <Prisma 
+                    projectId={projectId}
+                    onClose={() => setShowPrisma(false)}
+                />
+            )}
 
             <br />
             <br />

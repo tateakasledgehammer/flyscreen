@@ -593,6 +593,43 @@ app.post("/api/auth/reset-password-request", async (req, res) => {
     res.json({ success: true, message: "If that email exists, a link has been sent to reset password." });
 })
 
+// PRISMA diagram
+// Duplicates count for PRISMA
+app.get("/api/projects/:projectId/duplicates/count", requireAuth, requireProjectAccess, (req, res) => {
+    try {
+        const result = db.prepare(
+            "SELECT COUNT(*) as count FROM duplicates WHERE project_id = ?"
+        ).get(req.params.projectId);
+        res.json({ count: result.count });
+    } catch (err) {
+        console.error("Duplicates count error:", err);
+        res.status(500).json({ error: "Failed to get duplicates count" });
+    }
+});
+
+// Fulltext exclusion reasons breakdown for PRISMA
+app.get("/api/projects/:projectId/exclusion-reasons/breakdown", requireAuth, requireProjectAccess, (req, res) => {
+    try {
+        const reasons = db.prepare(`
+            SELECT s.reason, COUNT(*) as count
+            FROM screenings s
+            JOIN studies st ON st.id = s.study_id
+            WHERE st.project_id = ?
+              AND s.stage = 'FULLTEXT'
+              AND s.vote = 'REJECT'
+              AND s.is_final = 1
+              AND s.reason IS NOT NULL
+              AND s.reason != ''
+            GROUP BY s.reason
+            ORDER BY count DESC
+        `).all(req.params.projectId);
+        res.json(reasons);
+    } catch (err) {
+        console.error("Exclusion reasons error:", err);
+        res.status(500).json({ error: "Failed to get exclusion reasons" });
+    }
+});
+
 // ERROR 
 app.use((err, req, res, next) => {
     console.error("SERVER ERROR: ", err);

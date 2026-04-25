@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "./Navbar";
 import StudyCard from "./StudyCard";
+import * as XLSX from "xlsx";
+
 
 import ScreeningFiltersBar from "./ScreeningFiltersBar";
 import PaginationBar from "./PaginationBar";
@@ -49,6 +51,82 @@ export default function IncludedScreening({
         } catch (err) {
             console.error("Failed to fetch studies:", err);
         }
+    }
+
+    const [exportMsg, setExportMsg] = useState("");
+
+    function handleExport() {
+        if (includedStudies.length === 0) {
+            setExportMsg("No studies to export...");
+            return;
+        }
+
+        setExportMsg("");
+
+        const rows = includedStudies.map(study => ({
+            "Title":        study.title || "",
+            "Authors":      study.authors || "",
+            "Year":         study.year || "",
+            "Journal":      study.journal || "",
+            "Volume":       study.volume || "",
+            "Issue":        study.issue || "",
+            "DOI":          study.doi || "",
+            "Link":         study.link || "",
+            "Type":         study.type || "",
+            "Language":     study.language || "",
+            "Keywords":     study.keywords || "",
+            "Abstract":     study.abstract || "",
+            "Relevance Score": study.score != null ? study.score.toFixed(2) : "",
+            "Tags":         study.tags?.map(t => t.name).join(", ") || "",
+            "Notes":        study.notes?.map(n => n.content).join(" | ") || "",
+            "Population":   "",
+            "Intervention": "",
+            "Comparator":   "",
+            "Outcome":      "",
+            "Study Design": "",
+            "Sample Size":  "",
+            "Key Findings": "",
+            "Risk of Bias": "",
+            "Notes (extraction)": "",
+        }));
+    
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+    
+        // Column widths
+        worksheet["!cols"] = [
+            { wch: 60 },  // Title
+            { wch: 30 },  // Authors
+            { wch: 8  },  // Year
+            { wch: 25 },  // Journal
+            { wch: 8  },  // Volume
+            { wch: 8  },  // Issue
+            { wch: 30 },  // DOI
+            { wch: 30 },  // Link
+            { wch: 12 },  // Type
+            { wch: 10 },  // Language
+            { wch: 40 },  // Keywords
+            { wch: 80 },  // Abstract
+            { wch: 14 },  // Score
+            { wch: 20 },  // Tags
+            { wch: 30 },  // Notes
+            { wch: 20 },  // Population
+            { wch: 20 },  // Intervention
+            { wch: 20 },  // Comparator
+            { wch: 20 },  // Outcome
+            { wch: 20 },  // Study Design
+            { wch: 14 },  // Sample Size
+            { wch: 40 },  // Key Findings
+            { wch: 14 },  // Risk of Bias
+            { wch: 30 },  // Notes (extraction)
+        ];
+    
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Included Studies");
+    
+        const projectName = "flyscreen_included_studies";
+        const date = new Date().toISOString().split("T")[0];
+        XLSX.writeFile(workbook, `${projectName}_${date}.xlsx`);
+        setExportMsg(`Exported ${includedStudies.length} studies into spreadsheet ${projectName}_${date}.xlsx`);
     }
 
     useEffect(() => {
@@ -121,7 +199,11 @@ export default function IncludedScreening({
                     <i className="fa-solid fa-circle-check"></i> Final Included Studies
                 </h1>
 
-                <button onClick={() => alert("Function not yet finalised")}>EXPORT FINAL STUDIES</button>
+                <button onClick={handleExport}>
+                    <i class="fa-solid fa-file-excel" /> EXPORT FINAL STUDIES
+                </button>
+                
+                {exportMsg && <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{exportMsg}</p>}                
 
                 <br />
                 <br />
