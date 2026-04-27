@@ -369,7 +369,7 @@ router.get(
             if (!perStudy[v.study_id]) {
                 perStudy[v.study_id] = { TA: [], FULLTEXT: [] };
             }
-            perStudy[v.study_id][v.stage].push(v.vote);
+            perStudy[v.study_id][v.stage].push(v);
         }
 
         // initialise
@@ -392,39 +392,62 @@ router.get(
 
             // TA
             let taStatus;
-            if (taVotes.length === 0) {
-                taStatus = "UNSCREENED";
-                taUnscreened++;
-            } else if 
-                (taVotes.includes("ACCEPT") && taVotes.includes("REJECT")) {
-                    taStatus = "CONFLICT";
-                    taConflict++;
-            } else if
-                (taVotes.every(v => v === "ACCEPT") && taVotes.length >= 2) {
-                    taStatus = "ACCEPTED";
-                    taAccepted++;
-            } else if
-                (taVotes.every(v => v === "REJECT") && taVotes.length >= 2) {
-                    taStatus = "REJECTED";
-                    taRejected++;
-            } else {
-                taStatus = "PENDING"
-                taPending++;
-            }
+            const taFinal = taVotes.find(v => v.is_final === 1);
 
+            if (taFinal) {
+                if (taFinal.vote === "ACCEPT") { 
+                    taStatus = "ACCEPTED"; 
+                    taAccepted++; 
+                } else {
+                    taStatus = "REJECTED"; 
+                    taRejected++;
+                }
+            } else {
+                const taVals = taVotes.map(v => v.vote);
+                if (taVals.length === 0) {
+                    taStatus = "UNSCREENED";
+                    taUnscreened++;
+                } else if 
+                    (taVals.includes("ACCEPT") && taVals.includes("REJECT")) {
+                        taStatus = "CONFLICT";
+                        taConflict++;
+                } else if
+                    (taVals.every(v => v === "ACCEPT") && taVals.length >= 2) {
+                        taStatus = "ACCEPTED";
+                        taAccepted++;
+                } else if
+                    (taVals.every(v => v === "REJECT") && taVals.length >= 2) {
+                        taStatus = "REJECTED";
+                        taRejected++;
+                } else {
+                    taStatus = "PENDING"
+                    taPending++;
+                }
+            }
 
             if (taStatus === "ACCEPTED") {
                 // FT
-                if (ftVotes.length === 0) {
-                    ftUnscreened++;
-                } else if (ftVotes.includes("ACCEPT") && ftVotes.includes("REJECT")) {
-                    ftConflict++;
-                } else if (ftVotes.every(v => v === "ACCEPT") && ftVotes.length >= 2) {
-                    ftAccepted++;
-                } else if (ftVotes.every(v => v === "REJECT") && ftVotes.length >= 2) {
-                    ftRejected++;
+                const ftFinal = ftVotes.find(v => v.is_final === 1);
+
+                if (ftFinal) {
+                    if (ftFinal.vote === "ACCEPT") {
+                        ftAccepted++;
+                    } else {
+                        ftRejected++;
+                    }
                 } else {
-                    ftPending++;
+                    const ftVals = ftVotes.map(v => v.vote);
+                    if (ftVals.length === 0) {
+                        ftUnscreened++;
+                    } else if (ftVals.includes("ACCEPT") && ftVals.includes("REJECT")) {
+                        ftConflict++;
+                    } else if (ftVals.every(v => v === "ACCEPT") && ftVals.length >= 2) {
+                        ftAccepted++;
+                    } else if (ftVals.every(v => v === "REJECT") && ftVals.length >= 2) {
+                        ftRejected++;
+                    } else {
+                        ftPending++;
+                    }
                 }
             }
         }

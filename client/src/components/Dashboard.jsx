@@ -22,7 +22,7 @@ export default function Dashboard(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // ── INLINE ACTION STATE (replaces prompt/confirm) ───────
+    // ── INLINE ACTION STATE (instead of prompts) ───────
     const [renamingId, setRenamingId] = useState(null);
     const [renameValue, setRenameValue] = useState("");
 
@@ -92,7 +92,6 @@ export default function Dashboard(props) {
     }
 
     // ── RENAME ──────────────────────────────────────────────
-    // Replaces: handleRenameProject (used prompt())
     async function submitRename(projId) {
         if (!renameValue.trim()) return;
         try {
@@ -116,7 +115,6 @@ export default function Dashboard(props) {
     }
 
     // ── ADD REVIEWER ────────────────────────────────────────
-    // Replaces: handleAddReviewer (used prompt() + alert())
     async function submitAddReviewer(proj) {
         if (!reviewerUsername.trim()) return;
         setReviewerMsg("");

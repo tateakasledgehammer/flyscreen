@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     getTAStatus, 
     getFTStatus, 
@@ -27,6 +27,9 @@ export default function StudyCard(props) {
         exclusionTerms
     } = props;
 
+    const [addingNoteId, setAddingNoteId] = useState(null);
+    const [noteText, setNoteText] = useState("");
+
     if (!studies || studies.length === 0) {
         return (
             <>
@@ -39,20 +42,6 @@ export default function StudyCard(props) {
     return (
         <div>
             {studies.map((study) => {
-
-                async function handleAddNote(studyId) {
-                    const content = prompt("Enter your note:");
-                    if (!content) return;
-
-                    await fetch(`/api/projects/${projectId}/notes`, {
-                        method: "POST",
-                        credentials: "include",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ study_id: studyId, content })
-                    });
-
-                    refreshScreenings();
-                }
 
                 async function handleAssignTag(studyId, tag) {
                     await fetch(`/api/projects/${projectId}/tags/attach`, {
@@ -367,7 +356,40 @@ export default function StudyCard(props) {
 
         
                         {/* NOTE */}
-                        <button onClick={(e) => (handleAddNote(study.id))}>ADD NOTE</button>
+                        {(stage === "TA" || stage === "FULLTEXT") ? (
+                            addingNoteId === study.id ? (
+                                <div onClick={e => e.stopPropagation()}>
+                                    <input 
+                                        autoFocus
+                                        value={noteText}
+                                        onChange={e => setNoteText(e.target.value)}
+                                        placeholder="Enter note..."
+                                        onKeyDown={e => e.key === "Escape" && setAddingNoteId(null)}
+                                    />
+                                    <button onClick={async () => {
+                                        if (!noteText.trim()) return;
+
+                                        await fetch(`/api/projects/${projectId}/notes`, {
+                                            method: "POST",
+                                            credentials: "include",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ study_id: study.id, content: noteText.trim() })
+                                        });
+                                        
+                                        setAddingNoteId(null);
+                                        setNoteText("");
+                                        refreshScreenings();
+                                    }}>
+                                        Save
+                                    </button>
+                                    <button onClick={() => { setAddingNoteId(null); setNoteText(""); }}>Cancel</button>
+                                </div>
+                            ) : (
+                                <button onClick={() => { setAddingNoteId(study.id); setNoteText(""); }}>
+                                    ADD NOTE
+                                </button>
+                            )
+                        ) : null}
 
                         {/* TAG */}
                         <select
@@ -390,8 +412,7 @@ export default function StudyCard(props) {
                             <ul>
                                 {study.notes.map((note) => (
                                     <li key={note.id}>
-                                        <strong>{note.username}:</strong> {note.content}
-                                        <button onClick={() => removeNote(note.id)}>x</button>
+                                        <strong>{note.username}:</strong> {note.content} <button onClick={() => removeNote(note.id)}>x</button>
                                     </li>
                                 ))}
                             </ul>

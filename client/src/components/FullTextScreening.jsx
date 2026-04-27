@@ -156,7 +156,6 @@ export default function FullTextScreening(props) {
                 clearFilters={clearFilters}
                 studies={taAcceptedStudies}
                 studyTags={studyTags}
-                setStudyTags={setStudyTags}
             />
 
             <StatusToggleBar

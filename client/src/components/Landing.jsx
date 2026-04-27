@@ -381,7 +381,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 </div>
                 <div className="footer-col">
                     <span className="footer-col-head">Resources</span>
-                    <a href="#user-guide">User guide (PDF)</a>
+                    <a href="#how-it-works">User guide</a>
                     <a href="#info-sessions">Info sessions</a>
                     <a href="#contact-us">Contact us</a>
                 </div>

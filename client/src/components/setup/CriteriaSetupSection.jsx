@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export default function CriteriaSetupSection({ 
    inclusionSections,
    exclusionSections,
@@ -7,18 +9,24 @@ export default function CriteriaSetupSection({
    setFullTextReasons,
 }) {
 
-    //
-    // inclusion
-    //
+    // useStates
+    const [newInclusionSection, setNewInclusionSection] = useState("");
+    const [newExclusionSection, setNewExclusionSection] = useState("");
+    const [newFullTextReason, setNewFullTextReason] = useState("");
 
+    const [newInclusionTerms, setNewInclusionTerms] = useState({});
+    const [newExclusionTerms, setNewExclusionTerms] = useState({});
+
+    // inclusion
     function addInclusionSection() {
-        const name = prompt("New inclusion section name:");
-        if (!name?.trim()) return;
+        if (!newInclusionSection.trim()) return;
 
         setInclusionSections(prev => [
             ...prev,
-            { category: name.trim(), criteria: [], type: "inclusion" }
-        ])
+            { category: newInclusionSection.trim(), criteria: [], type: "inclusion" }
+        ]);
+
+        setNewInclusionSection("");
     }
 
     function deleteInclusionSection(index) {
@@ -26,7 +34,7 @@ export default function CriteriaSetupSection({
     }
 
     function addInclusionCriteria(sectionIndex) {
-        const term = prompt("New inclusion term");
+        const term = newInclusionTerms[sectionIndex] ?? "";
         if (!term?.trim()) return;
 
         setInclusionSections(prev =>
@@ -35,7 +43,9 @@ export default function CriteriaSetupSection({
                     ? { ...section, criteria: [...section.criteria, term.trim()] }
                     : section
             )
-        )
+        );
+
+        setNewInclusionTerms(prev => ({ ...prev, [sectionIndex]: "" }));
     }
 
     function deleteInclusionCriteria(sectionIndex, termIndex) {
@@ -55,18 +65,16 @@ export default function CriteriaSetupSection({
         setInclusionSections([]);
     }
 
-    //
     // exclusion
-    //
-
     function addExclusionSection() {
-        const name = prompt("New exclusion section name:");
-        if (!name?.trim()) return;
+        if (!newExclusionSection.trim()) return;
 
         setExclusionSections(prev => [
             ...prev,
-            { category: name.trim(), criteria: [], type: "exclusion" }
-        ])
+            { category: newExclusionSection.trim(), criteria: [], type: "exclusion" }
+        ]);
+
+        setNewExclusionSection("");
     }
 
     function deleteExclusionSection(index) {
@@ -74,7 +82,7 @@ export default function CriteriaSetupSection({
     }
 
     function addExclusionCriteria(sectionIndex) {
-        const term = prompt("New exclusion term");
+        const term = newExclusionTerms[sectionIndex] ?? "";
         if (!term?.trim()) return;
 
         setExclusionSections(prev =>
@@ -83,7 +91,9 @@ export default function CriteriaSetupSection({
                     ? { ...section, criteria: [...section.criteria, term.trim()] }
                     : section
             )
-        )
+        );
+
+        setNewExclusionTerms(prev => ({ ...prev, [sectionIndex]: "" }));
     }
 
     function deleteExclusionCriteria(sectionIndex, termIndex) {
@@ -108,13 +118,14 @@ export default function CriteriaSetupSection({
     //
 
     function addFullTextReason() {
-        const name = prompt("New full text reason:");
-        if (!name?.trim()) return;
+        if (!newFullTextReason?.trim()) return;
 
         setFullTextReasons(prev => [
             ...prev,
-            name.trim()
+            newFullTextReason.trim()
         ]);
+
+        setNewFullTextReason("");
     }
 
     function deleteFullTextReason(index) {
@@ -129,13 +140,31 @@ export default function CriteriaSetupSection({
         <>
         <div>
             <h3>Set Inclusion & Exclusion Criteria</h3>
-            <p>The terms that you input below will show up highlighted in green (inclusion) or red (exclusion) to help guide your screening process (this can also be toggled off). You are able to add your own subheadings for maximum customisability.</p>
+            <p>
+                The terms that you input below will show up highlighted 
+                in green (inclusion) or red (exclusion) to help guide your 
+                screening process (this can also be toggled off). You are 
+                able to add your own subheadings for maximum customisability.
+            </p>
 
             {/* INCLUSION */}
             <div>
                 <br />
                 <h3>Inclusion Criteria</h3>
-                <button onClick={addInclusionSection}>Add Inclusion Section (i.e. Population, Intervention...)</button>
+
+                <div>
+                    <input 
+                        value={newInclusionSection}
+                        onChange={e => setNewInclusionSection(e.target.value)}
+                        placeholder="New section name (e.g. Population, Intervention ...)"
+                        onKeyDown={e => e.key === "Enter" && addInclusionSection()}
+                    />
+
+                    <button onClick={addInclusionSection}>
+                        Add Inclusion Section
+                    </button>
+                </div>
+
                 {inclusionSections.length === 0 && <p>No inclusion sections set.</p>}
 
                 {inclusionSections && inclusionSections.length > 0 && (
@@ -147,7 +176,19 @@ export default function CriteriaSetupSection({
                                     <button className="criteria-subheading" onClick={() => deleteInclusionSection(index)}>X</button>
                                 </h4>
 
-                                <button className="criteria-subheading" onClick={() => addInclusionCriteria(index)}>Add Term</button>
+                                <div>
+                                <input 
+                                    value={newInclusionTerms[index] ?? ""}
+                                    onChange={e => setNewInclusionTerms(prev => ({ ...prev, [index]: e.target.value }))}
+                                    placeholder="New inclusion term"
+                                    onKeyDown={e => e.key === "Enter" && addInclusionCriteria(index)}
+                                />
+
+                                <button className="criteria-subheading" onClick={() => addInclusionCriteria(index)}>
+                                    Add Term
+                                </button>
+
+                                </div>
                                 
                                 {section.criteria.length === 0 && (
                                     <p>No terms for inclusion added.</p>
@@ -174,10 +215,24 @@ export default function CriteriaSetupSection({
             <br />
 
             </div>
+
             {/* EXCLUSION */}
             <div>
                 <h3>Exclusion Criteria</h3>
-                <button onClick={addExclusionSection}>Add Exclusion Section (i.e. Population, Intervention...)</button>
+
+                <div>
+                    <input 
+                        value={newExclusionSection}
+                        onChange={e => setNewExclusionSection(e.target.value)}
+                        placeholder="New section name (e.g. Population, Intervention ...)"
+                        onKeyDown={e => e.key === "Enter" && addExclusionSection()}
+                    />
+
+                    <button onClick={addExclusionSection}>
+                        Add Exclusion Section
+                    </button>
+                </div>
+
                 {exclusionSections.length === 0 && <p>No Exclusion sections set.</p>}
 
                 {exclusionSections && exclusionSections.length > 0 && (
@@ -189,7 +244,18 @@ export default function CriteriaSetupSection({
                                     <button className="criteria-subheading" onClick={() => deleteExclusionSection(index)}>X</button>
                                 </h4>
 
-                                <button className="criteria-subheading" onClick={() => addExclusionCriteria(index)}>Add Term</button>
+                                <div>
+                                    <input 
+                                        value={newExclusionTerms[index] ?? ""}
+                                        onChange={e => setNewExclusionTerms(prev => ({ ...prev, [index]: e.target.value }))}
+                                        placeholder="New exclusion term"
+                                        onKeyDown={e => e.key === "Enter" && addExclusionCriteria(index)}
+                                    />
+
+                                    <button className="criteria-subheading" onClick={() => addExclusionCriteria(index)}>
+                                        Add Term
+                                    </button>
+                                </div>
                                 
                                 {section.criteria.length === 0 && (
                                     <p>No terms for Exclusion added.</p>
@@ -221,8 +287,17 @@ export default function CriteriaSetupSection({
             {/* FULL TEXT */}
             <div>
                 <h3>Full Text Exclusion Criteria</h3>
-                <button onClick={addFullTextReason}>Add Full Text Exclusion Reason (i.e. primary study, unavailable, incorrect population...)</button>
-                
+
+                <div>
+                    <input 
+                        value={newFullTextReason}
+                        onChange={e => setNewFullTextReason(e.target.value)}
+                        placeholder="New reason (e.g. secondary research, unavailable, incorrect population...)"
+                        onKeyDown={e => e.key === "Enter" && addFullTextReason()}
+                    />
+                    <button onClick={addFullTextReason}>Add Reason</button>
+                </div>
+
                 <br />
                 <br />
 

@@ -2,7 +2,7 @@ const { db } = require("../db");
 
 module.exports = {
     getVotes: db.prepare(`
-        SELECT s.study_id, s.stage, s.vote
+        SELECT s.study_id, s.stage, s.vote, s.is_final
         FROM screenings s
         JOIN studies st ON st.id = s.study_id
         WHERE st.project_id = ?    

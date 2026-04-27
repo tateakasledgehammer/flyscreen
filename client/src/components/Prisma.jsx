@@ -151,7 +151,7 @@ export default function Prisma({ projectId, onClose }) {
 
                     {/* ── INCLUDED ── */}
                     <PhaseLabel label="Included" />
-                    <Box label="Studies included in qualitative synthesis" n={finalIncluded} wide highlight />
+                    <Box label="Studies included in review" n={finalIncluded} wide highlight />
 
                 </div>
                 {/* end diagram */}
