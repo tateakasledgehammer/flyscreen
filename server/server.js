@@ -331,7 +331,7 @@ app.delete(
 // clear projects
 app.delete(
     '/api/projects/:id', requireAuth, requireProjectAccess, (req, res) => {
-        const projectId = Number(req.params.id);
+        const projectId = Number(req.params.projectId);
 
         try {
             const deleteProjectTx = db.transaction(() => {
@@ -441,6 +441,32 @@ app.patch("/api/auth/change-password", requireAuth, async (req, res) => {
     } catch (err) {
         console.error("Change password error:", err);
         res.status(500).json({ success: false, errors: ["Server error"] });
+    }
+});
+
+app.patch("/api/auth/update-username", requireAuth, async (req, res) => {
+    const { newUsername } = req.body;
+    const userId = req.user.userid;
+
+    if (!newUsername || typeof newUsername !== "string") {
+        return res.json({ success: false, errors: ["Username required"] });
+    }
+
+    const trimmed = newUsername.trim();
+
+    if (trimmed.length < 4) return res.json({ success: false, errors: ["Username must be at least 4 characters"] });
+    if (trimmed.length > 20) return res.json({ success: false, errors: ["Username must be 20 characters or less"] });
+
+    try {
+        const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(trimmed);
+        if (existing) return res.json({ success: false, errors: ["Username already taken"] });
+
+        db.prepare("UPDATE users SET username = ? WHERE id = ?").run(trimmed, userId);
+        res.json({ success: true, errors: "Username updated" });
+
+    } catch (err) {
+        console.error("Update username error", err);
+        res.status(500).json({ success: false, errors: ["Could not update username"] });
     }
 });
 

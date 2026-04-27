@@ -62,17 +62,14 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
                 <h3 className="media-col-heading">SCREEN FASTER</h3>
                 <p>Your next review: Coming in 2 months, not 12</p>
                 <div className="video-wrapper">
-                    {/*
-                        Replace placeholder with:
-                        <iframe
-                        src="https://www.youtube.com/embed/YOUR_ID"
-                        title="Flyscreen demo"
+                    <iframe
+                        src="https://www.loom.com/embed/6c2a29fae894487a8417c66ae99ca26d"
+                        title="Flyscreen Academics Demo"
                         allowFullScreen
-                        />
-                    */}
+                    />
                     <div className="video-placeholder">
                         <i className="fa-regular fa-circle-play" />
-                        <h2>DEMO COMING SOON</h2>
+                        <h2>Video loading!</h2>
                     </div>
                 </div>
 

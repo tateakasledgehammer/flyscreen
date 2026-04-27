@@ -15,6 +15,8 @@ export default function Dashboard(props) {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [passwordMsg, setPasswordMsg] = useState("");
+    const [newUsername, setNewUsername] = useState("");
+    const [usernameMsg, setUsernameMsg] = useState("");
 
     // ── PROJECT STATE ───────────────────────────────────────
     const [projects, setProjects] = useState([]);
@@ -88,6 +90,28 @@ export default function Dashboard(props) {
             if (data.success) { setCurrentPassword(""); setNewPassword(""); }
         } catch {
             setPasswordMsg("Failed to connect.");
+        }
+    }
+
+    async function handleUpdateUsername(e) {
+        e.preventDefault();
+        try {
+            const res = await fetch("/api/auth/update-username", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ newUsername })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setUsernameMsg("Username updated!");
+                setUser(prev => ({ ...prev, username: newUsername }));
+                setNewUsername("");
+            } else {
+                setUsernameMsg(data.errors?.[0] || "Something went wrong");
+            }
+        } catch {
+            setUsernameMsg("Failed to connect.");
         }
     }
 
@@ -214,6 +238,20 @@ export default function Dashboard(props) {
                 <p>Member since: <strong>{joinedDate}</strong></p>
 
                 <br />
+
+                <h3>Update username</h3>
+                <label className="auth-label">Username</label>
+                <input
+                    className="auth-input"
+                    type="text"
+                    value={newUsername}
+                    onChange={e => setNewUsername(e.target.value)}
+                    placeholder="new username (4-20 characters)"
+                />
+                <button onClick={handleUpdateUsername}>Update username</button>
+                {usernameMsg && <p style={{ marginTop: 8, fontSize: "0.85rem" }}>{usernameMsg}</p>}
+
+                <br /><br />
 
                 <h3>Update email</h3>
                 <label className="auth-label">Email</label>
