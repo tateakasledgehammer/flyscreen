@@ -49,7 +49,7 @@ export default function Landing({ isAuthenticated, setIsAuthenticated, setUser }
             {/* ── STICKY CENTRED HEADER — Urban Climb style ── */}
             <div className="landing-header">
                 <div className="landing-header-inner">
-                    FLYSCREEN ACADEMICS.
+                    FLYSCREEN.
                     <i className="fa-regular fa-paper-plane" />
                 </div>
                 {/* <div className="landing-header-menu">

@@ -20,6 +20,9 @@ export default function Import(props) {
 
     const [scoringProgress, setScoringProgress] = useState({ done: 0, total: 0 });
 
+    const [confirmDeleteUploadId, setConfirmDeleteUploadId] = useState(null)
+    const [confirmClearAll, setConfirmClearAll] = useState(false);
+
     useEffect(() => {
         if (projectId) {
             fetchUploads();
@@ -160,76 +163,66 @@ export default function Import(props) {
     
     async function deleteUpload(uploadId) {
         if (!projectId) return;
-        const proceed = window.confirm("Delete this upload and all its studies");
-        if (!proceed) return;
 
-        const res = await fetch(
-            `/api/projects/${projectId}/uploads/${uploadId}`, 
-            { 
-                method: "DELETE",
-                credentials: "include" 
+        try {
+            const res = await fetch(
+                `/api/projects/${projectId}/uploads/${uploadId}`, 
+                { method: "DELETE", credentials: "include" }
+            );
+    
+            if (!res.ok) {
+                const err = await res.json();
+                setError(err.error || "Failed to delete upload");
+                return;
             }
-        );
+    
+            await fetchUploads();
+            await fetchStudiesFromServer();  
 
-        if (!res.ok) {
-            const err = await res.json();
-            setError(err.error || "Failed to delete upload");
-            return;
-        }
+        } catch (err) {
+            console.error("Delete upload failed:", err);
+            setError("Failed to delete upload");
 
-        await fetchUploads();
-        await fetchStudiesFromServer();           
+        } finally {
+            setConfirmDeleteUploadId(null);
+        }      
     }
 
     async function handleClear() {
         if (!projectId) return;
-        const proceed = window.confirm("Delete all uploads and all studies");
-        if (!proceed) return;
-
         setIsLoading(true);
+        setConfirmClearAll(false);
 
         // clear uploads
         try {
-            const res = await fetch(
+            const uploadRes = await fetch(
                 `/api/projects/${projectId}/uploads`, 
-                { 
-                    method: "DELETE",
-                    credentials: "include" 
-                }
+                { method: "DELETE", credentials: "include" }
             );
-            if (!res.ok) {
-                let err = await res.json();
+            if (!uploadRes.ok) {
+                const err = await uploadRes.json();
                 throw new Error(err.error || "Failed to clear uploads from the backend");
             }
-        } catch (err) {
-            console.error(err);
-            setError("Failed to clear uploads.");
-        }
 
-        // clear studies
-        try {
-            const res = await fetch(
-                `/api/projects/${projectId}/studies`, 
-                {
-                    method: "DELETE",
-                    credentials: "include",
-                }
+            const studiesRes = await fetch(
+                `api/projects/${projectId}/studies`,
+                { method: "DELETE", credentials: "include" }
             );
-
-            if (!res.ok) {
-                let err = await res.json();
+            if (!studiesRes.ok) {
+                const err = await studiesRes.json();
                 throw new Error(err.error || "Failed to clear studies from the backend");
             }
-            
+
             setStudies([]);
             setFileName('');
             setUploadHistory([]);
-            setUploadProgress("");
+            setUploadProgress(0);
             setUploadMessage("");
 
         } catch (err) {
             console.error(err);
-            setError("Failed to clear studies.");
+            setError(err.message || "Failed to clear imports.");
+
         } finally {
             setIsLoading(false);
         }
@@ -295,9 +288,17 @@ export default function Import(props) {
                             <td>{entry.duplicate_count + entry.study_count}</td>
                             <td>{new Date(entry.created_at).toLocaleString()}</td>
                             <td>
-                                <button onClick={() => deleteUpload(entry.upload_id)}>
-                                    Delete
-                                </button>
+                                {confirmDeleteUploadId === entry.upload_id ? (
+                                    <span style={{ display: "flex", gap: 6 }}>
+                                        Delete this upload and all its studies?{" "}
+                                        <button onClick={() => deleteUpload(entry.upload_id)}>Yes</button>
+                                        <button onClick={() => setConfirmDeleteUploadId(null)}>No</button>
+                                    </span>
+                                ) : (
+                                    <button onClick={() => setConfirmDeleteUploadId(entry.upload_id)}>
+                                        Delete
+                                    </button>
+                                )}
                             </td>
                         </tr>
                     ))}
@@ -309,7 +310,23 @@ export default function Import(props) {
             <br />
             <br />
 
-            <button onClick={handleClear}>Clear imports & studies</button>
+            {confirmClearAll ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                    <span style={{ display: "flex", gap: 6, fontSize: "0.88rem" }}>
+                        Delete all uploads and studies?{" "}
+                        <button style={{ background: "rgb(237,159,159)" }} onClick={handleClear}>Yes, clear all</button>
+                        <button onClick={() => setConfirmClearAll(false)}>No</button>
+                    </span>
+                </div>
+            ) : (
+                <button 
+                    onClick={() => setConfirmClearAll(true)}
+                    style={{ background: "rgb(237,159,159" }}
+                >
+                    Clear imports & studies
+                </button>
+            )}
+            
         </div>
         </>
     )

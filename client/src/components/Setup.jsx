@@ -28,6 +28,9 @@ export default function Setup(props) {
     const [exclusionSections, setExclusionSections] = useState([]);
     const [fullTextReasons, setFullTextReasons] = useState([]);
     
+    const [showAIConfirm, setShowAIConfirm] = useState(false);
+    const [pendingAIMode, setPendingAIMode] = useState(null);
+
     const [background, setBackground] = useState({
         title: "",
         context: "",
@@ -276,30 +279,33 @@ export default function Setup(props) {
     }
 
     // Toggle AI
-    async function handleToggleAI() {
+    function handleToggleAI() {
         const mode = scoringMode === "ai" ? "keyword" : "ai";
+        setPendingAIMode(mode);
+        setShowAIConfirm(true);
+    }
 
-        if (mode === "ai") {
-            const confirm = window.confirm(
-                "AI scoring may take longer and use API credits.\nEnable AI scoring?"
-            );
-            if (!confirm) return;
-        } else {
-            const confirm = window.confirm(
-                "AI scores aren't saved, returning to keyword scores will require all studies to be re-scored by AI later if you want this option.\nDisable AI scoring?"
-            )
-            if (!confirm) return;
+    async function confirmToggleAI() {
+        try {
+            const res = await fetch(`/api/projects/${projectId}/scoring-mode`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ mode: pendingAIMode })
+            });
+            const data = await res.json();
+            setScoringMode(data.scoring_mode);
+        } catch (err) {
+            console.error("Toggle AI failed:", err);
+        } finally {
+            setShowAIConfirm(false);
+            setPendingAIMode(null);
         }
+    }
 
-        const res = await fetch(`/api/projects/${projectId}/scoring-mode`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ mode })
-        });
-
-        const data = await res.json();
-        setScoringMode(data.scoring_mode);
+    function cancelToggleAI() {
+        setShowAIConfirm(false);
+        setPendingAIMode(null);
     }
 
     return (
@@ -340,6 +346,38 @@ export default function Setup(props) {
                 checked={scoringMode === "ai"}
                 onChange={handleToggleAI}
             />
+
+            {showAIConfirm && (
+                <div style={{
+                    marginTop: 12,
+                    padding: "14px 16px",
+                    border: "2px solid var(--ink)",
+                    background: "var(--surface)",
+                    borderRadius: 4,
+                    maxWidth: 480,
+                    display: "flex",
+                    alignContent: "center"
+                }}>
+                    {pendingAIMode === "ai" ? (
+                        <p style={{ marginBottom: 10, fontSize: "0.88rem" }}>
+                            <strong>Enable AI Scoring?</strong> This may take
+                            longer and will use API credits. Make sure your 
+                            background and criteria are complete before rescoring.
+                            You will need to click the 'rescore' button to activate this.
+                        </p>
+                    ) : (
+                        <p>
+                            <strong>Disable AI Scoring?</strong> AI scores aren't saved - Returning
+                            to keyword scoring means studies will need to be re-scored by AI later if you
+                            want to return to this option.
+                        </p>
+                    )}
+                    <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={confirmToggleAI}>Confirm</button>
+                        <button onClick={cancelToggleAI}>Cancel</button>
+                    </div>
+                </div>
+            )}
             <br />
         </div>
 
